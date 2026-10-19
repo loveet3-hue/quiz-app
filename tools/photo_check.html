@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>사진 점검</title>
+<style>
+  body { margin: 0; font: 12px/1.3 -apple-system, sans-serif; background: #fff; color: #111; }
+  h2 { margin: 12px 8px 6px; font-size: 15px; }
+  .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 0 6px; }
+  .cell { border: 1px solid #ddd; }
+  .cell img { width: 100%; height: 96px; object-fit: cover; display: block; background: #eee; }
+  .cell.err { outline: 3px solid red; }
+  .cell b { display: block; padding: 2px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cell i { display: block; padding: 0 4px 3px; color: #c00; font-style: normal; }
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script src="../data/_init.js"></script>
+<script>
+// 사용: tools/photo_check.html?q=animals,landmarks  (없으면 사진 문제가 있는 퀴즈 전부)
+const want = new URLSearchParams(location.search).get('q');
+const ids = want ? want.split(',') : null;
+const files = (ids || ['flags','flags-hard','paintings','space','animals','landmarks','celeb-photos','streamers','cars','vehicles','dogs','cats','birds','insects','sea','flowers','fruits-veg','food-photos','instruments']);
+let left = files.length;
+const thumb = (u) => u.replace('?width=640', '?width=200');
+files.forEach((id) => {
+  const s = document.createElement('script');
+  s.src = `../data/${id}.js?t=${Date.now()}`;
+  s.onload = s.onerror = () => { if (--left === 0) draw(); };
+  document.head.appendChild(s);
+});
+function draw() {
+  const out = document.getElementById('out');
+  let bad = [];
+  for (const id of files) {
+    const qs = (QUESTIONS[id] || []).filter((q) => q.image);
+    if (!qs.length) continue;
+    const h = document.createElement('h2');
+    h.textContent = `${id} (${qs.length})`;
+    out.appendChild(h);
+    const g = document.createElement('div');
+    g.className = 'grid';
+    qs.forEach((q, i) => {
+      const c = document.createElement('div');
+      c.className = 'cell';
+      c.innerHTML = `<img loading="lazy" src="${thumb(q.image)}"><b>${i + 1}. ${q.answer}</b>`;
+      c.querySelector('img').onerror = () => { c.classList.add('err'); bad.push(`${id}:${q.answer}`); window.BAD = bad; };
+      g.appendChild(c);
+    });
+    out.appendChild(g);
+  }
+  window.BAD = bad;
+}
+</script>
+</body>
+</html>

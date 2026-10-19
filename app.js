@@ -39,14 +39,14 @@ function editDistance(a, b) {
   return dp[a.length][b.length];
 }
 
-// 채점 결과: 'exact'(정답) · 'close'(오타 인정: 4글자 이상은 1글자, 12글자 이상은 2글자) · null(오답)
+// 채점 결과: 'exact'(정답) · 'close'(오타 인정: 5글자 이상은 1글자, 12글자 이상은 2글자) · null(오답)
 function judge(input, q) {
   const mine = normalize(input);
   if (!mine) return null;
   const answers = [q.answer, ...(q.alias || [])].map(normalize);
   if (answers.includes(mine)) return 'exact';
   if (q.exact) return null;
-  if (answers.some((a) => a.length >= 4 && editDistance(a, mine) <= (a.length >= 12 ? 2 : 1))) return 'close';
+  if (answers.some((a) => a.length >= 5 && editDistance(a, mine) <= (a.length >= 12 ? 2 : 1))) return 'close';
   return null;
 }
 
@@ -88,6 +88,79 @@ function toast(msg) {
 
 const quizUrl = (id) => `${location.origin}${location.pathname}#/q/${id}`;
 
+/* ───────── 참여 수 (익명 집계) ───────── */
+// 퀴즈를 끝까지 풀면 퀴즈 id만 보낸다. 같은 기기에서 같은 퀴즈는 하루 한 번만 센다.
+
+const countOn = () => typeof CONFIG !== 'undefined' && !!CONFIG.COUNT_API;
+
+const counts = {
+  get() {
+    try { return JSON.parse(localStorage.getItem('quiz-counts') || '{}').data || {}; } catch { return {}; }
+  },
+  save(data) {
+    try { localStorage.setItem('quiz-counts', JSON.stringify({ at: Date.now(), data })); } catch { /* 무시 */ }
+  },
+  async refresh() {
+    if (!countOn()) return null;
+    try {
+      const res = await fetch(`${CONFIG.COUNT_API}?action=counts`);
+      const json = await res.json();
+      if (json.ok) {
+        this.save(json.counts);
+        return json.counts;
+      }
+    } catch { /* 네트워크 실패 시 지난 값 사용 */ }
+    return null;
+  },
+};
+
+function reportPlay(quizId) {
+  if (!countOn()) return;
+  const today = new Date().toISOString().slice(0, 10);
+  let done = {};
+  try { done = JSON.parse(localStorage.getItem('quiz-counted') || '{}'); } catch { /* 무시 */ }
+  if (done[quizId] === today) return;
+  done[quizId] = today;
+  try { localStorage.setItem('quiz-counted', JSON.stringify(done)); } catch { /* 무시 */ }
+  fetch(`${CONFIG.COUNT_API}?action=play&quiz=${encodeURIComponent(quizId)}`, { method: 'POST', body: '', keepalive: true }).catch(() => {});
+  // 화면에도 바로 반영
+  const c = counts.get();
+  c[quizId] = (c[quizId] || 0) + 1;
+  counts.save(c);
+}
+
+const fmtCount = (n) => (n >= 10000 ? `${(n / 10000).toFixed(n >= 100000 ? 0 : 1)}만` : n.toLocaleString('ko-KR'));
+
+/* ───────── 광고 영역 ───────── */
+// 애드센스 승인 전에는 자리 표시만, 승인 후 config.js에 코드를 넣으면 실제 광고.
+
+const adsOn = () => typeof CONFIG !== 'undefined' && CONFIG.ADS && !!CONFIG.ADS.client;
+
+function adHtml(name) {
+  const ads = typeof CONFIG !== 'undefined' ? CONFIG.ADS : null;
+  if (!ads) return '';
+  if (adsOn() && ads.slots[name]) {
+    return `<div class="ad-slot"><span class="ad-label">광고</span><ins class="adsbygoogle" style="display:block" data-ad-client="${esc(ads.client)}" data-ad-slot="${esc(ads.slots[name])}" data-ad-format="auto" data-full-width-responsive="true"></ins></div>`;
+  }
+  return ads.placeholder ? `<div class="ad-slot ad-placeholder"><span>광고 영역</span></div>` : '';
+}
+
+function fillAds() {
+  if (!adsOn()) return;
+  if (!document.getElementById('adsense-js')) {
+    const sc = document.createElement('script');
+    sc.id = 'adsense-js';
+    sc.async = true;
+    sc.crossOrigin = 'anonymous';
+    sc.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${encodeURIComponent(CONFIG.ADS.client)}`;
+    document.head.appendChild(sc);
+  }
+  document.querySelectorAll('ins.adsbygoogle:not([data-filled])').forEach((el) => {
+    el.dataset.filled = '1';
+    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch { /* 무시 */ }
+  });
+}
+
 /* ───────── 목록 화면 ───────── */
 
 const home = { category: '전체', query: '' };
@@ -104,6 +177,7 @@ function renderHome() {
       ${CATEGORIES.map((c) => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === home.category}">${esc(c)}</button>`).join('')}
     </div>
     <div class="grid"></div>
+    ${adHtml('homeBottom')}
     <footer class="site-foot">
       <a href="privacy.html">개인정보 처리방침</a>
     </footer>
@@ -121,16 +195,23 @@ function renderHome() {
     })
   );
   renderGrid();
+  fillAds();
+  counts.refresh().then((fresh) => {
+    if (fresh && app.querySelector('.grid') && !play) renderGrid();
+  });
 }
 
 function renderGrid() {
   const stats = store.get();
   const q = normalize(home.query);
+  const plays = counts.get();
+  // 참여 많은 순 (같으면 원래 순서)
+  const order = new Map(QUIZZES.map((quiz, i) => [quiz.id, i]));
   const list = QUIZZES.filter(
     (quiz) =>
       (home.category === '전체' || quiz.category === home.category) &&
       (!q || normalize(quiz.title + quiz.desc).includes(q))
-  );
+  ).sort((a, b) => (plays[b.id] || 0) - (plays[a.id] || 0) || order.get(a.id) - order.get(b.id));
   const grid = app.querySelector('.grid');
   if (!list.length) {
     grid.outerHTML = `<div class="grid"></div><p class="empty">찾는 퀴즈가 없어요</p>`;
@@ -138,8 +219,9 @@ function renderGrid() {
   }
   app.querySelector('.empty')?.remove();
   grid.innerHTML = list
-    .map((quiz) => {
+    .map((quiz, idx) => {
       const n = quiz.generate ? quiz.perPlay : Math.min(quiz.perPlay, quiz.questions.length);
+      const pool = quiz.generate ? '매번 새 문제' : `전체 ${quiz.questions.length}문제`;
       const s = stats[quiz.id];
       const cover = quiz.cover.flags
         ? `<div class="flag-grid${quiz.cover.vs ? ' vs' : ''}">${quiz.cover.flags
@@ -152,11 +234,58 @@ function renderGrid() {
           <div class="cover" ${bg}>${cover}<span class="badge">${esc(quiz.category)}</span></div>
           <div class="card-body">
             <h2 class="card-title">${esc(quiz.title)}</h2>
-            <div class="card-meta">${n}문제 · 주관식${s ? ` · 최고 <b>${s.best}/${s.total}</b>` : ''}</div>
+            <div class="card-meta">${pool}${plays[quiz.id] ? ` · 참여 ${fmtCount(plays[quiz.id])}` : ` · 한 판 ${n}문제`}${
+              s?.bestTime ? ` · 만점 <b>${formatTime(s.bestTime)}</b>` : s ? ` · 최고 <b>${s.best}/${s.total}</b>` : ''
+            }</div>
           </div>
-        </a>`;
+        </a>${idx === 5 && list.length > 6 ? `<div class="ad-row">${adHtml('homeFeed')}</div>` : ''}`;
     })
     .join('');
+  fillAds();
+}
+
+/* ───────── 문제 고르기: 안 본 문제 먼저 ───────── */
+// 이 기기에서 이미 나온 문제(정답 기준)를 기억해 두고, 안 본 문제부터 낸다.
+// 전부 한 번씩 보면 기억을 비우고 처음부터 다시 섞는다.
+
+const qKey = (q) => normalize(q.answer) + '|' + normalize(q.text || q.big || '');
+
+const seen = {
+  all() {
+    try { return JSON.parse(localStorage.getItem('quiz-seen') || '{}'); } catch { return {}; }
+  },
+  get(id) {
+    return new Set(this.all()[id] || []);
+  },
+  set(id, set) {
+    const all = this.all();
+    all[id] = [...set];
+    try { localStorage.setItem('quiz-seen', JSON.stringify(all)); } catch { /* 무시 */ }
+  },
+  add(id, q) {
+    const s = this.get(id);
+    s.add(qKey(q));
+    this.set(id, s);
+  },
+};
+
+function pickFresh(quiz) {
+  const n = Math.min(quiz.perPlay, quiz.questions.length);
+  let used = seen.get(quiz.id);
+  let fresh = quiz.questions.filter((q) => !used.has(qKey(q)));
+  if (fresh.length === 0) {
+    // 한 바퀴 다 돌았으면 처음부터
+    used = new Set();
+    seen.set(quiz.id, used);
+    fresh = quiz.questions;
+  }
+  const picked = shuffle(fresh).slice(0, n);
+  if (picked.length < n) {
+    // 안 본 문제가 모자라면 본 문제 중에서 채움
+    const rest = shuffle(quiz.questions.filter((q) => !picked.includes(q)));
+    picked.push(...rest.slice(0, n - picked.length));
+  }
+  return picked;
 }
 
 /* ───────── 풀기 화면 ───────── */
@@ -170,9 +299,7 @@ function startQuiz(id) {
     location.hash = '#/';
     return;
   }
-  const picked = quiz.generate
-    ? quiz.generate(quiz.perPlay)
-    : shuffle(quiz.questions).slice(0, Math.min(quiz.perPlay, quiz.questions.length));
+  const picked = quiz.generate ? quiz.generate(quiz.perPlay) : pickFresh(quiz);
   play = {
     quiz,
     items: picked.map((q) => ({ q: quiz.exact ? { ...q, exact: true } : q, input: '', result: null, hinted: false, passed: false })),
@@ -283,6 +410,7 @@ function submit() {
 function showFeedback(result) {
   const item = play.items[play.idx];
   item.result = result;
+  if (!play.quiz.generate) seen.add(play.quiz.id, item.q);
   play.phase = 'feedback';
   play.feedbackAt = Date.now();
 
@@ -344,12 +472,27 @@ function renderResult() {
   const stats = store.get();
   const prev = stats[quiz.id];
   const isBest = !prev || score > prev.best;
+  // 전부 맞혔을 때만 시간 기록 (가장 빠른 기록 하나 보관)
+  const perfect = score === total;
+  const prevTime = prev?.bestTime;
+  const newTimeRecord = perfect && (!prevTime || timeMs < prevTime);
   stats[quiz.id] = {
     plays: (prev?.plays || 0) + 1,
     best: isBest ? score : prev.best,
     total,
+    bestTime: newTimeRecord ? timeMs : prevTime,
   };
   store.save(stats);
+  reportPlay(quiz.id);
+  const timeLine = perfect
+    ? `<div class="clear-time">
+        <span>전부 맞히는 데 걸린 시간</span>
+        <b>${formatTime(timeMs)}</b>
+        <small class="${newTimeRecord && prevTime ? 'new' : ''}">${
+          !prevTime ? '첫 만점 기록이에요!' : newTimeRecord ? `최단 기록 갱신! (이전 ${formatTime(prevTime)})` : `내 최단 기록 ${formatTime(prevTime)}`
+        }</small>
+      </div>`
+    : `<p class="best">걸린 시간 ${formatTime(timeMs)}${prevTime ? ` · 내 만점 최단 ${formatTime(prevTime)}` : ''}</p>`;
 
   app.innerHTML = `
     <div class="play-head">
@@ -363,13 +506,14 @@ function renderResult() {
       <p class="best ${isBest && prev ? 'new' : ''}">${
         !prev ? '첫 기록이에요' : isBest ? `최고 기록 갱신! (이전 ${prev.best}개)` : `내 최고 기록 ${prev.best} / ${prev.total}`
       }</p>
-      <p class="best">걸린 시간 ${formatTime(timeMs)}</p>
+      ${timeLine}
     </section>
     <div class="result-actions">
       <button class="btn" data-act="retry">다시 풀기</button>
       <button class="btn ghost" data-act="share">친구에게 공유</button>
       <button class="btn ghost" data-act="home">다른 퀴즈</button>
     </div>
+    ${quiz.noAds ? '' : adHtml('result')}
     <h3 class="section-title">문제 다시 보기</h3>
     <ul class="review">
       ${items
@@ -400,6 +544,7 @@ function renderResult() {
     })
   );
   app.querySelector('[data-act="share"]').addEventListener('click', () => share(quiz, score, total));
+  fillAds();
   window.scrollTo(0, 0);
 }
 

@@ -27,10 +27,7 @@
 //
 // 퀴즈에 credit을 쓰면 문제 아래에 사진 출처가 작게 표시됨.
 
-const FLAG = (code) => `https://flagcdn.com/w640/${code}.png`;
-// 위키미디어 공용 파일 (모두 퍼블릭 도메인/CC0만 사용, 2026-10 확인)
-const WM = (file) => `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=640`;
-const rand = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
+// FLAG(), WM(), rand(), QUESTIONS 는 data/_init.js에 있음. 문제 목록은 data/<퀴즈id>.js에 따로 둠.
 
 // 시계 그림을 코드로 직접 그림 (저작권 걱정 없음)
 function clockSvg(h, m) {
@@ -384,8 +381,8 @@ const QUIZZES = [
   },
   {
     id: 'flags-hard',
-    title: '헷갈리는 국기 맞히기',
-    desc: '닮은꼴 국기만 모았어요. 국기 1탄을 깼다면 도전!',
+    title: '어려운 국기 맞히기',
+    desc: '덜 알려진 나라와 닮은꼴 국기. 국기 1탄을 깼다면 도전!',
     category: '지리',
     perPlay: 10,
     cover: { flags: ['ro', 'td'], vs: true },
@@ -572,27 +569,39 @@ const QUIZZES = [
   {
     id: 'sequence',
     title: '규칙 찾아 빈칸 채우기',
-    desc: '숫자들 사이에 숨은 규칙을 찾아보세요',
+    desc: '풀 때마다 새 수열! 숨은 규칙을 찾아보세요',
     category: '수학',
     perPlay: 10,
     cover: { image: COVERS['sequence'] },
-    questions: [
-      { text: '2, 4, 6, 8, ?', ask: '?에 들어갈 수는?', answer: '10', numeric: true, hint: '2씩 커져요' },
-      { text: '3, 6, 12, 24, ?', ask: '?에 들어갈 수는?', answer: '48', numeric: true, hint: '앞의 수의 2배예요' },
-      { text: '1, 4, 9, 16, ?', ask: '?에 들어갈 수는?', answer: '25', numeric: true, hint: '1×1, 2×2, 3×3 …' },
-      { text: '1, 1, 2, 3, 5, 8, ?', ask: '?에 들어갈 수는?', answer: '13', numeric: true, hint: '앞의 두 수를 더해요' },
-      { text: '100, 90, 80, 70, ?', ask: '?에 들어갈 수는?', answer: '60', numeric: true, hint: '10씩 작아져요' },
-      { text: '1, 3, 6, 10, ?', ask: '?에 들어갈 수는?', answer: '15', numeric: true, hint: '더하는 수가 1씩 커져요' },
-      { text: '2, 3, 5, 7, 11, ?', ask: '?에 들어갈 수는?', answer: '13', numeric: true, hint: '1과 자기 자신으로만 나누어지는 수' },
-      { text: '81, 27, 9, 3, ?', ask: '?에 들어갈 수는?', answer: '1', numeric: true, hint: '3으로 나눠요' },
-      { text: '1, 8, 27, 64, ?', ask: '?에 들어갈 수는?', answer: '125', numeric: true, hint: '1×1×1, 2×2×2 …' },
-      { text: '5, 10, 20, 40, ?', ask: '?에 들어갈 수는?', answer: '80', numeric: true, hint: '앞의 수의 2배예요' },
-      { text: '1, 2, 4, 7, 11, ?', ask: '?에 들어갈 수는?', answer: '16', numeric: true, hint: '1, 2, 3, 4 … 씩 커져요' },
-      { text: '10, 9, 7, 4, ?', ask: '?에 들어갈 수는?', answer: '0', numeric: true, hint: '1, 2, 3 … 씩 작아져요' },
-      { text: '2, 6, 12, 20, ?', ask: '?에 들어갈 수는?', answer: '30', numeric: true, hint: '1×2, 2×3, 3×4 …' },
-      { text: '1, 10, 100, 1000, ?', ask: '?에 들어갈 수는?', answer: '10000', numeric: true, hint: '10배씩 커져요' },
-      { text: '7, 14, 21, 28, ?', ask: '?에 들어갈 수는?', answer: '35', numeric: true, hint: '7단이에요' },
-    ],
+    // 풀 때마다 규칙을 무작위로 골라 새 수열을 만든다
+    generate(count) {
+      const pick = (arr) => arr[rand(0, arr.length - 1)];
+      const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71];
+      const makers = [
+        () => { const a = rand(1, 30), d = rand(2, 12), n = rand(4, 5); const xs = Array.from({ length: n + 1 }, (_, i) => a + d * i); return [xs, `${d}씩 커져요`]; },
+        () => { const d = rand(3, 15), n = rand(4, 5), a = d * n + rand(5, 60); const xs = Array.from({ length: n + 1 }, (_, i) => a - d * i); return [xs, `${d}씩 작아져요`]; },
+        () => { const r = pick([2, 3]), a = rand(1, 5), n = r === 2 ? 5 : 4; const xs = Array.from({ length: n + 1 }, (_, i) => a * r ** i); return [xs, `앞의 수의 ${r}배예요`]; },
+        () => { const s = rand(1, 6), n = 5; const xs = Array.from({ length: n + 1 }, (_, i) => (s + i) ** 2); return [xs, '같은 수를 두 번 곱한 수예요 (1×1, 2×2 …)']; },
+        () => { const s = rand(1, 3); const xs = Array.from({ length: 5 }, (_, i) => (s + i) ** 3); return [xs, '같은 수를 세 번 곱한 수예요 (1×1×1, 2×2×2 …)']; },
+        () => { let a = rand(1, 4), b = a + rand(0, 4); const xs = [a, b]; while (xs.length < 7) xs.push(xs[xs.length - 1] + xs[xs.length - 2]); return [xs, '앞의 두 수를 더해요']; },
+        () => { const a = rand(1, 20), d = rand(1, 3); const xs = [a]; for (let i = 0; i < 5; i++) xs.push(xs[i] + d * (i + 1)); return [xs, `더하는 수가 ${d}씩 커져요`]; },
+        () => { const s = rand(0, PRIMES.length - 7); return [PRIMES.slice(s, s + 6), '1과 자기 자신으로만 나누어지는 수예요']; },
+        () => { const r = pick([2, 3]), n = 4, end = rand(1, 3); const xs = Array.from({ length: n + 1 }, (_, i) => end * r ** (n - i)); return [xs, `${r}로 나눠요`]; },
+        () => { const a = rand(1, 9), p = rand(2, 6), m = rand(1, 4); const xs = [a]; for (let i = 1; i < 7; i++) xs.push(i % 2 ? xs[i - 1] + p : xs[i - 1] - m); return [xs, `+${p}, −${m}을 번갈아 해요`]; },
+        () => { const s = rand(1, 4); const xs = Array.from({ length: 5 }, (_, i) => (s + i) * (s + i + 1)); return [xs, '1×2, 2×3, 3×4 … 처럼 이웃한 두 수를 곱해요']; },
+      ];
+      const list = [];
+      const seen = new Set();
+      while (list.length < count) {
+        const [xs, hint] = pick(makers)();
+        const key = xs.join(',');
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const shown = xs.slice(0, -1).join(', ');
+        list.push({ text: `${shown}, ?`, ask: '?에 들어갈 수는?', answer: String(xs[xs.length - 1]), numeric: true, hint });
+      }
+      return list;
+    },
   },
   {
     id: 'celebs',
@@ -622,6 +631,26 @@ const QUIZZES = [
     ],
   },
   {
+    id: 'celeb-photos',
+    noAds: true, // 실존 인물 사진이라 광고를 붙이지 않음 (초상권·퍼블리시티권)
+    title: '사진 보고 연예인 맞히기',
+    desc: '누군지 한눈에 알아보시겠어요?',
+    category: '연예',
+    perPlay: 10,
+    cover: { image: COVERS.celebs },
+    questions: [],
+  },
+  {
+    id: 'streamers',
+    noAds: true, // 실존 인물 사진이라 광고를 붙이지 않음 (초상권·퍼블리시티권)
+    title: '사진 보고 스트리머·유튜버 맞히기',
+    desc: '닉네임으로 맞혀 보세요',
+    category: '연예',
+    perPlay: 10,
+    cover: { image: COVERS.streamers },
+    questions: [],
+  },
+  {
     id: 'movies',
     title: '초성 보고 영화 제목 맞히기',
     desc: '줄거리 한 줄로 영화를 맞혀 보세요',
@@ -647,6 +676,105 @@ const QUIZZES = [
       { chosung: true, answer: '인터스텔라', text: '죽어 가는 지구를 떠나 웜홀 너머 새 행성을 찾는 우주 비행사들' },
       { chosung: true, answer: '어벤져스', alias: ['어벤저스'], text: '아이언맨·토르·헐크 등 영웅들이 처음 한 팀으로 뭉친다' },
     ],
+  },
+  {
+    id: 'cars',
+    title: '사진 보고 자동차 모델 맞히기',
+    desc: '브랜드 말고 모델 이름까지!',
+    category: '탈것',
+    perPlay: 10,
+    cover: { fromFirst: true }, // 문제 목록의 첫 사진을 표지로
+    questions: [],
+  },
+  {
+    id: 'vehicles',
+    title: '사진 보고 탈것 맞히기',
+    desc: '기차·배·비행기, 이름이 뭘까요?',
+    category: '탈것',
+    perPlay: 10,
+    cover: { fromFirst: true }, // 문제 목록의 첫 사진을 표지로
+    questions: [],
+  },
+  {
+    id: 'dogs',
+    title: '사진 보고 강아지 품종 맞히기',
+    desc: '산책길에 본 그 강아지, 품종은?',
+    category: '동물',
+    perPlay: 10,
+    cover: { fromFirst: true }, // 문제 목록의 첫 사진을 표지로
+    questions: [],
+  },
+  {
+    id: 'cats',
+    title: '사진 보고 고양이 품종 맞히기',
+    desc: '털 모양과 얼굴로 맞혀 보세요',
+    category: '동물',
+    perPlay: 10,
+    cover: { fromFirst: true }, // 문제 목록의 첫 사진을 표지로
+    questions: [],
+  },
+  {
+    id: 'birds',
+    title: '사진 보고 새 이름 맞히기',
+    desc: '하늘을 나는 친구들',
+    category: '동물',
+    perPlay: 10,
+    cover: { fromFirst: true }, // 문제 목록의 첫 사진을 표지로
+    questions: [],
+  },
+  {
+    id: 'insects',
+    title: '사진 보고 곤충 맞히기',
+    desc: '작지만 이름은 다 있어요',
+    category: '동물',
+    perPlay: 10,
+    cover: { fromFirst: true }, // 문제 목록의 첫 사진을 표지로
+    questions: [],
+  },
+  {
+    id: 'sea',
+    title: '사진 보고 바다 생물 맞히기',
+    desc: '바닷속 생물 이름 맞히기',
+    category: '동물',
+    perPlay: 10,
+    cover: { fromFirst: true }, // 문제 목록의 첫 사진을 표지로
+    questions: [],
+  },
+  {
+    id: 'flowers',
+    title: '사진 보고 꽃 이름 맞히기',
+    desc: '길가와 꽃집에서 본 그 꽃',
+    category: '자연',
+    perPlay: 10,
+    cover: { fromFirst: true }, // 문제 목록의 첫 사진을 표지로
+    questions: [],
+  },
+  {
+    id: 'fruits-veg',
+    title: '사진 보고 과일·채소 맞히기',
+    desc: '마트에서 본 듯한데 이름이…',
+    category: '자연',
+    perPlay: 10,
+    cover: { fromFirst: true }, // 문제 목록의 첫 사진을 표지로
+    questions: [],
+  },
+  {
+    id: 'food-photos',
+    title: '사진 보고 음식 맞히기',
+    desc: '세계 음식 사진, 이름은?',
+    category: '음식',
+    perPlay: 10,
+    cover: { fromFirst: true }, // 문제 목록의 첫 사진을 표지로
+    questions: [],
+  },
+  {
+    id: 'instruments',
+    title: '사진 보고 악기 맞히기',
+    desc: '국악기부터 오케스트라 악기까지',
+    category: '예술',
+    perPlay: 10,
+    cover: { fromFirst: true }, // 문제 목록의 첫 사진을 표지로
+    questions: [],
   },
   {
     id: 'clock',
@@ -678,3 +806,16 @@ const QUIZZES = [
     },
   },
 ];
+
+// data/<퀴즈id>.js 에 문제 목록이 있으면 그것을 쓴다 (없으면 위에 적힌 기본 문제)
+for (const quiz of QUIZZES) {
+  if (QUESTIONS[quiz.id] && QUESTIONS[quiz.id].length) quiz.questions = QUESTIONS[quiz.id];
+}
+// 표지를 첫 문제 사진으로 쓰는 퀴즈
+for (const quiz of QUIZZES) {
+  if (quiz.cover.fromFirst) quiz.cover = { image: quiz.questions[0]?.image };
+}
+// 문제가 하나도 없는 퀴즈는 목록에서 뺀다 (사진을 아직 못 구한 경우 등)
+for (let i = QUIZZES.length - 1; i >= 0; i--) {
+  if (!QUIZZES[i].generate && !QUIZZES[i].questions.length) QUIZZES.splice(i, 1);
+}

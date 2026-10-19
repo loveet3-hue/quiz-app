@@ -218,6 +218,20 @@ const COVERS = (() => {
       <g stroke="#fff" stroke-width="3" opacity=".5"><line x1="104" y1="176" x2="230" y2="176"/><line x1="104" y1="204" x2="230" y2="204"/></g>
       <text x="167" y="198" font-family="${KO}" font-size="22" font-weight="800" fill="#fff" text-anchor="middle" opacity=".9">TAKE 1</text>`),
 
+    // 스트리머·유튜버: 방송 화면 + 재생 버튼 + 채팅
+    streamers: make('#ffe1e1', '#ff9f9f', `
+      ${shadow(200, 262, 110)}
+      <rect x="84" y="64" width="190" height="130" rx="16" fill="#2d3142"/>
+      <rect x="96" y="76" width="166" height="106" rx="8" fill="#ff4f5e"/>
+      <path d="M166 106v46l40-23z" fill="#fff"/>
+      <circle cx="108" cy="88" r="5" fill="#fff"/><text x="118" y="93" font-family="${NUM}" font-size="13" font-weight="700" fill="#fff">LIVE</text>
+      <rect x="160" y="194" width="38" height="22" fill="#2d3142"/>
+      <rect x="128" y="214" width="102" height="12" rx="6" fill="#2d3142"/>
+      <rect x="250" y="120" width="96" height="34" rx="12" fill="#fff"/>
+      <rect x="262" y="132" width="56" height="10" rx="5" fill="#ffb3b9"/>
+      <rect x="236" y="164" width="110" height="34" rx="12" fill="#fff"/>
+      <rect x="248" y="176" width="72" height="10" rx="5" fill="#c9d0ff"/>`),
+
     // 시계
     clock: make('#ebe6ff', '#cbbcff', `
       ${shadow(200, 264, 84)}

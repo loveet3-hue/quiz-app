@@ -1,12 +1,48 @@
 // 오프라인에서도 열리도록 앱 파일을 저장해 두는 서비스 워커.
 // 파일을 고치면 VERSION 숫자를 올려야 사용자 기기에 새 버전이 반영된다.
-const VERSION = 'v10';
+const VERSION = 'v14';
 const SHELL = [
   './',
   'index.html',
   'style.css',
   'app.js',
+  'config.js',
   'covers.js',
+  'data/_init.js',
+  'data/flags.js',
+  'data/flags-hard.js',
+  'data/capitals.js',
+  'data/idioms.js',
+  'data/proverbs.js',
+  'data/spelling.js',
+  'data/antonyms.js',
+  'data/nonsense.js',
+  'data/slang.js',
+  'data/english.js',
+  'data/foods.js',
+  'data/history.js',
+  'data/celebs.js',
+  'data/movies.js',
+  'data/celeb-photos.js',
+  'data/streamers.js',
+  'data/cities.js',
+  'data/animals.js',
+  'data/landmarks.js',
+  'data/paintings.js',
+  'data/space.js',
+  'data/elements.js',
+  'data/baby-animals.js',
+  'data/cars.js',
+  'data/vehicles.js',
+  'data/dogs.js',
+  'data/cats.js',
+  'data/birds.js',
+  'data/insects.js',
+  'data/sea.js',
+  'data/flowers.js',
+  'data/fruits-veg.js',
+  'data/food-photos.js',
+  'data/instruments.js',
   'privacy.html',
   'quizzes.js',
   'manifest.webmanifest',
@@ -16,7 +52,12 @@ const SHELL = [
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // 파일 하나가 없어도 설치가 멈추지 않게 하나씩 저장
+  e.waitUntil(
+    caches.open(VERSION)
+      .then((c) => Promise.all(SHELL.map((f) => c.add(f).catch(() => {}))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (e) => {
@@ -35,8 +76,10 @@ self.addEventListener('fetch', (e) => {
   const sameOrigin = url.origin === self.location.origin;
 
   if (sameOrigin) {
+    // no-cache: 브라우저 캐시의 옛 파일이 섞이지 않게 항상 서버에 새 버전인지 확인
+    const fresh = e.request.mode === 'navigate' ? fetch(e.request.url, { cache: 'no-cache' }) : fetch(e.request, { cache: 'no-cache' });
     e.respondWith(
-      fetch(e.request)
+      fresh
         .then((res) => {
           const copy = res.clone();
           caches.open(VERSION).then((c) => c.put(e.request, copy));
