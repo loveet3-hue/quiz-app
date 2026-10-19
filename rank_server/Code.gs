@@ -169,6 +169,14 @@ function deleteByEmail(email) {
   Logger.log(`${target}: ${n}건 삭제`);
 }
 
+/* ───────── 처음 한 번 ───────── */
+
+// 배포 후 편집기에서 한 번 실행해 권한을 허용한다. (기록 탭도 이때 만들어짐)
+function setup() {
+  const sh = sheet_();
+  Logger.log('준비 완료: ' + sh.getParent().getUrl());
+}
+
 /* ───────── 공통 ───────── */
 
 function sheet_() {

@@ -438,7 +438,18 @@ function formatTime(ms) {
   return s < 60 ? `${s.toFixed(1)}초` : `${Math.floor(s / 60)}분 ${Math.round(s % 60)}초`;
 }
 
-async function rankApi(params, body) {
+// 구글 서버가 가끔 한 번씩 실패해서, 조회는 한 번 더 시도한다
+async function rankApi(params, body, retry = !body) {
+  try {
+    return await rankApiOnce(params, body);
+  } catch (e) {
+    if (!retry) throw e;
+    await new Promise((r) => setTimeout(r, 800));
+    return rankApiOnce(params, body);
+  }
+}
+
+async function rankApiOnce(params, body) {
   const url = `${CONFIG.RANK_API}?${new URLSearchParams(params)}`;
   const res = body
     ? await fetch(url, { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'text/plain;charset=utf-8' } })
