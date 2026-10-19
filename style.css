@@ -214,6 +214,7 @@ a { color: inherit; text-decoration: none; }
   inset: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); /* 두 줄이 칸 안에 딱 맞게 */
   gap: 8px;
   padding: 38px 14px 12px; /* 위쪽은 카테고리 표시 자리 (국기와 겹치지 않게) */
   background: linear-gradient(160deg, #dfe9ff, #b9ccff);
@@ -227,6 +228,7 @@ a { color: inherit; text-decoration: none; }
 }
 .flag-grid.vs {
   grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto;
   align-items: center;
   gap: 6px;
   padding: 38px 12px 12px;
