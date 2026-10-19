@@ -21,7 +21,7 @@
 // 사용: tools/photo_check.html?q=animals,landmarks  (없으면 사진 문제가 있는 퀴즈 전부)
 const want = new URLSearchParams(location.search).get('q');
 const ids = want ? want.split(',') : null;
-const files = (ids || ['flags','flags-hard','paintings','space','animals','landmarks','celeb-photos','streamers','cars','vehicles','dogs','cats','birds','insects','sea','flowers','fruits-veg','food-photos','instruments']);
+const files = (ids || ['flags','flags-hard','paintings','space','animals','landmarks','celeb-photos','cars','vehicles','dogs','cats','birds','insects','sea','flowers','fruits-veg','food-photos','instruments']);
 let left = files.length;
 const thumb = (u) => u.replace('?width=640', '?width=200');
 files.forEach((id) => {

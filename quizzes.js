@@ -641,16 +641,6 @@ const QUIZZES = [
     questions: [],
   },
   {
-    id: 'streamers',
-    noAds: true, // 실존 인물 사진이라 광고를 붙이지 않음 (초상권·퍼블리시티권)
-    title: '사진 보고 스트리머·유튜버 맞히기',
-    desc: '닉네임으로 맞혀 보세요',
-    category: '연예',
-    perPlay: 10,
-    cover: { image: COVERS.streamers },
-    questions: [],
-  },
-  {
     id: 'movies',
     title: '초성 보고 영화 제목 맞히기',
     desc: '줄거리 한 줄로 영화를 맞혀 보세요',

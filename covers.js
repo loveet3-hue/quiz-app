@@ -236,20 +236,6 @@ const COVERS = (() => {
         <text x="290" y="88" font-family="${NUM}" font-size="22" font-weight="700" fill="#7a4b00" text-anchor="middle">?</text>
       </g>`),
 
-    // 스트리머·유튜버: 방송 화면 + 재생 버튼 + 채팅
-    streamers: make('#ffe1e1', '#ff9f9f', `
-      ${shadow(200, 262, 110)}
-      <rect x="84" y="64" width="190" height="130" rx="16" fill="#2d3142"/>
-      <rect x="96" y="76" width="166" height="106" rx="8" fill="#ff4f5e"/>
-      <path d="M166 106v46l40-23z" fill="#fff"/>
-      <circle cx="108" cy="88" r="5" fill="#fff"/><text x="118" y="93" font-family="${NUM}" font-size="13" font-weight="700" fill="#fff">LIVE</text>
-      <rect x="160" y="194" width="38" height="22" fill="#2d3142"/>
-      <rect x="128" y="214" width="102" height="12" rx="6" fill="#2d3142"/>
-      <rect x="250" y="120" width="96" height="34" rx="12" fill="#fff"/>
-      <rect x="262" y="132" width="56" height="10" rx="5" fill="#ffb3b9"/>
-      <rect x="236" y="164" width="110" height="34" rx="12" fill="#fff"/>
-      <rect x="248" y="176" width="72" height="10" rx="5" fill="#c9d0ff"/>`),
-
     // 게임 캐릭터: 게임 패드
     'game-chars': make('#e0f2ff', '#9fd4ff', `
       ${shadow(200, 252, 112)}
