@@ -12,7 +12,7 @@ QUESTIONS['baby-animals'] = [
   { text: '곰의 새끼는?', answer: '능소니' },
   { text: '호랑이(범)의 새끼는?', answer: '개호주' },
   { text: '꿩의 새끼는?', answer: '꺼병이', alias: ['꿩병아리'] },
-  { text: '잠자리의 애벌레는?', answer: '학배기' },
+  { text: '잠자리의 애벌레는?', answer: '학배기', alias: ['수채'] },
   { text: '농어의 새끼는?', answer: '껄떼기' },
   { text: '방어의 새끼는?', answer: '마래미' },
   { text: '갈치의 새끼는?', answer: '풀치' },

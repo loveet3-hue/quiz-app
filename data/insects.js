@@ -4,7 +4,7 @@ QUESTIONS['insects'] = [
   { image: WM("Japanese rhinoceros beetle (Trypoxylus dichotomus) (20492490700).jpg"), text: '이 곤충의 이름은?', answer: '장수풍뎅이', credit: "사진: harum.koh from Kobe city, Japan · CC BY-SA 2.0" },
   { image: WM("Hercules beetle (Dynastes hercules).jpg"), text: '이 곤충의 이름은?', answer: '헤라클레스장수풍뎅이', alias: ["헤라클레스", "헤라클레스 장수풍뎅이"], credit: "사진: Novita Estiti from Tokyo, Japan · CC BY 2.0" },
   { image: WM("Lucanus maculifemoratus 01.jpg"), text: '이 곤충의 이름은?', answer: '사슴벌레', credit: "사진: Σ64 · CC BY 3.0" },
-  { image: WM("Tenodera sinensis 5 Luc Viatour.jpg"), text: '이 곤충의 이름은?', answer: '사마귀', credit: "사진: Luc Viatour · CC BY-SA 3.0" },
+  { image: WM("Tenodera sinensis 5 Luc Viatour.jpg"), text: '이 곤충의 이름은?', answer: '사마귀', alias: ['버마재비'], credit: "사진: Luc Viatour · CC BY-SA 3.0" },
   { image: WM("말매미.jpg"), text: '이 곤충의 이름은?', answer: '매미', credit: "사진: Eastolany · CC BY-SA 4.0" },
   { image: WM("Pantala flavescens-Kadavoor-2017-05-04-002.jpg"), text: '이 곤충의 이름은?', answer: '잠자리', credit: "사진: Jeevan Jose, Kerala, India · CC BY-SA 4.0" },
   { image: WM("Ischnura elegans F Opekarna.jpg"), text: '이 곤충의 이름은?', answer: '실잠자리', credit: "사진: Yerpo · CC BY-SA 4.0" },

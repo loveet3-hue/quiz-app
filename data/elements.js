@@ -16,7 +16,7 @@ QUESTIONS['elements'] = [
   { big: 'Al', text: '이 원소의 이름은?', answer: '알루미늄' }, // 13
   { big: 'Si', text: '이 원소의 이름은?', answer: '규소', alias: ['실리콘'] }, // 14
   { big: 'P', text: '이 원소의 이름은?', answer: '인' }, // 15
-  { big: 'S', text: '이 원소의 이름은?', answer: '황' }, // 16
+  { big: 'S', text: '이 원소의 이름은?', answer: '황', alias: ['유황'] }, // 16
   { big: 'Cl', text: '이 원소의 이름은?', answer: '염소' }, // 17
   { big: 'Ar', text: '이 원소의 이름은?', answer: '아르곤' }, // 18
   { big: 'K', text: '이 원소의 이름은?', answer: '포타슘', alias: ['칼륨'] }, // 19
@@ -29,7 +29,7 @@ QUESTIONS['elements'] = [
   { big: 'Fe', text: '이 원소의 이름은?', answer: '철' }, // 26
   { big: 'Co', text: '이 원소의 이름은?', answer: '코발트' }, // 27
   { big: 'Ni', text: '이 원소의 이름은?', answer: '니켈' }, // 28
-  { big: 'Cu', text: '이 원소의 이름은?', answer: '구리' }, // 29
+  { big: 'Cu', text: '이 원소의 이름은?', answer: '구리', alias: ['동'] }, // 29
   { big: 'Zn', text: '이 원소의 이름은?', answer: '아연' }, // 30
   { big: 'Ga', text: '이 원소의 이름은?', answer: '갈륨' }, // 31
   { big: 'Ge', text: '이 원소의 이름은?', answer: '저마늄', alias: ['게르마늄'] }, // 32
@@ -74,16 +74,16 @@ QUESTIONS['elements'] = [
   { big: 'Lu', text: '이 원소의 이름은?', answer: '루테튬' }, // 71
   { big: 'Hf', text: '이 원소의 이름은?', answer: '하프늄' }, // 72
   { big: 'Ta', text: '이 원소의 이름은?', answer: '탄탈럼', alias: ['탄탈'] }, // 73
-  { big: 'W', text: '이 원소의 이름은?', answer: '텅스텐' }, // 74
+  { big: 'W', text: '이 원소의 이름은?', answer: '텅스텐', alias: ['볼프람'] }, // 74
   { big: 'Re', text: '이 원소의 이름은?', answer: '레늄' }, // 75
   { big: 'Os', text: '이 원소의 이름은?', answer: '오스뮴' }, // 76
   { big: 'Ir', text: '이 원소의 이름은?', answer: '이리듐' }, // 77
-  { big: 'Pt', text: '이 원소의 이름은?', answer: '백금' }, // 78
+  { big: 'Pt', text: '이 원소의 이름은?', answer: '백금', alias: ['플래티넘', '플래티늄'] }, // 78
   { big: 'Au', text: '이 원소의 이름은?', answer: '금' }, // 79
   { big: 'Hg', text: '이 원소의 이름은?', answer: '수은' }, // 80
   { big: 'Tl', text: '이 원소의 이름은?', answer: '탈륨' }, // 81
   { big: 'Pb', text: '이 원소의 이름은?', answer: '납' }, // 82
-  { big: 'Bi', text: '이 원소의 이름은?', answer: '비스무트' }, // 83
+  { big: 'Bi', text: '이 원소의 이름은?', answer: '비스무트', alias: ['비스무스'] }, // 83
   { big: 'Po', text: '이 원소의 이름은?', answer: '폴로늄' }, // 84
   { big: 'At', text: '이 원소의 이름은?', answer: '아스타틴' }, // 85
   { big: 'Rn', text: '이 원소의 이름은?', answer: '라돈' }, // 86

@@ -1,10 +1,10 @@
 // 명화 보고 제목 맞히기 — 위키미디어 공용에서 퍼블릭 도메인(또는 CC0)으로 확인한 작품 사진만 (2026-10 확인)
 // 문제 115개. by(작가)는 힌트에 쓰임.
 QUESTIONS['paintings'] = [
-  { image: WM('Mona Lisa, by Leonardo da Vinci, from C2RMF retouched.jpg'), answer: '모나리자', alias: ['라 조콘다'], by: '레오나르도 다빈치' },
+  { image: WM('Mona Lisa, by Leonardo da Vinci, from C2RMF retouched.jpg'), answer: '모나리자', alias: ['라 조콘다', '조콘다'], by: '레오나르도 다빈치' },
   { image: WM('Van Gogh - Starry Night - Google Art Project.jpg'), answer: '별이 빛나는 밤', alias: ['별이 빛나는 밤에'], by: '빈센트 반 고흐' },
   { image: WM('1665 Girl with a Pearl Earring.jpg'), answer: '진주 귀고리를 한 소녀', alias: ['진주 귀걸이를 한 소녀', '진주 귀고리 소녀', '진주 귀걸이 소녀'], by: '요하네스 페르메이르' },
-  { image: WM('Edvard Munch, 1893, The Scream, oil, tempera and pastel on cardboard, 91 x 73 cm, National Gallery of Norway.jpg'), answer: '절규', alias: ['비명'], by: '에드바르 뭉크' },
+  { image: WM('Edvard Munch, 1893, The Scream, oil, tempera and pastel on cardboard, 91 x 73 cm, National Gallery of Norway.jpg'), answer: '절규', alias: ['비명', '외침'], by: '에드바르 뭉크' },
   { image: WM('Sandro Botticelli - La nascita di Venere - Google Art Project - edited.jpg'), answer: '비너스의 탄생', by: '산드로 보티첼리' },
   { image: WM('The Last Supper - Leonardo Da Vinci - High Resolution 32x16.jpg'), answer: '최후의 만찬', by: '레오나르도 다빈치' },
   { image: WM('Tsunami by hokusai 19th century.jpg'), answer: '가나가와 해변의 높은 파도 아래', alias: ['가나가와 해변의 높은 파도', '가나가와의 큰 파도', '가나가와 해변의 큰 파도', '큰 파도'], by: '가쓰시카 호쿠사이' },
@@ -57,9 +57,9 @@ QUESTIONS['paintings'] = [
   { image: WM('JEAN LOUIS THÉODORE GÉRICAULT - La Balsa de la Medusa (Museo del Louvre, 1818-19).jpg'), answer: '메두사호의 뗏목', alias: ['메두사의 뗏목'], by: '테오도르 제리코' },
   { image: WM('Caspar David Friedrich - Wanderer above the Sea of Fog.jpeg'), answer: '안개 바다 위의 방랑자', alias: ['안개 위의 방랑자', '안개 바다 위의 나그네'], by: '카스파어 다비트 프리드리히' },
   { image: WM('The Fighting Temeraire, JMW Turner, National Gallery.jpg'), answer: '전함 테메레르', alias: ['테메레르', '해체를 위해 마지막 정박지로 예인되는 전함 테메레르'], by: '윌리엄 터너' },
-  { image: WM('John Constable - The Hay Wain (1821).jpg'), answer: '건초 마차', by: '존 컨스터블' },
+  { image: WM('John Constable - The Hay Wain (1821).jpg'), answer: '건초 마차', alias: ['건초 수레'], by: '존 컨스터블' },
   { image: WM('Hovhannes Aivazovsky - The Ninth Wave - Google Art Project.jpg'), answer: '아홉 번째 파도', alias: ['제9의 파도', '아홉 번째 물결'], by: '이반 아이바좁스키' },
-  { image: WM('John Everett Millais - Ophelia - Google Art Project.jpg'), answer: '오필리아', by: '존 에버렛 밀레이' },
+  { image: WM('John Everett Millais - Ophelia - Google Art Project.jpg'), answer: '오필리아', alias: ['오필리어'], by: '존 에버렛 밀레이' },
   { image: WM('John William Waterhouse - The Lady of Shalott - Google Art Project.jpg'), answer: '샬롯의 여인', alias: ['샬럿의 여인', '샬롯의 아가씨', '샬롯 아가씨'], by: '존 윌리엄 워터하우스' },
   { image: WM('Whistlers Mother high res.jpg'), answer: '휘슬러의 어머니', alias: ['회색과 검정의 배열', '회색과 검은색의 배열'], by: '제임스 맥닐 휘슬러' },
   { image: WM('Jean-François Millet - The Sower - Google Art Project.jpg'), answer: '씨 뿌리는 사람', alias: ['씨 뿌리는 농부'], by: '장 프랑수아 밀레' },

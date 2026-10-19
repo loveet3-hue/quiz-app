@@ -2,7 +2,7 @@
 QUESTIONS['cats'] = [
   { image: WM("Persialainen.jpg"), text: '이 고양이의 품종은?', answer: '페르시안', alias: ["페르시아고양이", "페르시안 고양이"], credit: "사진: Lajoma · CC BY-SA 3.0" },
   { image: WM("Siamese cat Vaillante.JPG"), text: '이 고양이의 품종은?', answer: '샴', alias: ["샴고양이", "시암"], credit: "사진: Meekahoo · CC BY-SA 3.0" },
-  { image: WM("Russian blue kitten (cropped).jpg"), text: '이 고양이의 품종은?', answer: '러시안 블루', credit: "사진: Anna Utekhina · CC BY-SA 3.0" },
+  { image: WM("Russian blue kitten (cropped).jpg"), text: '이 고양이의 품종은?', answer: '러시안 블루', alias: ['러블'], credit: "사진: Anna Utekhina · CC BY-SA 3.0" },
   { image: WM("Mystica from British Empire Cattery.jpg"), text: '이 고양이의 품종은?', answer: '브리티시 쇼트헤어', alias: ["브리티시 숏헤어", "브리티쉬 숏헤어", "브숏"], credit: "사진: BritishEmpire · CC BY-SA 3.0" },
   { image: WM("Scottish Fold - CFF cat show Heinola 2008-05-03 IMG 7882.JPG"), text: '이 고양이의 품종은?', answer: '스코티시 폴드', alias: ["스코티쉬 폴드"], credit: "사진: Heikki Siltala · CC BY 3.0" },
   { image: WM("Ragdoll from Gatil Ragbelas.jpg"), text: '이 고양이의 품종은?', answer: '랙돌', alias: ["래그돌"], credit: "사진: Simone Johnsson · CC BY-SA 2.0" },
@@ -26,7 +26,7 @@ QUESTIONS['cats'] = [
   { image: WM("JapaneseBobtailBlueEyedMi-ke.JPG"), text: '이 고양이의 품종은?', answer: '재패니즈 밥테일', credit: "사진: ようてい · CC BY-SA 3.0" },
   { image: WM("Manx cat Latte.jpg"), text: '이 고양이의 품종은?', answer: '맹크스', alias: ["맹크스 고양이"], credit: "사진: Hekl01999 · CC0" },
   { image: WM("Fatale de la légende d'ali.jpg"), text: '이 고양이의 품종은?', answer: '오리엔탈 쇼트헤어', alias: ["오리엔탈", "오리엔탈 숏헤어"], credit: "사진: Daly69 · CC BY-SA 3.0" },
-  { image: WM("Hattikatin Lumipyry.JPG"), text: '이 고양이의 품종은?', answer: '스노슈', credit: "사진: Heikki Siltala · CC BY 3.0" },
+  { image: WM("Hattikatin Lumipyry.JPG"), text: '이 고양이의 품종은?', answer: '스노슈', alias: ['스노우슈'], credit: "사진: Heikki Siltala · CC BY 3.0" },
   { image: WM("American curl 2.jpg"), text: '이 고양이의 품종은?', answer: '아메리칸 컬', credit: "사진: 작자 미상 · CC BY-SA 3.0" },
   { image: WM("Havana kittens.jpg"), text: '이 고양이의 품종은?', answer: '하바나 브라운', credit: "사진: Havanabrowngirl · CC BY 4.0" },
 ];

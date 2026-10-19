@@ -1,10 +1,10 @@
 // 줄임말 원래 말 맞히기 — 문제 100개
 QUESTIONS['slang'] = [
-  { big: '소확행', text: '원래 말은?', answer: '소소하지만 확실한 행복' },
-  { big: '워라밸', text: '원래 말은?', answer: '워크 라이프 밸런스', alias: ['일과 삶의 균형'] },
+  { big: '소확행', text: '원래 말은?', answer: '소소하지만 확실한 행복', alias: ['작지만 확실한 행복'] },
+  { big: '워라밸', text: '원래 말은?', answer: '워크 라이프 밸런스', alias: ['일과 삶의 균형', 'work life balance'] },
   { big: '갑분싸', text: '원래 말은?', answer: '갑자기 분위기 싸해짐', alias: ['갑자기 분위기가 싸해짐', '갑자기 분위기 싸해진다'] },
   { big: '얼죽아', text: '원래 말은?', answer: '얼어 죽어도 아이스 아메리카노' },
-  { big: '케바케', text: '원래 말은?', answer: '케이스 바이 케이스' },
+  { big: '케바케', text: '원래 말은?', answer: '케이스 바이 케이스', alias: ['case by case'] },
   { big: '엄친아', text: '원래 말은?', answer: '엄마 친구 아들' },
   { big: '내로남불', text: '원래 말은?', answer: '내가 하면 로맨스 남이 하면 불륜' },
   { big: '만반잘부', text: '원래 말은?', answer: '만나서 반가워 잘 부탁해' },
@@ -52,7 +52,7 @@ QUESTIONS['slang'] = [
   { big: '읽씹', text: '원래 말은?', answer: '읽고 씹기', alias: ['읽고 씹음', '읽고 씹다'] },
   { big: '갠톡', text: '원래 말은?', answer: '개인 톡', alias: ['개인 카톡', '개인 톡방'] },
   { big: '셀카', text: '원래 말은?', answer: '셀프 카메라' },
-  { big: '인강', text: '원래 말은?', answer: '인터넷 강의' },
+  { big: '인강', text: '원래 말은?', answer: '인터넷 강의', alias: ['인터넷 강좌'] },
   { big: '얼짱', text: '원래 말은?', answer: '얼굴 짱', alias: ['얼굴이 짱'] },
   { big: '실검', text: '원래 말은?', answer: '실시간 검색어' },
   { big: '단톡방', text: '원래 말은?', answer: '단체 카톡방', alias: ['단체 톡방', '단체 카카오톡 방', '단체 대화방'] },

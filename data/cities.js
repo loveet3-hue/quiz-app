@@ -3,11 +3,11 @@ QUESTIONS['cities'] = [
   // 기존 문제
   { chosung: true, answer: '부산', text: '해운대와 광안리가 있는 항구 도시' },
   { chosung: true, answer: '대구', text: '사과와 무더위로 유명한 경상도의 광역시' },
-  { chosung: true, answer: '광주', text: '무등산이 있는 전라도의 광역시' },
+  { chosung: true, answer: '광주', alias: ['광주광역시'], text: '무등산이 있는 전라도의 광역시' },
   { chosung: true, answer: '대전', text: '엑스포와 유명 빵집으로 알려진 중부의 광역시' },
-  { chosung: true, answer: '인천', text: '국제공항과 차이나타운이 있는 항구 도시' },
+  { chosung: true, answer: '인천', alias: ['인천광역시'], text: '국제공항과 차이나타운이 있는 항구 도시' },
   { chosung: true, answer: '울산', text: '자동차·조선 공장이 모인 공업 도시' },
-  { chosung: true, answer: '제주', alias: ['제주도'], text: '한라산과 돌하르방의 섬' },
+  { chosung: true, answer: '제주', alias: ['제주도', '제주특별자치도'], text: '한라산과 돌하르방의 섬' },
   { chosung: true, answer: '전주', text: '비빔밥과 한옥마을로 유명한 도시' },
   { chosung: true, answer: '경주', text: '불국사와 첨성대가 있는 신라의 옛 수도' },
   { chosung: true, answer: '강릉', text: '경포대와 커피 거리로 유명한 동해안 도시' },
@@ -18,8 +18,8 @@ QUESTIONS['cities'] = [
   { chosung: true, answer: '속초', text: '설악산 아래 동해안 항구 도시' },
 
   // 특별시·특별자치시
-  { chosung: true, answer: '서울', text: '경복궁과 남산타워가 있는 대한민국의 수도' },
-  { chosung: true, answer: '세종', alias: ['세종시'], text: '정부 부처들이 옮겨 온 행정중심복합도시' },
+  { chosung: true, answer: '서울', alias: ['서울특별시'], text: '경복궁과 남산타워가 있는 대한민국의 수도' },
+  { chosung: true, answer: '세종', alias: ['세종시', '세종특별자치시'], text: '정부 부처들이 옮겨 온 행정중심복합도시' },
 
   // 경기·인천
   { chosung: true, answer: '용인', text: '에버랜드와 한국민속촌이 있는 경기도 도시' },
@@ -111,7 +111,7 @@ QUESTIONS['cities'] = [
   { chosung: true, answer: '창원', text: '벚꽃 축제 진해 군항제가 열리는 경남 도청 소재지' },
   { chosung: true, answer: '김해', text: '금관가야 김수로왕릉이 있는 도시' },
   { chosung: true, answer: '진주', text: '진주성과 남강 유등 축제로 유명한 도시' },
-  { chosung: true, answer: '통영', text: '충무김밥과 이순신의 삼도수군통제영이 있던 항구 도시' },
+  { chosung: true, answer: '통영', alias: ['충무'], text: '충무김밥과 이순신의 삼도수군통제영이 있던 항구 도시' },
   { chosung: true, answer: '거제', text: '대형 조선소와 외도 보타니아가 있는 섬 도시' },
   { chosung: true, answer: '남해', text: '독일마을과 다랭이마을이 있는 섬 군' },
   { chosung: true, answer: '하동', text: '화개장터와 녹차, 소설 "토지"의 평사리가 있는 군' },
