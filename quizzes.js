@@ -1,0 +1,627 @@
+// 퀴즈 데이터.
+// 나중에 서버(직접 만들기 기능)로 옮겨도 이 모양 그대로 쓸 수 있게 맞춰 둠.
+//
+// 퀴즈 하나:
+//   id        주소에 쓰이는 영문 이름 (#/q/flags)
+//   title     제목
+//   desc      한 줄 설명
+//   category  카테고리 (목록 필터에 쓰임)
+//   perPlay   한 판에 낼 문제 수 (문제가 더 많으면 무작위로 뽑음)
+//   cover     목록 카드 표지 { image } 또는 { text, colors: [위, 아래] }
+//   questions 문제 목록
+//   exact     true면 오타를 봐주지 않음 (맞춤법 퀴즈)
+//   generate  questions 대신 쓰는 함수. 풀 때마다 문제를 새로 만들어 냄 (암산 등)
+//
+// 문제 하나 (필요한 것만 쓰면 됨):
+//   image     보여줄 사진 주소
+//   big       크게 보여줄 글자
+//   chosung   true면 정답의 초성을 자동으로 만들어 크게 보여줌
+//   text      문제 문장
+//   answer    정답
+//   alias     같이 인정할 다른 답 목록
+//   hint      힌트 (안 쓰면 정답의 초성, 영어 정답이면 첫 글자와 글자 수가 힌트로 나감)
+//   numeric   true면 휴대폰에서 숫자 키패드가 뜸
+//   ask       '정답은?' 대신 보여줄 질문 (글만 있는 문제)
+//   credit    이 문제 사진의 출처 (퀴즈 전체 credit보다 우선)
+//   by        작가 이름. 쓰면 힌트가 '작가 + 초성'으로 나감 (명화 퀴즈)
+//
+// 퀴즈에 credit을 쓰면 문제 아래에 사진 출처가 작게 표시됨.
+
+const FLAG = (code) => `https://flagcdn.com/w640/${code}.png`;
+// 위키미디어 공용 파일 (모두 퍼블릭 도메인/CC0만 사용, 2026-10 확인)
+const WM = (file) => `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=640`;
+const rand = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
+
+// 시계 그림을 코드로 직접 그림 (저작권 걱정 없음)
+function clockSvg(h, m) {
+  const hand = (deg, len, width, color) => {
+    const r = ((deg - 90) * Math.PI) / 180;
+    return `<line x1="100" y1="100" x2="${(100 + len * Math.cos(r)).toFixed(1)}" y2="${(100 + len * Math.sin(r)).toFixed(1)}" stroke="${color}" stroke-width="${width}" stroke-linecap="round"/>`;
+  };
+  let marks = '';
+  for (let i = 1; i <= 12; i++) {
+    const r = ((i * 30 - 90) * Math.PI) / 180;
+    marks += `<text x="${(100 + 66 * Math.cos(r)).toFixed(1)}" y="${(100 + 66 * Math.sin(r)).toFixed(1)}" font-size="17" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="#1d1b26" font-family="Arial, sans-serif">${i}</text>`;
+  }
+  for (let i = 0; i < 60; i++) {
+    const r = ((i * 6 - 90) * Math.PI) / 180;
+    const inner = i % 5 === 0 ? 80 : 84;
+    marks += `<line x1="${(100 + inner * Math.cos(r)).toFixed(1)}" y1="${(100 + inner * Math.sin(r)).toFixed(1)}" x2="${(100 + 88 * Math.cos(r)).toFixed(1)}" y2="${(100 + 88 * Math.sin(r)).toFixed(1)}" stroke="#8f8aa3" stroke-width="${i % 5 === 0 ? 2.5 : 1}"/>`;
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+    <rect width="200" height="200" fill="#f6f5fb"/>
+    <circle cx="100" cy="100" r="92" fill="#fff" stroke="#1d1b26" stroke-width="5"/>
+    ${marks}
+    ${hand(((h % 12) + m / 60) * 30, 44, 7, '#1d1b26')}
+    ${hand(m * 6, 70, 4.5, '#7c5cff')}
+    <circle cx="100" cy="100" r="5" fill="#1d1b26"/>
+  </svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+const QUIZZES = [
+  {
+    id: 'flags',
+    title: '국기 보고 나라 맞히기',
+    desc: '국기만 보고 어느 나라인지 맞혀 보세요',
+    category: '지리',
+    perPlay: 10,
+    cover: { image: FLAG('kr') },
+    questions: [
+      { image: FLAG('kr'), answer: '대한민국', alias: ['한국', '남한'] },
+      { image: FLAG('jp'), answer: '일본' },
+      { image: FLAG('us'), answer: '미국', alias: ['미합중국'] },
+      { image: FLAG('gb'), answer: '영국' },
+      { image: FLAG('fr'), answer: '프랑스' },
+      { image: FLAG('de'), answer: '독일' },
+      { image: FLAG('br'), answer: '브라질' },
+      { image: FLAG('ca'), answer: '캐나다' },
+      { image: FLAG('it'), answer: '이탈리아', alias: ['이태리'] },
+      { image: FLAG('in'), answer: '인도' },
+      { image: FLAG('mx'), answer: '멕시코' },
+      { image: FLAG('tr'), answer: '튀르키예', alias: ['터키'] },
+      { image: FLAG('se'), answer: '스웨덴' },
+      { image: FLAG('ch'), answer: '스위스' },
+      { image: FLAG('ar'), answer: '아르헨티나' },
+      { image: FLAG('gr'), answer: '그리스' },
+      { image: FLAG('vn'), answer: '베트남' },
+      { image: FLAG('za'), answer: '남아프리카공화국', alias: ['남아공', '남아프리카'] },
+    ],
+  },
+  {
+    id: 'idioms',
+    title: '초성 보고 사자성어 맞히기',
+    desc: '초성과 뜻풀이를 보고 네 글자를 채워 보세요',
+    category: '언어',
+    perPlay: 10,
+    cover: { text: 'ㅇㅅㅇㅈ', colors: ['#7c5cff', '#b06bff'] },
+    questions: [
+      { chosung: true, answer: '일석이조', text: '한 가지 일로 두 가지 이득을 봄' },
+      { chosung: true, answer: '자업자득', text: '자기가 저지른 일의 결과를 자기가 받음' },
+      { chosung: true, answer: '우왕좌왕', text: '이리저리 왔다 갔다 하며 갈피를 못 잡음' },
+      { chosung: true, answer: '감언이설', text: '귀가 솔깃하도록 비위를 맞추는 달콤한 말' },
+      { chosung: true, answer: '이구동성', text: '여러 사람의 말이 한결같음' },
+      { chosung: true, answer: '대기만성', text: '큰 그릇은 늦게 이루어짐' },
+      { chosung: true, answer: '새옹지마', text: '인생의 좋고 나쁜 일은 예측하기 어려움' },
+      { chosung: true, answer: '유비무환', text: '미리 준비해 두면 걱정할 것이 없음' },
+      { chosung: true, answer: '작심삼일', text: '굳게 먹은 마음이 사흘을 가지 못함' },
+      { chosung: true, answer: '과유불급', text: '정도를 지나침은 미치지 못함과 같음' },
+      { chosung: true, answer: '동문서답', text: '묻는 말에 전혀 엉뚱한 대답을 함' },
+      { chosung: true, answer: '십중팔구', text: '열 가운데 여덟이나 아홉, 거의 대부분' },
+      { chosung: true, answer: '전화위복', text: '나쁜 일이 오히려 좋은 일의 계기가 됨' },
+      { chosung: true, answer: '역지사지', text: '처지를 바꾸어 생각해 봄' },
+    ],
+  },
+  {
+    id: 'capitals',
+    title: '나라 이름 보고 수도 맞히기',
+    desc: '헷갈리기 쉬운 수도만 모았어요',
+    category: '지리',
+    perPlay: 10,
+    cover: { text: '수도?', colors: ['#ff6b81', '#ffa36b'] },
+    questions: [
+      { text: '호주의 수도는?', answer: '캔버라' },
+      { text: '캐나다의 수도는?', answer: '오타와' },
+      { text: '브라질의 수도는?', answer: '브라질리아' },
+      { text: '튀르키예의 수도는?', answer: '앙카라' },
+      { text: '스위스의 수도는?', answer: '베른' },
+      { text: '베트남의 수도는?', answer: '하노이' },
+      { text: '뉴질랜드의 수도는?', answer: '웰링턴' },
+      { text: '미국의 수도는?', answer: '워싱턴 D.C.', alias: ['워싱턴', '워싱턴디씨', '워싱턴dc'] },
+      { text: '이집트의 수도는?', answer: '카이로' },
+      { text: '스페인의 수도는?', answer: '마드리드' },
+      { text: '태국의 수도는?', answer: '방콕' },
+      { text: '필리핀의 수도는?', answer: '마닐라' },
+      { text: '포르투갈의 수도는?', answer: '리스본' },
+      { text: '아르헨티나의 수도는?', answer: '부에노스아이레스' },
+    ],
+  },
+  {
+    id: 'nonsense',
+    title: '넌센스 퀴즈',
+    desc: '머리 말고 말장난으로 푸는 문제',
+    category: '재미',
+    perPlay: 10,
+    cover: { text: '???', colors: ['#ffb84d', '#ff7a59'] },
+    questions: [
+      { text: '세상에서 가장 뜨거운 과일은?', answer: '천도복숭아' },
+      { text: '왕이 넘어지면?', answer: '킹콩' },
+      { text: '소가 웃으면?', answer: '우하하', alias: ['우하하하'] },
+      { text: '바나나가 웃으면?', answer: '바나나킥' },
+      { text: '미소의 반대말은?', answer: '당기소' },
+      { text: '오리가 얼면?', answer: '언덕' },
+      { text: '세상에서 가장 쉬운 숫자는?', answer: '십구만', alias: ['190000', '19만'] },
+      { text: '아몬드가 죽으면?', answer: '다이아몬드' },
+      { text: '개가 사람을 가르치면?', answer: '개인지도' },
+      { text: '자동차를 톡 치면?', answer: '카톡' },
+      { text: '칼이 정색하면?', answer: '검정색', alias: ['검정'] },
+      { text: '세상에서 제일 빠른 닭은?', answer: '후다닥' },
+      { text: '딸기가 직장을 잃으면?', answer: '딸기시럽' },
+      { text: '물고기의 반대말은?', answer: '불고기' },
+      { text: '신발이 화나면?', answer: '신발끈' },
+    ],
+  },
+  {
+    id: 'foods',
+    title: '초성 보고 음식 맞히기',
+    desc: '설명을 보면 군침부터 돌아요',
+    category: '음식',
+    perPlay: 10,
+    cover: { text: 'ㄸㅂㅇ', colors: ['#ff6b6b', '#ff9f43'] },
+    questions: [
+      { chosung: true, answer: '떡볶이', text: '빨간 양념에 떡과 어묵을 볶은 분식' },
+      { chosung: true, answer: '김치찌개', text: '김치와 돼지고기를 넣고 끓인 찌개' },
+      { chosung: true, answer: '비빔밥', text: '밥에 나물과 고추장을 넣고 비벼 먹는 음식' },
+      { chosung: true, answer: '삼겹살', text: '돼지 뱃살을 구워 먹는 고기' },
+      { chosung: true, answer: '불고기', text: '간장 양념에 재운 소고기 구이' },
+      { chosung: true, answer: '냉면', text: '차가운 육수에 메밀면을 말아 먹는 음식' },
+      { chosung: true, answer: '김밥', text: '김에 밥과 재료를 넣고 돌돌 만 음식' },
+      { chosung: true, answer: '잡채', text: '당면과 채소를 볶아 무친 잔치 음식' },
+      { chosung: true, answer: '짜장면', alias: ['자장면'], text: '검은 춘장 소스에 비벼 먹는 중식 면' },
+      { chosung: true, answer: '탕수육', text: '튀긴 고기에 새콤달콤한 소스를 곁들인 요리' },
+      { chosung: true, answer: '순대', text: '돼지 창자에 당면 등을 채워 찐 음식' },
+      { chosung: true, answer: '호떡', text: '반죽 속에 설탕과 견과를 넣고 구운 겨울 간식' },
+      { chosung: true, answer: '팥빙수', text: '곱게 간 얼음 위에 팥을 올린 여름 디저트' },
+      { chosung: true, answer: '감자탕', text: '돼지 등뼈와 감자를 넣고 얼큰하게 끓인 탕' },
+      { chosung: true, answer: '갈비찜', text: '갈비를 간장 양념에 푹 쪄 낸 명절 음식' },
+    ],
+  },
+  {
+    id: 'proverbs',
+    title: '속담 빈칸 채우기',
+    desc: '빈칸에 들어갈 말을 써 보세요',
+    category: '언어',
+    perPlay: 10,
+    cover: { text: '＿＿', colors: ['#4facfe', '#6a7bff'] },
+    questions: [
+      { text: '가는 말이 고와야 ＿＿ 말이 곱다', answer: '오는' },
+      { text: '낮말은 새가 듣고 밤말은 ＿가 듣는다', answer: '쥐' },
+      { text: '원숭이도 ＿＿에서 떨어진다', answer: '나무' },
+      { text: '소 잃고 ＿＿＿ 고친다', answer: '외양간' },
+      { text: '세 살 버릇 ＿＿까지 간다', answer: '여든' },
+      { text: '백지장도 ＿＿면 낫다', answer: '맞들' },
+      { text: '하늘이 무너져도 솟아날 ＿＿이 있다', answer: '구멍' },
+      { text: '고래 싸움에 ＿＿ 등 터진다', answer: '새우' },
+      { text: '등잔 밑이 ＿＿＿', answer: '어둡다' },
+      { text: '발 없는 말이 ＿＿ 간다', answer: '천리', alias: ['천 리'] },
+      { text: '티끌 모아 ＿＿', answer: '태산' },
+      { text: '우물 안 ＿＿＿', answer: '개구리' },
+      { text: '빈 수레가 ＿＿＿＿', answer: '요란하다' },
+      { text: '될성부른 나무는 ＿＿부터 알아본다', answer: '떡잎' },
+      { text: '열 번 찍어 안 넘어가는 ＿＿ 없다', answer: '나무' },
+    ],
+  },
+  {
+    id: 'english',
+    title: '우리말 보고 영어 단어 쓰기',
+    desc: '철자까지 정확하게 써 보세요',
+    category: '언어',
+    perPlay: 10,
+    cover: { text: 'ABC', colors: ['#00b894', '#00cec9'] },
+    questions: [
+      { big: '사과', text: '영어로 쓰면?', answer: 'apple' },
+      { big: '학교', text: '영어로 쓰면?', answer: 'school' },
+      { big: '친구', text: '영어로 쓰면?', answer: 'friend' },
+      { big: '도서관', text: '영어로 쓰면?', answer: 'library' },
+      { big: '나비', text: '영어로 쓰면?', answer: 'butterfly' },
+      { big: '우산', text: '영어로 쓰면?', answer: 'umbrella' },
+      { big: '생일', text: '영어로 쓰면?', answer: 'birthday' },
+      { big: '부엌', text: '영어로 쓰면?', answer: 'kitchen' },
+      { big: '날씨', text: '영어로 쓰면?', answer: 'weather' },
+      { big: '병원', text: '영어로 쓰면?', answer: 'hospital' },
+      { big: '코끼리', text: '영어로 쓰면?', answer: 'elephant' },
+      { big: '연필', text: '영어로 쓰면?', answer: 'pencil' },
+      { big: '비행기', text: '영어로 쓰면?', answer: 'airplane', alias: ['plane', 'aeroplane'] },
+      { big: '거북이', text: '영어로 쓰면?', answer: 'turtle', alias: ['tortoise'] },
+      { big: '아침 식사', text: '영어로 쓰면?', answer: 'breakfast' },
+    ],
+  },
+  {
+    id: 'mental-math',
+    title: '10초 암산',
+    desc: '풀 때마다 새 문제가 나와요',
+    category: '수학',
+    perPlay: 10,
+    cover: { text: '7×8', colors: ['#2d3436', '#636e72'] },
+    generate(count) {
+      const make = () => {
+        const kind = rand(0, 2);
+        let a, b, op, ans;
+        if (kind === 0) { a = rand(12, 89); b = rand(12, 89); op = '+'; ans = a + b; }
+        else if (kind === 1) { a = rand(30, 99); b = rand(11, a - 1); op = '−'; ans = a - b; }
+        else { a = rand(12, 39); b = rand(3, 9); op = '×'; ans = a * b; }
+        return { big: `${a} ${op} ${b}`, answer: String(ans), numeric: true, hint: `일의 자리 숫자는 ${ans % 10}` };
+      };
+      return Array.from({ length: count }, make);
+    },
+  },
+  {
+    id: 'elements',
+    title: '원소 기호 보고 이름 맞히기',
+    desc: '과학 시간에 외웠던 그 기호들',
+    category: '과학',
+    perPlay: 10,
+    cover: { text: 'Fe', colors: ['#6c5ce7', '#a29bfe'] },
+    questions: [
+      { big: 'H', text: '이 원소의 이름은?', answer: '수소' },
+      { big: 'He', text: '이 원소의 이름은?', answer: '헬륨' },
+      { big: 'C', text: '이 원소의 이름은?', answer: '탄소' },
+      { big: 'N', text: '이 원소의 이름은?', answer: '질소' },
+      { big: 'O', text: '이 원소의 이름은?', answer: '산소' },
+      { big: 'Na', text: '이 원소의 이름은?', answer: '나트륨', alias: ['소듐'] },
+      { big: 'Fe', text: '이 원소의 이름은?', answer: '철' },
+      { big: 'Au', text: '이 원소의 이름은?', answer: '금' },
+      { big: 'Ag', text: '이 원소의 이름은?', answer: '은' },
+      { big: 'Cu', text: '이 원소의 이름은?', answer: '구리' },
+      { big: 'Ca', text: '이 원소의 이름은?', answer: '칼슘' },
+      { big: 'Cl', text: '이 원소의 이름은?', answer: '염소' },
+      { big: 'K', text: '이 원소의 이름은?', answer: '칼륨', alias: ['포타슘'] },
+      { big: 'Mg', text: '이 원소의 이름은?', answer: '마그네슘' },
+      { big: 'S', text: '이 원소의 이름은?', answer: '황' },
+      { big: 'Zn', text: '이 원소의 이름은?', answer: '아연' },
+    ],
+  },
+  {
+    id: 'history',
+    title: '설명 보고 역사 인물 맞히기',
+    desc: '교과서에서 만난 우리 역사 속 인물',
+    category: '역사',
+    perPlay: 10,
+    cover: { text: '人', colors: ['#a0522d', '#d2691e'] },
+    questions: [
+      { text: '훈민정음을 만든 조선의 왕은?', answer: '세종대왕', alias: ['세종'] },
+      { text: '거북선을 이끌고 임진왜란에서 활약한 장군은?', answer: '이순신' },
+      { text: '고구려를 세운 왕은?', answer: '주몽', alias: ['동명성왕'] },
+      { text: '신라의 삼국 통일을 이끈 장군은?', answer: '김유신' },
+      { text: '측우기와 자격루를 만든 조선의 과학자는?', answer: '장영실' },
+      { text: '3·1 운동 때 아우내 장터에서 만세 운동을 이끈 학생은?', answer: '유관순' },
+      { text: '조선을 세운 왕은?', answer: '이성계', alias: ['태조', '태조이성계'] },
+      { text: '하얼빈에서 이토 히로부미를 저격한 독립운동가는?', answer: '안중근' },
+      { text: '대한민국 임시정부 주석을 지낸 독립운동가는?', answer: '김구', alias: ['백범김구'] },
+      { text: '고려를 세운 왕은?', answer: '왕건', alias: ['태조왕건'] },
+      { text: '거중기를 설계해 수원 화성 축조에 기여한 실학자는?', answer: '정약용', alias: ['다산'] },
+      { text: '발해를 세운 인물은?', answer: '대조영' },
+      { text: '평양으로 도읍을 옮긴 광개토대왕의 아들은?', answer: '장수왕' },
+      { text: '"동의보감"을 쓴 조선의 의관은?', answer: '허준' },
+      { text: '임진왜란 때 행주대첩을 승리로 이끈 장군은?', answer: '권율' },
+    ],
+  },
+  {
+    id: 'cities',
+    title: '초성 보고 우리나라 도시 맞히기',
+    desc: '명소와 먹거리로 떠올려 보세요',
+    category: '지리',
+    perPlay: 10,
+    cover: { text: 'ㅂㅅ', colors: ['#0984e3', '#74b9ff'] },
+    questions: [
+      { chosung: true, answer: '부산', text: '해운대와 광안리가 있는 항구 도시' },
+      { chosung: true, answer: '대구', text: '사과와 무더위로 유명한 경상도의 광역시' },
+      { chosung: true, answer: '광주', text: '무등산이 있는 전라도의 광역시' },
+      { chosung: true, answer: '대전', text: '엑스포와 유명 빵집으로 알려진 중부의 광역시' },
+      { chosung: true, answer: '인천', text: '국제공항과 차이나타운이 있는 항구 도시' },
+      { chosung: true, answer: '울산', text: '자동차·조선 공장이 모인 공업 도시' },
+      { chosung: true, answer: '제주', alias: ['제주도'], text: '한라산과 돌하르방의 섬' },
+      { chosung: true, answer: '전주', text: '비빔밥과 한옥마을로 유명한 도시' },
+      { chosung: true, answer: '경주', text: '불국사와 첨성대가 있는 신라의 옛 수도' },
+      { chosung: true, answer: '강릉', text: '경포대와 커피 거리로 유명한 동해안 도시' },
+      { chosung: true, answer: '춘천', text: '닭갈비와 호수로 유명한 강원도 도시' },
+      { chosung: true, answer: '수원', text: '화성과 갈비로 유명한 경기도 도시' },
+      { chosung: true, answer: '여수', text: '밤바다로 유명한 남해안 도시' },
+      { chosung: true, answer: '안동', text: '하회마을과 찜닭의 도시' },
+      { chosung: true, answer: '속초', text: '설악산 아래 동해안 항구 도시' },
+    ],
+  },
+  {
+    id: 'paintings',
+    title: '명화 보고 제목 맞히기',
+    desc: '한 번쯤 본 그 그림, 제목은 뭘까요?',
+    category: '예술',
+    perPlay: 10,
+    credit: '그림 출처: 위키미디어 공용 (퍼블릭 도메인)',
+    cover: { image: WM('Van Gogh - Starry Night - Google Art Project.jpg') },
+    questions: [
+      { image: WM('Mona Lisa, by Leonardo da Vinci, from C2RMF retouched.jpg'), answer: '모나리자', alias: ['라 조콘다'], by: '레오나르도 다빈치' },
+      { image: WM('Van Gogh - Starry Night - Google Art Project.jpg'), answer: '별이 빛나는 밤', alias: ['별이 빛나는 밤에'], by: '빈센트 반 고흐' },
+      { image: WM('1665 Girl with a Pearl Earring.jpg'), answer: '진주 귀고리를 한 소녀', alias: ['진주 귀걸이를 한 소녀', '진주 귀고리 소녀', '진주 귀걸이 소녀'], by: '요하네스 페르메이르' },
+      { image: WM('Edvard Munch, 1893, The Scream, oil, tempera and pastel on cardboard, 91 x 73 cm, National Gallery of Norway.jpg'), answer: '절규', alias: ['비명'], by: '에드바르 뭉크' },
+      { image: WM('Sandro Botticelli - La nascita di Venere - Google Art Project - edited.jpg'), answer: '비너스의 탄생', by: '산드로 보티첼리' },
+      { image: WM('The Last Supper - Leonardo Da Vinci - High Resolution 32x16.jpg'), answer: '최후의 만찬', by: '레오나르도 다빈치' },
+      { image: WM('Tsunami by hokusai 19th century.jpg'), answer: '가나가와 해변의 높은 파도 아래', alias: ['가나가와 해변의 높은 파도', '가나가와의 큰 파도', '가나가와 해변의 큰 파도', '큰 파도'], by: '가쓰시카 호쿠사이' },
+      { image: WM('Vincent Willem van Gogh 127.jpg'), answer: '해바라기', by: '빈센트 반 고흐' },
+      { image: WM('The Kiss - Gustav Klimt - Google Cultural Institute.jpg'), answer: '키스', alias: ['입맞춤'], by: '구스타프 클림트' },
+      { image: WM('Monet - Impression, Sunrise.jpg'), answer: '인상, 해돋이', alias: ['해돋이', '인상 해돋이'], by: '클로드 모네' },
+      { image: WM('Jean-François Millet - Gleaners - Google Art Project 2.jpg'), answer: '이삭 줍는 여인들', alias: ['이삭줍기', '이삭 줍는 사람들'], by: '장 프랑수아 밀레' },
+      { image: WM('Jean-François Millet - The Angelus - Google Art Project.jpg'), answer: '만종', alias: ['삼종기도'], by: '장 프랑수아 밀레' },
+      { image: WM('Michelangelo - Creation of Adam (cropped).jpg'), answer: '아담의 창조', alias: ['천지창조'], by: '미켈란젤로' },
+      { image: WM('Eugène Delacroix - Le 28 Juillet. La Liberté guidant le peuple.jpg'), answer: '민중을 이끄는 자유의 여신', alias: ['민중을 이끄는 자유', '자유의 여신'], by: '외젠 들라크루아' },
+      { image: WM('A Sunday on La Grande Jatte, Georges Seurat, 1884.jpg'), answer: '그랑드 자트 섬의 일요일 오후', alias: ['그랑드자트섬의 일요일 오후'], by: '조르주 쇠라' },
+      { image: WM('Vincent Willem van Gogh - Cafe Terrace at Night (Yorck).jpg'), answer: '밤의 카페 테라스', alias: ['카페 테라스'], by: '빈센트 반 고흐' },
+      { image: WM('Bridge over a Pond of Water Lilies MET DT1854.jpg'), answer: '수련 연못 위의 다리', alias: ['수련', '수련 연못', '일본식 다리'], by: '클로드 모네' },
+      { image: WM('Danwon Ssireum.jpg'), answer: '씨름', by: '김홍도' },
+      { image: WM('Inwangjesaekdo.jpg'), answer: '인왕제색도', by: '정선' },
+    ],
+  },
+  {
+    id: 'space',
+    title: '우주 사진 보고 천체 맞히기',
+    desc: 'NASA가 찍은 진짜 사진이에요',
+    category: '과학',
+    perPlay: 10,
+    credit: '사진 출처: NASA · 위키미디어 공용 (퍼블릭 도메인)',
+    cover: { image: WM('Saturn during Equinox.jpg') },
+    questions: [
+      { image: WM('Mercury in true color.jpg'), text: '이 천체의 이름은?', answer: '수성' },
+      { image: WM('Venus-real color.jpg'), text: '이 천체의 이름은?', answer: '금성' },
+      { image: WM('The Earth seen from Apollo 17.jpg'), text: '이 천체의 이름은?', answer: '지구' },
+      { image: WM('Mars atmosphere by Hubble.jpg'), text: '이 천체의 이름은?', answer: '화성' },
+      { image: WM('Jupiter and its shrunken Great Red Spot.jpg'), text: '이 천체의 이름은?', answer: '목성' },
+      { image: WM('Saturn during Equinox.jpg'), text: '이 천체의 이름은?', answer: '토성' },
+      { image: WM('Uranus2.jpg'), text: '이 천체의 이름은?', answer: '천왕성' },
+      { image: WM('Neptune Full.jpg'), text: '이 천체의 이름은?', answer: '해왕성' },
+      { image: WM("The Sun by the Atmospheric Imaging Assembly of NASA's Solar Dynamics Observatory - 20100819.jpg"), text: '이 천체의 이름은?', answer: '태양', alias: ['해'] },
+      { image: WM('Moon nearside LRO 5000.jpg'), text: '이 천체의 이름은?', answer: '달' },
+      { image: WM('Pluto in True Color - High-Res.jpg'), text: '이 천체의 이름은?', answer: '명왕성' },
+    ],
+  },
+  {
+    id: 'flags-hard',
+    title: '헷갈리는 국기 맞히기',
+    desc: '닮은꼴 국기만 모았어요. 국기 1탄을 깼다면 도전!',
+    category: '지리',
+    perPlay: 10,
+    cover: { image: FLAG('td') },
+    questions: [
+      { image: FLAG('id'), answer: '인도네시아' },
+      { image: FLAG('mc'), answer: '모나코' },
+      { image: FLAG('ro'), answer: '루마니아' },
+      { image: FLAG('td'), answer: '차드' },
+      { image: FLAG('ie'), answer: '아일랜드' },
+      { image: FLAG('ci'), answer: '코트디부아르', alias: ['아이보리코스트'] },
+      { image: FLAG('no'), answer: '노르웨이' },
+      { image: FLAG('is'), answer: '아이슬란드' },
+      { image: FLAG('fi'), answer: '핀란드' },
+      { image: FLAG('dk'), answer: '덴마크' },
+      { image: FLAG('nl'), answer: '네덜란드' },
+      { image: FLAG('lu'), answer: '룩셈부르크' },
+      { image: FLAG('ru'), answer: '러시아' },
+      { image: FLAG('au'), answer: '호주', alias: ['오스트레일리아'] },
+      { image: FLAG('nz'), answer: '뉴질랜드' },
+      { image: FLAG('pl'), answer: '폴란드' },
+      { image: FLAG('at'), answer: '오스트리아' },
+      { image: FLAG('be'), answer: '벨기에' },
+      { image: FLAG('co'), answer: '콜롬비아' },
+      { image: FLAG('ec'), answer: '에콰도르' },
+    ],
+  },
+  {
+    id: 'animals',
+    title: '사진 보고 동물 맞히기',
+    desc: '동물원에서 본 그 동물, 이름이 뭐였더라?',
+    category: '동물',
+    perPlay: 10,
+    cover: { image: WM('Meerkat (Suricata suricatta) Tswalu.jpg') },
+    questions: [
+      { image: WM("020 The lion king Snyggve in the Serengeti National Park Photo by Giles Laurent.jpg"), text: '이 동물의 이름은?', answer: '사자', credit: "사진: Giles Laurent · CC BY-SA 4.0" },
+      { image: WM("Bengal tiger (Panthera tigris tigris) female 3 crop.jpg"), text: '이 동물의 이름은?', answer: '호랑이', alias: ["범"], credit: "사진: Charles J. Sharp · CC BY-SA 4.0" },
+      { image: WM("178 Male African bush elephant in Etosha National Park Photo by Giles Laurent.jpg"), text: '이 동물의 이름은?', answer: '코끼리', credit: "사진: Giles Laurent · CC BY-SA 4.0" },
+      { image: WM("Equus quagga burchellii - Etosha, 2014.jpg"), text: '이 동물의 이름은?', answer: '얼룩말', credit: "사진: Yathin S Krishnappa · CC BY-SA 3.0" },
+      { image: WM("Grosser Panda.JPG"), text: '이 동물의 이름은?', answer: '판다', alias: ["자이언트판다", "대왕판다"], credit: "사진: J. Patrick Fischer · CC BY-SA 3.0" },
+      { image: WM("Aptenodytes forsteri -Snow Hill Island, Antarctica -adults and juvenile-8.jpg"), text: '이 동물의 이름은?', answer: '펭귄', alias: ["황제펭귄"], credit: "사진: Ian Duffy from UK · CC BY 2.0" },
+      { image: WM("Koala climbing tree.jpg"), text: '이 동물의 이름은?', answer: '코알라', credit: "사진: Diliff · CC BY-SA 3.0" },
+      { image: WM("Portrait Hippopotamus in the water.jpg"), text: '이 동물의 이름은?', answer: '하마', credit: "사진: Muhammad Mahdi Karim · CC BY-SA 4.0" },
+      { image: WM("Polar Bear - Alaska (cropped).jpg"), text: '이 동물의 이름은?', answer: '북극곰', alias: ["흰곰"], credit: "사진: Alan Wilson · CC BY-SA 3.0" },
+      { image: WM("Camelus dromedarius in Nuweiba.jpg"), text: '이 동물의 이름은?', answer: '낙타', credit: "사진: Florian Prischl · CC BY-SA 3.0" },
+      { image: WM("Male gorilla in SF zoo.jpg"), text: '이 동물의 이름은?', answer: '고릴라', credit: "사진: Brocken Inaglory · CC BY-SA 3.0" },
+      { image: WM("American Flamingo JG.jpg"), text: '이 동물의 이름은?', answer: '홍학', alias: ["플라밍고"], credit: "사진: JeffreyGammon · CC BY 4.0" },
+      { image: WM("Sea Otter (Enhydra lutris) (25169790524) crop.jpg"), text: '이 동물의 이름은?', answer: '해달', alias: ["수달"], credit: "사진: Marshal Hedin from San Diego · CC BY-SA 2.0" },
+      { image: WM("Meerkat (Suricata suricatta) Tswalu.jpg"), text: '이 동물의 이름은?', answer: '미어캣', credit: "사진: Charles J. Sharp · CC BY-SA 4.0" },
+      { image: WM("Male cheetah facing left in South Africa.jpg"), text: '이 동물의 이름은?', answer: '치타', credit: "사진: AfricanConservation · CC BY-SA 4.0" },
+      { image: WM("Erinaceus europaeus LC0119.jpg"), text: '이 동물의 이름은?', answer: '고슴도치', credit: "사진: Jörg Hempel · CC BY-SA 2.0 de" },
+      { image: WM("Peacock on tree (52077240794).jpg"), text: '이 동물의 이름은?', answer: '공작', alias: ["공작새"], credit: "사진: Kandukuru Nagarjun from Bangalore, India · CC BY 2.0" },
+    ],
+  },
+  {
+    id: 'landmarks',
+    title: '사진 보고 세계 명소 맞히기',
+    desc: '여행 가고 싶어지는 그곳',
+    category: '지리',
+    perPlay: 10,
+    cover: { image: WM('Pyramids of the Giza Necropolis.jpg') },
+    questions: [
+      { image: WM("Tour Eiffel Wikimedia Commons (cropped).jpg"), text: '이곳의 이름은?', answer: '에펠탑', credit: "사진: Benh LIEU SONG · Public domain" },
+      { image: WM("Front view of Statue of Liberty (cropped).jpg"), text: '이곳의 이름은?', answer: '자유의 여신상', credit: "사진: AskALotl · CC0" },
+      { image: WM("Pyramids of the Giza Necropolis.jpg"), text: '이곳의 이름은?', answer: '피라미드', alias: ["기자 피라미드", "기자의 피라미드"], credit: "사진: KennyOMG · CC BY-SA 4.0" },
+      { image: WM("Colosseo 2020.jpg"), text: '이곳의 이름은?', answer: '콜로세움', alias: ["콜로세오"], credit: "사진: FeaturedPics · CC BY-SA 4.0" },
+      { image: WM("Taj Mahal (Edited).jpeg"), text: '이곳의 이름은?', answer: '타지마할', credit: "사진: Yann; edited by Jim Carter · CC BY-SA 4.0" },
+      { image: WM("The Great Wall of China at Jinshanling-edit.jpg"), text: '이곳의 이름은?', answer: '만리장성', credit: "사진: Severin.stalder · CC BY-SA 3.0" },
+      { image: WM("Italy - Pisa - Leaning Tower.jpg"), text: '이곳의 이름은?', answer: '피사의 사탑', alias: ["피사의 탑", "피사 사탑"], credit: "사진: Arne Müseler · CC BY-SA 3.0 de" },
+      { image: WM("Sydney Australia. (21339175489).jpg"), text: '이곳의 이름은?', answer: '시드니 오페라 하우스', alias: ["오페라 하우스"], credit: "사진: Bernard Spragg. NZ from Christchurch, New Zealand · CC0" },
+      { image: WM("Elizabeth Tower and the north front of the Palace of Westminster, London.jpg"), text: '이곳의 이름은?', answer: '빅벤', alias: ["엘리자베스 타워"], credit: "사진: Christian David · CC BY-SA 4.0" },
+      { image: WM("Machu Picchu, 2023 (012).jpg"), text: '이곳의 이름은?', answer: '마추픽추', credit: "사진: Draceane · CC BY-SA 4.0" },
+      { image: WM("Angkor Wat.jpg"), text: '이곳의 이름은?', answer: '앙코르와트', credit: "사진: Bjørn Christian Tørrissen · CC BY-SA 4.0" },
+      { image: WM("AhuTongariki.JPG"), text: '이곳의 이름은?', answer: '모아이', alias: ["모아이 석상"], credit: "사진: Ian Sewell · CC BY 2.5" },
+      { image: WM("Golden Gate Bridge as seen from Battery East.jpg"), text: '이곳의 이름은?', answer: '금문교', alias: ["골든게이트교", "골든 게이트 브리지"], credit: "사진: Frank Schulenburg · CC BY-SA 4.0" },
+      { image: WM("Stonehenge2007 07 30.jpg"), text: '이곳의 이름은?', answer: '스톤헨지', credit: "사진: garethwiscombe · CC BY 2.0" },
+      { image: WM("The Parthenon in Athens.jpg"), text: '이곳의 이름은?', answer: '파르테논 신전', alias: ["파르테논"], credit: "사진: Steve Swayne · CC BY 2.0" },
+      { image: WM("Sungnyemun Gate, front, 2013.jpg"), text: '이곳의 이름은?', answer: '숭례문', alias: ["남대문"], credit: "사진: DoulosCore · CC BY-SA 3.0" },
+      { image: WM("Cheomseongdae Observatory under blue sky in Gyeongju South Korea.jpg"), text: '이곳의 이름은?', answer: '첨성대', credit: "사진: Basile Morin · CC BY-SA 4.0" },
+      { image: WM("Lotus Flower Bridge and Seven Treasure Bridge at Bulguksa in Gyeongju, Korea.jpg"), text: '이곳의 이름은?', answer: '불국사', credit: "사진: 작자 미상 · Public domain" },
+      { image: WM("Saint Basil's Cathedral in Moscow.jpg"), text: '이곳의 이름은?', answer: '성 바실리 대성당', alias: ["성 바실리 성당", "바실리 성당"], credit: "사진: Tsy1980 · CC BY-SA 4.0" },
+    ],
+  },
+  {
+    id: 'spelling',
+    title: '맞춤법 퀴즈',
+    desc: '둘 중 맞는 표기를 그대로 써 보세요',
+    category: '언어',
+    perPlay: 10,
+    exact: true, // 오타 인정 없음 (틀린 표기가 정답 처리되지 않게)
+    cover: { text: '금세?', colors: ['#e17055', '#fab1a0'] },
+    questions: [
+      { text: '금새 / 금세', ask: '맞는 표기는?', answer: '금세', hint: "'금시에'가 줄어든 말이에요" },
+      { text: '며칠 / 몇일', ask: '맞는 표기는?', answer: '며칠', hint: "'몇 일'로 쓰는 경우는 없어요" },
+      { text: '어의없다 / 어이없다', ask: '맞는 표기는?', answer: '어이없다', hint: "'어의'는 임금의 의사예요" },
+      { text: '왠지 / 웬지', ask: '맞는 표기는?', answer: '왠지', hint: "'왜인지'가 줄어든 말이에요" },
+      { text: '설겆이 / 설거지', ask: '맞는 표기는?', answer: '설거지', hint: '소리 나는 대로 써요' },
+      { text: '희한하다 / 희안하다', ask: '맞는 표기는?', answer: '희한하다', hint: "드물 희(稀), 드물 한(罕)" },
+      { text: '오랫만에 / 오랜만에', ask: '맞는 표기는?', answer: '오랜만에', hint: "'오래간만에'가 줄어든 말이에요" },
+      { text: '일일이 / 일일히', ask: '맞는 표기는?', answer: '일일이', hint: "'하나하나'라는 뜻이에요" },
+      { text: '구지 / 굳이', ask: '맞는 표기는?', answer: '굳이', hint: "'굳다'에서 온 말이에요" },
+      { text: '역할 / 역활', ask: '맞는 표기는?', answer: '역할', hint: "부릴 역(役), 나눌 할(割)" },
+      { text: '내일 봬요 / 내일 뵈요', ask: '맞는 표기는?', answer: '내일 봬요', alias: ['봬요'], hint: "'뵈어요'가 줄어든 말이에요" },
+      { text: '할께요 / 할게요', ask: '맞는 표기는?', answer: '할게요', hint: '된소리로 나도 예사소리로 써요' },
+      { text: '내로라하는 / 내노라하는', ask: '맞는 표기는?', answer: '내로라하는', hint: "'나+이로라'에서 온 말이에요" },
+      { text: '깨끗히 / 깨끗이', ask: '맞는 표기는?', answer: '깨끗이', hint: "'ㅅ' 받침 뒤에는 '-이'를 써요" },
+      { text: '육개장 / 육계장', ask: '맞는 표기는?', answer: '육개장', hint: '닭(계)이 아니라 소고기(육)로 끓인 개장국이에요' },
+      { text: '무난하다 / 문안하다', ask: "'별 어려움이 없다'는 뜻의 맞는 표기는?", answer: '무난하다', hint: '없을 무(無), 어려울 난(難)' },
+    ],
+  },
+  {
+    id: 'antonyms',
+    title: '반대말 맞히기',
+    desc: '보자마자 반대말이 떠오르나요?',
+    category: '언어',
+    perPlay: 10,
+    cover: { text: '↔', colors: ['#00a8a8', '#55efc4'] },
+    questions: [
+      { big: '뜨겁다', text: '반대말은?', answer: '차갑다' },
+      { big: '길다', text: '반대말은?', answer: '짧다' },
+      { big: '무겁다', text: '반대말은?', answer: '가볍다' },
+      { big: '넓다', text: '반대말은?', answer: '좁다' },
+      { big: '밝다', text: '반대말은?', answer: '어둡다' },
+      { big: '높다', text: '반대말은?', answer: '낮다' },
+      { big: '깊다', text: '반대말은?', answer: '얕다' },
+      { big: '쉽다', text: '반대말은?', answer: '어렵다' },
+      { big: '빠르다', text: '반대말은?', answer: '느리다' },
+      { big: '이기다', text: '반대말은?', answer: '지다' },
+      { big: '입구', text: '반대말은?', answer: '출구' },
+      { big: '찬성', text: '반대말은?', answer: '반대' },
+      { big: '성공', text: '반대말은?', answer: '실패' },
+      { big: '공격', text: '반대말은?', answer: '수비', alias: ['방어'] },
+      { big: '부지런하다', text: '반대말은?', answer: '게으르다' },
+      { big: '두껍다', text: '반대말은?', answer: '얇다' },
+    ],
+  },
+  {
+    id: 'baby-animals',
+    title: '동물 새끼 이름 맞히기',
+    desc: '올챙이부터 능소니까지',
+    category: '동물',
+    perPlay: 10,
+    cover: { text: '새끼?', colors: ['#fdcb6e', '#e17055'] },
+    questions: [
+      { text: '개구리의 새끼는?', answer: '올챙이' },
+      { text: '닭의 새끼는?', answer: '병아리' },
+      { text: '개의 새끼는?', answer: '강아지' },
+      { text: '소의 새끼는?', answer: '송아지' },
+      { text: '말의 새끼는?', answer: '망아지' },
+      { text: '모기의 애벌레는?', answer: '장구벌레' },
+      { text: '매미의 애벌레는?', answer: '굼벵이' },
+      { text: '명태의 새끼는?', answer: '노가리' },
+      { text: '고등어의 새끼는?', answer: '고도리' },
+      { text: '곰의 새끼는?', answer: '능소니' },
+      { text: '호랑이의 새끼는?', answer: '개호주' },
+      { text: '꿩의 새끼는?', answer: '꺼병이' },
+      { text: '잠자리의 애벌레는?', answer: '학배기' },
+    ],
+  },
+  {
+    id: 'slang',
+    title: '줄임말 원래 말 맞히기',
+    desc: '별걸 다 줄이는 요즘 말, 풀어서 써 보세요',
+    category: '재미',
+    perPlay: 10,
+    cover: { text: '별다줄', colors: ['#e84393', '#fd79a8'] },
+    questions: [
+      { big: '소확행', text: '원래 말은?', answer: '소소하지만 확실한 행복' },
+      { big: '워라밸', text: '원래 말은?', answer: '워크 라이프 밸런스', alias: ['일과 삶의 균형'] },
+      { big: '갑분싸', text: '원래 말은?', answer: '갑자기 분위기 싸해짐', alias: ['갑자기 분위기가 싸해짐', '갑자기 분위기 싸해진다'] },
+      { big: '얼죽아', text: '원래 말은?', answer: '얼어 죽어도 아이스 아메리카노' },
+      { big: '케바케', text: '원래 말은?', answer: '케이스 바이 케이스' },
+      { big: '엄친아', text: '원래 말은?', answer: '엄마 친구 아들' },
+      { big: '내로남불', text: '원래 말은?', answer: '내가 하면 로맨스 남이 하면 불륜' },
+      { big: '만반잘부', text: '원래 말은?', answer: '만나서 반가워 잘 부탁해' },
+      { big: '스불재', text: '원래 말은?', answer: '스스로 불러온 재앙' },
+      { big: '점메추', text: '원래 말은?', answer: '점심 메뉴 추천' },
+      { big: '알잘딱깔센', text: '원래 말은?', answer: '알아서 잘 딱 깔끔하고 센스 있게' },
+      { big: '가성비', text: '원래 말은?', answer: '가격 대비 성능', alias: ['가격 대비 성능비'] },
+      { big: '버카충', text: '원래 말은?', answer: '버스 카드 충전' },
+      { big: '별다줄', text: '원래 말은?', answer: '별걸 다 줄인다', alias: ['별것을 다 줄인다'] },
+      { big: '할말하않', text: '원래 말은?', answer: '할 말은 많지만 하지 않겠다', alias: ['할 말은 많지만 하지 않겠어'] },
+    ],
+  },
+  {
+    id: 'sequence',
+    title: '규칙 찾아 빈칸 채우기',
+    desc: '숫자들 사이에 숨은 규칙을 찾아보세요',
+    category: '수학',
+    perPlay: 10,
+    cover: { text: '1, 1, 2, 3, ?', colors: ['#0f3057', '#00587a'] },
+    questions: [
+      { text: '2, 4, 6, 8, ?', ask: '?에 들어갈 수는?', answer: '10', numeric: true, hint: '2씩 커져요' },
+      { text: '3, 6, 12, 24, ?', ask: '?에 들어갈 수는?', answer: '48', numeric: true, hint: '앞의 수의 2배예요' },
+      { text: '1, 4, 9, 16, ?', ask: '?에 들어갈 수는?', answer: '25', numeric: true, hint: '1×1, 2×2, 3×3 …' },
+      { text: '1, 1, 2, 3, 5, 8, ?', ask: '?에 들어갈 수는?', answer: '13', numeric: true, hint: '앞의 두 수를 더해요' },
+      { text: '100, 90, 80, 70, ?', ask: '?에 들어갈 수는?', answer: '60', numeric: true, hint: '10씩 작아져요' },
+      { text: '1, 3, 6, 10, ?', ask: '?에 들어갈 수는?', answer: '15', numeric: true, hint: '더하는 수가 1씩 커져요' },
+      { text: '2, 3, 5, 7, 11, ?', ask: '?에 들어갈 수는?', answer: '13', numeric: true, hint: '1과 자기 자신으로만 나누어지는 수' },
+      { text: '81, 27, 9, 3, ?', ask: '?에 들어갈 수는?', answer: '1', numeric: true, hint: '3으로 나눠요' },
+      { text: '1, 8, 27, 64, ?', ask: '?에 들어갈 수는?', answer: '125', numeric: true, hint: '1×1×1, 2×2×2 …' },
+      { text: '5, 10, 20, 40, ?', ask: '?에 들어갈 수는?', answer: '80', numeric: true, hint: '앞의 수의 2배예요' },
+      { text: '1, 2, 4, 7, 11, ?', ask: '?에 들어갈 수는?', answer: '16', numeric: true, hint: '1, 2, 3, 4 … 씩 커져요' },
+      { text: '10, 9, 7, 4, ?', ask: '?에 들어갈 수는?', answer: '0', numeric: true, hint: '1, 2, 3 … 씩 작아져요' },
+      { text: '2, 6, 12, 20, ?', ask: '?에 들어갈 수는?', answer: '30', numeric: true, hint: '1×2, 2×3, 3×4 …' },
+      { text: '1, 10, 100, 1000, ?', ask: '?에 들어갈 수는?', answer: '10000', numeric: true, hint: '10배씩 커져요' },
+      { text: '7, 14, 21, 28, ?', ask: '?에 들어갈 수는?', answer: '35', numeric: true, hint: '7단이에요' },
+    ],
+  },
+  {
+    id: 'clock',
+    title: '시계 보고 시간 맞히기',
+    desc: '"3시 15분"처럼 써 보세요. 풀 때마다 새 시계!',
+    category: '수학',
+    perPlay: 10,
+    cover: { image: clockSvg(10, 10) },
+    generate(count) {
+      const seen = new Set();
+      const list = [];
+      while (list.length < count) {
+        const h = rand(1, 12);
+        const m = rand(0, 11) * 5;
+        if (seen.has(`${h}:${m}`)) continue;
+        seen.add(`${h}:${m}`);
+        const mm = String(m).padStart(2, '0');
+        const alias = [`${h}:${mm}`, `${h + 12}:${mm}`, `${h}시 ${m}분`];
+        if (m === 30) alias.push(`${h}시 반`);
+        list.push({
+          image: clockSvg(h, m),
+          text: '몇 시 몇 분일까요?',
+          answer: m === 0 ? `${h}시` : `${h}시 ${m}분`,
+          alias,
+          hint: m === 0 ? '긴 바늘이 12를 가리켜요' : `짧은 바늘은 ${h}과(와) ${(h % 12) + 1} 사이에 있어요`,
+        });
+      }
+      return list;
+    },
+  },
+];
