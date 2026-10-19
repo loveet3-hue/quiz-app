@@ -179,7 +179,7 @@ function renderHome() {
     <div class="grid"></div>
     ${adHtml('homeBottom')}
     <footer class="site-foot">
-      <a href="privacy.html">개인정보 처리방침</a>
+      <a href="privacy.html">개인정보 처리방침</a> · <a href="credits.html">사진 출처</a>
     </footer>
   `;
 

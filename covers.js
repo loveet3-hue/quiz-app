@@ -218,6 +218,24 @@ const COVERS = (() => {
       <g stroke="#fff" stroke-width="3" opacity=".5"><line x1="104" y1="176" x2="230" y2="176"/><line x1="104" y1="204" x2="230" y2="204"/></g>
       <text x="167" y="198" font-family="${KO}" font-size="22" font-weight="800" fill="#fff" text-anchor="middle" opacity=".9">TAKE 1</text>`),
 
+    // 연예인 사진: 폴라로이드 + 실루엣 + 물음표
+    'celeb-photos': make('#ffe6f0', '#ffb3d1', `
+      ${shadow(200, 262, 96)}
+      <g transform="rotate(-8 150 150)">
+        <rect x="88" y="62" width="120" height="146" rx="6" fill="#fff"/>
+        <rect x="98" y="72" width="100" height="100" fill="#ffd1e3"/>
+        <circle cx="148" cy="108" r="20" fill="#e97aa6"/>
+        <path d="M112 172c4-24 18-36 36-36s32 12 36 36z" fill="#e97aa6"/>
+      </g>
+      <g transform="rotate(7 252 146)">
+        <rect x="192" y="60" width="120" height="146" rx="6" fill="#fff"/>
+        <rect x="202" y="70" width="100" height="100" fill="#d9d4ff"/>
+        <circle cx="252" cy="106" r="20" fill="#8f7ad6"/>
+        <path d="M216 170c4-24 18-36 36-36s32 12 36 36z" fill="#8f7ad6"/>
+        <circle cx="290" cy="80" r="16" fill="#ffcc33"/>
+        <text x="290" y="88" font-family="${NUM}" font-size="22" font-weight="700" fill="#7a4b00" text-anchor="middle">?</text>
+      </g>`),
+
     // 스트리머·유튜버: 방송 화면 + 재생 버튼 + 채팅
     streamers: make('#ffe1e1', '#ff9f9f', `
       ${shadow(200, 262, 110)}
@@ -231,6 +249,29 @@ const COVERS = (() => {
       <rect x="262" y="132" width="56" height="10" rx="5" fill="#ffb3b9"/>
       <rect x="236" y="164" width="110" height="34" rx="12" fill="#fff"/>
       <rect x="248" y="176" width="72" height="10" rx="5" fill="#c9d0ff"/>`),
+
+    // 게임 캐릭터: 게임 패드
+    'game-chars': make('#e0f2ff', '#9fd4ff', `
+      ${shadow(200, 252, 112)}
+      <path d="M122 110h156c34 0 52 30 58 66 6 34-14 58-36 50-16-6-24-30-44-30h-112c-20 0-28 24-44 30-22 8-42-16-36-50 6-36 24-66 58-66z" fill="#3b4a6b"/>
+      <rect x="132" y="138" width="14" height="44" rx="4" fill="#fff"/>
+      <rect x="117" y="153" width="44" height="14" rx="4" fill="#fff"/>
+      <circle cx="262" cy="146" r="10" fill="#ff6b6b"/><circle cx="284" cy="166" r="10" fill="#ffcc33"/>
+      <circle cx="240" cy="166" r="10" fill="#4fd18b"/><circle cx="262" cy="186" r="10" fill="#4f8cff"/>
+      <rect x="182" y="146" width="16" height="7" rx="3" fill="#8b97b5"/><rect x="204" y="146" width="16" height="7" rx="3" fill="#8b97b5"/>
+      <g fill="#ffd93d"><path d="M96 66l5 12 13 1-10 8 3 13-11-7-11 7 3-13-10-8 13-1z"/><path d="M308 58l4 9 10 1-8 6 3 10-9-5-9 5 3-10-8-6 10-1z"/></g>`),
+
+    // 만화 캐릭터: 말풍선 + 만화 칸
+    'anime-chars': make('#fff1d6', '#ffc98f', `
+      ${shadow(200, 256, 112)}
+      <rect x="92" y="88" width="216" height="150" rx="8" fill="#fff" stroke="#2d3142" stroke-width="5"/>
+      <line x1="200" y1="88" x2="200" y2="238" stroke="#2d3142" stroke-width="5"/>
+      <line x1="92" y1="166" x2="200" y2="166" stroke="#2d3142" stroke-width="5"/>
+      <g stroke="#ffb020" stroke-width="3" opacity=".7"><line x1="212" y1="104" x2="296" y2="104"/><line x1="212" y1="124" x2="296" y2="124"/><line x1="212" y1="144" x2="296" y2="144"/></g>
+      <circle cx="146" cy="128" r="18" fill="#ffd1a6"/><circle cx="140" cy="125" r="3" fill="#2d3142"/><circle cx="152" cy="125" r="3" fill="#2d3142"/>
+      <path d="M140 134q6 6 12 0" fill="none" stroke="#2d3142" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M220 40h96a16 16 0 0 1 16 16v30a16 16 0 0 1-16 16h-56l-22 18 4-18h-22a16 16 0 0 1-16-16v-30a16 16 0 0 1 16-16z" fill="#fff" stroke="#2d3142" stroke-width="4"/>
+      <text x="268" y="82" font-family="${KO}" font-size="28" font-weight="800" fill="#e84393" text-anchor="middle">?!</text>`),
 
     // 시계
     clock: make('#ebe6ff', '#cbbcff', `

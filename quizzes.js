@@ -637,7 +637,7 @@ const QUIZZES = [
     desc: '누군지 한눈에 알아보시겠어요?',
     category: '연예',
     perPlay: 10,
-    cover: { image: COVERS.celebs },
+    cover: { image: COVERS['celeb-photos'] },
     questions: [],
   },
   {
@@ -774,6 +774,24 @@ const QUIZZES = [
     category: '예술',
     perPlay: 10,
     cover: { fromFirst: true }, // 문제 목록의 첫 사진을 표지로
+    questions: [],
+  },
+  {
+    id: 'game-chars',
+    title: '초성 보고 게임 캐릭터 맞히기',
+    desc: '설명 한 줄로 떠올려 보세요',
+    category: '게임·만화',
+    perPlay: 10,
+    cover: { image: COVERS['game-chars'] },
+    questions: [],
+  },
+  {
+    id: 'anime-chars',
+    title: '초성 보고 만화 캐릭터 맞히기',
+    desc: '어릴 때 보던 그 캐릭터, 이름은?',
+    category: '게임·만화',
+    perPlay: 10,
+    cover: { image: COVERS['anime-chars'] },
     questions: [],
   },
   {

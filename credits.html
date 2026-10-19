@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>사진 출처 · 맞혀봐</title>
+  <meta name="theme-color" content="#7c5cff">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .credits { padding-top: 8px; }
+    .credits h1 { font-size: 24px; letter-spacing: -0.03em; margin: 12px 0 4px; }
+    .credits .meta { color: var(--text-3); font-size: 14px; margin: 0 0 16px; line-height: 1.6; }
+    .credits section { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; }
+    .credits h2 { font-size: 16px; margin: 0 0 8px; }
+    .credits ul { margin: 0; padding-left: 18px; }
+    .credits li { font-size: 13px; color: var(--text-2); line-height: 1.7; }
+    .credits a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="topbar-inner"><a class="logo" href="./#/"><img src="icons/icon-192.png" alt="" width="28" height="28"><span>맞혀봐</span></a></div></header>
+  <main class="container credits">
+    <h1>사진 출처</h1>
+    <p class="meta">문제에 쓰인 사진은 위키미디어 공용(Wikimedia Commons)의 퍼블릭 도메인 또는
+      <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ko" target="_blank" rel="noopener">CC BY·CC BY-SA</a> 라이선스 사진이며,
+      화면에 맞게 크기만 줄여 사용합니다. 국기 이미지는 <a href="https://flagcdn.com" target="_blank" rel="noopener">flagcdn.com</a>,
+      명화·우주 사진은 퍼블릭 도메인입니다. 사진 이름을 누르면 원본 페이지로 이동합니다.</p>
+    <div id="list"><p class="meta">불러오는 중…</p></div>
+    <p class="meta" style="text-align:center"><a href="./#/">← 퀴즈로 돌아가기</a></p>
+  </main>
+  <script src="config.js"></script>
+  <script src="data/_init.js"></script>
+  <script src="covers.js"></script>
+  <script>
+    // index.html과 같은 data 파일 목록을 읽어 와서 불러온다
+    fetch('index.html').then((r) => r.text()).then((html) => {
+      const files = [...html.matchAll(/src="(data\/[^"?]+\.js)/g)].map((m) => m[1]).filter((f) => !f.endsWith('_init.js'));
+      let left = files.length;
+      files.forEach((f) => {
+        const s = document.createElement('script');
+        s.src = f;
+        s.onload = s.onerror = () => { if (--left === 0) loadQuizzes(); };
+        document.head.appendChild(s);
+      });
+    });
+    function loadQuizzes() {
+      const s = document.createElement('script');
+      s.src = 'quizzes.js';
+      s.onload = draw;
+      document.head.appendChild(s);
+    }
+    const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    function draw() {
+      const out = [];
+      for (const quiz of QUIZZES) {
+        const rows = (quiz.questions || []).filter((q) => q.image && q.image.includes('wikimedia'));
+        if (!rows.length) continue;
+        const items = rows.map((q) => {
+          const file = decodeURIComponent(q.image.split('/Special:FilePath/')[1].split('?')[0]);
+          const page = 'https://commons.wikimedia.org/wiki/File:' + encodeURIComponent(file.replace(/ /g, '_'));
+          const who = q.credit ? q.credit.replace(/^사진:\s*/, '') : (q.by ? `${q.by} 작품 · 퍼블릭 도메인` : '퍼블릭 도메인');
+          return `<li>${esc(q.answer)} — <a href="${page}" target="_blank" rel="noopener">${esc(file)}</a> · ${esc(who)}</li>`;
+        });
+        out.push(`<section><h2>${esc(quiz.title)} (${rows.length})</h2><ul>${items.join('')}</ul></section>`);
+      }
+      document.getElementById('list').innerHTML = out.join('') || '<p class="meta">사진 문제가 없어요.</p>';
+    }
+  </script>
+</body>
+</html>

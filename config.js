@@ -11,6 +11,6 @@ const CONFIG = {
       homeBottom: '', // 목록 맨 아래
       result: '', // 결과 화면
     },
-    placeholder: true, // client가 비어 있을 때 '광고 영역' 자리 표시를 보여줄지
+    placeholder: false, // client가 비어 있을 때 '광고 영역' 자리 표시를 보여줄지 (지금은 숨김)
   },
 };
