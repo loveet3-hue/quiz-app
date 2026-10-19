@@ -47,6 +47,8 @@ function judge(input, q) {
   if (answers.includes(mine)) return 'exact';
   if (q.exact) return null;
   if (answers.some((a) => a.length >= 5 && editDistance(a, mine) <= (a.length >= 12 ? 2 : 1))) return 'close';
+  // 4글자 이상 한글 답은 한 글자를 빼거나 더한 것도 인정 (예: 동명성왕 → 동명왕). 글자를 바꾼 건 인정 안 함
+  if (answers.some((a) => a.length >= 4 && /[가-힣]/.test(a) && Math.abs(a.length - mine.length) === 1 && editDistance(a, mine) === 1)) return 'close';
   return null;
 }
 
@@ -341,6 +343,7 @@ function renderQuestion() {
           ? `${mediaHtml(q)}<p class="qtext">${esc(q.text || '정답은?')}</p>`
           : `<div class="qmedia lead"><p class="qlead">${esc(q.text || '정답은?')}</p></div><p class="qtext sub">${esc(q.ask || '정답은?')}</p>`
       }
+      ${quiz.guide ? `<p class="qguide">${esc(quiz.guide)}</p>` : ''}
       <p class="qhint" data-role="hint"></p>
       <div class="answer-form">
         <input class="answer-input" type="text" placeholder="정답 입력" autocomplete="off" autocapitalize="off"
@@ -420,7 +423,7 @@ function showFeedback(result) {
 
   const last = play.idx === play.items.length - 1;
   const good = !!result;
-  const msg = good ? (result === 'close' ? '정답! (오타는 봐줄게요)' : '정답!') : item.passed ? '정답은' : '아쉬워요, 정답은';
+  const msg = good ? (result === 'close' ? '정답! (비슷하게 써도 인정)' : '정답!') : item.passed ? '정답은' : '아쉬워요, 정답은';
 
   app.querySelector('[data-role="after"]').innerHTML = `
     <div class="feedback ${good ? 'good' : 'bad'}">
@@ -578,9 +581,22 @@ function formatTime(ms) {
 
 function route() {
   window.scrollTo(0, 0);
+  if (typeof stopGame === 'function') stopGame();
   const q = location.hash.match(/^#\/q\/([\w-]+)/);
+  const g = location.hash.match(/^#\/game\/([\w-]+)/);
+  const onGames = !!g || location.hash.startsWith('#/games');
+  document.querySelectorAll('.top-tabs a').forEach((el) => {
+    if ((el.dataset.tab === 'games') === onGames) el.setAttribute('aria-current', 'page');
+    else el.removeAttribute('aria-current');
+  });
   if (q) startQuiz(q[1]);
-  else {
+  else if (g) {
+    play = null;
+    renderGame(g[1]);
+  } else if (location.hash.startsWith('#/games')) {
+    play = null;
+    renderGamesHome();
+  } else {
     play = null;
     renderHome();
   }

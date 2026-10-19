@@ -10,6 +10,7 @@
 //   cover     목록 카드 표지 { image } (그림은 covers.js) 또는 { flags: [국가코드...], vs }
 //   questions 문제 목록
 //   exact     true면 오타를 봐주지 않음 (맞춤법 퀴즈)
+//   guide     문제 아래에 보여줄 답 쓰는 방법 안내
 //   generate  questions 대신 쓰는 함수. 풀 때마다 문제를 새로 만들어 냄 (암산 등)
 //
 // 문제 하나 (필요한 것만 쓰면 됨):
@@ -58,6 +59,7 @@ function clockSvg(h, m) {
 const QUIZZES = [
   {
     id: 'flags',
+    guide: '나라 이름을 써 보세요',
     title: '국기 보고 나라 맞히기',
     desc: '국기만 보고 어느 나라인지 맞혀 보세요',
     category: '지리',
@@ -209,6 +211,7 @@ const QUIZZES = [
   },
   {
     id: 'english',
+    guide: '영어 단어로 써 보세요 · 대소문자는 상관없어요',
     title: '우리말 보고 영어 단어 쓰기',
     desc: '철자까지 정확하게 써 보세요',
     category: '언어',
@@ -234,6 +237,7 @@ const QUIZZES = [
   },
   {
     id: 'mental-math',
+    guide: '숫자만 써 보세요',
     title: '10초 암산',
     desc: '풀 때마다 새 문제가 나와요',
     category: '수학',
@@ -253,6 +257,7 @@ const QUIZZES = [
   },
   {
     id: 'elements',
+    guide: '원소 이름을 한글로 써 보세요 (예: 철, 산소)',
     title: '원소 기호 보고 이름 맞히기',
     desc: '과학 시간에 외웠던 그 기호들',
     category: '과학',
@@ -329,6 +334,7 @@ const QUIZZES = [
   },
   {
     id: 'paintings',
+    guide: '작품 제목을 써 보세요 · 작가 이름은 힌트에 있어요',
     title: '명화 보고 제목 맞히기',
     desc: '한 번쯤 본 그 그림, 제목은 뭘까요?',
     category: '예술',
@@ -381,6 +387,7 @@ const QUIZZES = [
   },
   {
     id: 'flags-hard',
+    guide: '나라 이름을 써 보세요',
     title: '어려운 국기 맞히기',
     desc: '덜 알려진 나라와 닮은꼴 국기. 국기 1탄을 깼다면 도전!',
     category: '지리',
@@ -568,6 +575,7 @@ const QUIZZES = [
   },
   {
     id: 'sequence',
+    guide: '숫자만 써 보세요',
     title: '규칙 찾아 빈칸 채우기',
     desc: '풀 때마다 새 수열! 숨은 규칙을 찾아보세요',
     category: '수학',
@@ -632,6 +640,7 @@ const QUIZZES = [
   },
   {
     id: 'celeb-photos',
+    guide: '활동명(예명)으로 써 보세요',
     noAds: true, // 실존 인물 사진이라 광고를 붙이지 않음 (초상권·퍼블리시티권)
     title: '사진 보고 연예인 맞히기',
     desc: '누군지 한눈에 알아보시겠어요?',
@@ -669,6 +678,7 @@ const QUIZZES = [
   },
   {
     id: 'cars',
+    guide: '브랜드와 모델명으로 써 보세요 (예: 현대 쏘나타) · 모델명만 써도 정답',
     title: '사진 보고 자동차 모델 맞히기',
     desc: '브랜드 말고 모델 이름까지!',
     category: '탈것',
@@ -687,6 +697,7 @@ const QUIZZES = [
   },
   {
     id: 'dogs',
+    guide: '품종 이름을 써 보세요 (예: 골든 리트리버)',
     title: '사진 보고 강아지 품종 맞히기',
     desc: '산책길에 본 그 강아지, 품종은?',
     category: '동물',
@@ -696,6 +707,7 @@ const QUIZZES = [
   },
   {
     id: 'cats',
+    guide: '품종 이름을 써 보세요 (예: 러시안 블루)',
     title: '사진 보고 고양이 품종 맞히기',
     desc: '털 모양과 얼굴로 맞혀 보세요',
     category: '동물',
@@ -786,6 +798,7 @@ const QUIZZES = [
   },
   {
     id: 'clock',
+    guide: "'3시 15분'처럼 써 보세요 · '3:15'도 정답",
     title: '시계 보고 시간 맞히기',
     desc: '"3시 15분"처럼 써 보세요. 풀 때마다 새 시계!',
     category: '수학',

@@ -259,6 +259,47 @@ const COVERS = (() => {
       <path d="M220 40h96a16 16 0 0 1 16 16v30a16 16 0 0 1-16 16h-56l-22 18 4-18h-22a16 16 0 0 1-16-16v-30a16 16 0 0 1 16-16z" fill="#fff" stroke="#2d3142" stroke-width="4"/>
       <text x="268" y="82" font-family="${KO}" font-size="28" font-weight="800" fill="#e84393" text-anchor="middle">?!</text>`),
 
+    // 뽑기 게임: 돌림판
+    'game-wheel': make('#fff1d6', '#ffcf8f', `
+      ${shadow(200, 262, 92)}
+      ${Array.from({ length: 8 }, (_, i) => {
+        const a0 = (i / 8) * Math.PI * 2, a1 = ((i + 1) / 8) * Math.PI * 2, r = 96;
+        const c = ['#ff6b6b', '#ffb020', '#ffd93d', '#4fd18b', '#4f8cff', '#7c5cff', '#e84393', '#00cec9'][i];
+        return `<path d="M200 150L${(200 + r * Math.cos(a0)).toFixed(1)} ${(150 + r * Math.sin(a0)).toFixed(1)}A${r} ${r} 0 0 1 ${(200 + r * Math.cos(a1)).toFixed(1)} ${(150 + r * Math.sin(a1)).toFixed(1)}z" fill="${c}" stroke="#fff" stroke-width="3"/>`;
+      }).join('')}
+      <circle cx="200" cy="150" r="18" fill="#fff" stroke="#2d3142" stroke-width="5"/>
+      <path d="M200 70l-14-26h28z" fill="#2d3142"/>`),
+
+    // 뽑기 게임: 사다리
+    'game-ladder': make('#e3f7ec', '#a8e6c5', `
+      ${shadow(200, 262, 100)}
+      <g stroke="#2d3142" stroke-width="6" stroke-linecap="round">
+        ${[110, 170, 230, 290].map((x) => `<line x1="${x}" y1="70" x2="${x}" y2="230"/>`).join('')}
+        <line x1="110" y1="100" x2="170" y2="100"/><line x1="230" y1="120" x2="290" y2="120"/>
+        <line x1="170" y1="150" x2="230" y2="150"/><line x1="110" y1="190" x2="170" y2="190"/><line x1="230" y1="200" x2="290" y2="200"/>
+      </g>
+      <polyline points="170,70 170,100 110,100 110,190 170,190 170,230" fill="none" stroke="#ff4f5e" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      ${[110, 170, 230, 290].map((x, i) => `<circle cx="${x}" cy="56" r="13" fill="${['#ffb020', '#ff4f5e', '#4f8cff', '#7c5cff'][i]}"/>`).join('')}
+      <rect x="152" y="236" width="36" height="22" rx="6" fill="#ffcc33"/><text x="170" y="252" font-family="${KO}" font-size="13" font-weight="800" fill="#7a4b00" text-anchor="middle">당첨</text>`),
+
+    // 뽑기 게임: 구슬 추첨
+    'game-marble': make('#e6e9ff', '#b3bcff', `
+      ${shadow(200, 262, 100)}
+      <rect x="110" y="40" width="180" height="216" rx="14" fill="#fff" opacity=".7"/>
+      ${[[140, 90], [180, 90], [220, 90], [260, 90], [160, 130], [200, 130], [240, 130], [140, 170], [180, 170], [220, 170], [260, 170]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="#8f8aa3"/>`).join('')}
+      <line x1="150" y1="212" x2="196" y2="236" stroke="#5f5b70" stroke-width="5" stroke-linecap="round"/>
+      <line x1="250" y1="212" x2="204" y2="236" stroke="#5f5b70" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="168" cy="66" r="11" fill="#ff6b6b"/><circle cx="214" cy="110" r="11" fill="#4f8cff"/>
+      <circle cx="196" cy="152" r="11" fill="#ffb020"/><circle cx="238" cy="196" r="11" fill="#4fd18b"/>`),
+
+    // 뽑기 게임: 경주마
+    'game-horse': make('#e8f5d6', '#b8e29a', `
+      ${shadow(200, 262, 120)}
+      <rect x="70" y="70" width="260" height="170" rx="14" fill="#c98a4b"/>
+      ${[0, 1, 2, 3].map((i) => `<line x1="70" y1="${112 + i * 42}" x2="330" y2="${112 + i * 42}" stroke="#fff" stroke-width="3" stroke-dasharray="10 8" opacity=".7"/>`).join('')}
+      ${[0, 1, 2, 3].map((r) => [0, 1].map((c) => `<rect x="${300 + c * 12}" y="${70 + r * 42 + (c % 2 ? 21 : 0)}" width="12" height="21" fill="#2d3142"/>`).join('')).join('')}
+      ${[[230, '#ff6b6b', 1], [270, '#4f8cff', 2], [180, '#ffcc33', 3], [205, '#7c5cff', 4]].map(([x, col, n], i) => `<circle cx="${x}" cy="${91 + i * 42}" r="15" fill="${col}" stroke="#fff" stroke-width="3"/><text x="${x}" y="${97 + i * 42}" font-family="${NUM}" font-size="16" font-weight="700" fill="#fff" text-anchor="middle">${n}</text>`).join('')}`),
+
     // 시계
     clock: make('#ebe6ff', '#cbbcff', `
       ${shadow(200, 264, 84)}
