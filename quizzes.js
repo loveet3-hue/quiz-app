@@ -7,7 +7,7 @@
 //   desc      한 줄 설명
 //   category  카테고리 (목록 필터에 쓰임)
 //   perPlay   한 판에 낼 문제 수 (문제가 더 많으면 무작위로 뽑음)
-//   cover     목록 카드 표지 { image } 또는 { text, colors: [위, 아래] }
+//   cover     목록 카드 표지 { image } (그림은 covers.js) 또는 { flags: [국가코드...], vs }
 //   questions 문제 목록
 //   exact     true면 오타를 봐주지 않음 (맞춤법 퀴즈)
 //   generate  questions 대신 쓰는 함수. 풀 때마다 문제를 새로 만들어 냄 (암산 등)
@@ -48,8 +48,7 @@ function clockSvg(h, m) {
     const inner = i % 5 === 0 ? 80 : 84;
     marks += `<line x1="${(100 + inner * Math.cos(r)).toFixed(1)}" y1="${(100 + inner * Math.sin(r)).toFixed(1)}" x2="${(100 + 88 * Math.cos(r)).toFixed(1)}" y2="${(100 + 88 * Math.sin(r)).toFixed(1)}" stroke="#8f8aa3" stroke-width="${i % 5 === 0 ? 2.5 : 1}"/>`;
   }
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-    <rect width="200" height="200" fill="#f6f5fb"/>
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
     <circle cx="100" cy="100" r="92" fill="#fff" stroke="#1d1b26" stroke-width="5"/>
     ${marks}
     ${hand(((h % 12) + m / 60) * 30, 44, 7, '#1d1b26')}
@@ -66,7 +65,7 @@ const QUIZZES = [
     desc: '국기만 보고 어느 나라인지 맞혀 보세요',
     category: '지리',
     perPlay: 10,
-    cover: { image: FLAG('kr') },
+    cover: { flags: ['kr', 'us', 'jp', 'br'] },
     questions: [
       { image: FLAG('kr'), answer: '대한민국', alias: ['한국', '남한'] },
       { image: FLAG('jp'), answer: '일본' },
@@ -94,7 +93,7 @@ const QUIZZES = [
     desc: '초성과 뜻풀이를 보고 네 글자를 채워 보세요',
     category: '언어',
     perPlay: 10,
-    cover: { text: 'ㅇㅅㅇㅈ', colors: ['#7c5cff', '#b06bff'] },
+    cover: { image: COVERS['idioms'] },
     questions: [
       { chosung: true, answer: '일석이조', text: '한 가지 일로 두 가지 이득을 봄' },
       { chosung: true, answer: '자업자득', text: '자기가 저지른 일의 결과를 자기가 받음' },
@@ -118,7 +117,7 @@ const QUIZZES = [
     desc: '헷갈리기 쉬운 수도만 모았어요',
     category: '지리',
     perPlay: 10,
-    cover: { text: '수도?', colors: ['#ff6b81', '#ffa36b'] },
+    cover: { image: COVERS['capitals'] },
     questions: [
       { text: '호주의 수도는?', answer: '캔버라' },
       { text: '캐나다의 수도는?', answer: '오타와' },
@@ -142,7 +141,7 @@ const QUIZZES = [
     desc: '머리 말고 말장난으로 푸는 문제',
     category: '재미',
     perPlay: 10,
-    cover: { text: '???', colors: ['#ffb84d', '#ff7a59'] },
+    cover: { image: COVERS['nonsense'] },
     questions: [
       { text: '세상에서 가장 뜨거운 과일은?', answer: '천도복숭아' },
       { text: '왕이 넘어지면?', answer: '킹콩' },
@@ -167,7 +166,7 @@ const QUIZZES = [
     desc: '설명을 보면 군침부터 돌아요',
     category: '음식',
     perPlay: 10,
-    cover: { text: 'ㄸㅂㅇ', colors: ['#ff6b6b', '#ff9f43'] },
+    cover: { image: COVERS['foods'] },
     questions: [
       { chosung: true, answer: '떡볶이', text: '빨간 양념에 떡과 어묵을 볶은 분식' },
       { chosung: true, answer: '김치찌개', text: '김치와 돼지고기를 넣고 끓인 찌개' },
@@ -192,7 +191,7 @@ const QUIZZES = [
     desc: '빈칸에 들어갈 말을 써 보세요',
     category: '언어',
     perPlay: 10,
-    cover: { text: '＿＿', colors: ['#4facfe', '#6a7bff'] },
+    cover: { image: COVERS['proverbs'] },
     questions: [
       { text: '가는 말이 고와야 ＿＿ 말이 곱다', answer: '오는' },
       { text: '낮말은 새가 듣고 밤말은 ＿가 듣는다', answer: '쥐' },
@@ -217,7 +216,7 @@ const QUIZZES = [
     desc: '철자까지 정확하게 써 보세요',
     category: '언어',
     perPlay: 10,
-    cover: { text: 'ABC', colors: ['#00b894', '#00cec9'] },
+    cover: { image: COVERS['english'] },
     questions: [
       { big: '사과', text: '영어로 쓰면?', answer: 'apple' },
       { big: '학교', text: '영어로 쓰면?', answer: 'school' },
@@ -242,7 +241,7 @@ const QUIZZES = [
     desc: '풀 때마다 새 문제가 나와요',
     category: '수학',
     perPlay: 10,
-    cover: { text: '7×8', colors: ['#2d3436', '#636e72'] },
+    cover: { image: COVERS['mental-math'] },
     generate(count) {
       const make = () => {
         const kind = rand(0, 2);
@@ -261,7 +260,7 @@ const QUIZZES = [
     desc: '과학 시간에 외웠던 그 기호들',
     category: '과학',
     perPlay: 10,
-    cover: { text: 'Fe', colors: ['#6c5ce7', '#a29bfe'] },
+    cover: { image: COVERS['elements'] },
     questions: [
       { big: 'H', text: '이 원소의 이름은?', answer: '수소' },
       { big: 'He', text: '이 원소의 이름은?', answer: '헬륨' },
@@ -287,7 +286,7 @@ const QUIZZES = [
     desc: '교과서에서 만난 우리 역사 속 인물',
     category: '역사',
     perPlay: 10,
-    cover: { text: '人', colors: ['#a0522d', '#d2691e'] },
+    cover: { image: COVERS['history'] },
     questions: [
       { text: '훈민정음을 만든 조선의 왕은?', answer: '세종대왕', alias: ['세종'] },
       { text: '거북선을 이끌고 임진왜란에서 활약한 장군은?', answer: '이순신' },
@@ -312,7 +311,7 @@ const QUIZZES = [
     desc: '명소와 먹거리로 떠올려 보세요',
     category: '지리',
     perPlay: 10,
-    cover: { text: 'ㅂㅅ', colors: ['#0984e3', '#74b9ff'] },
+    cover: { image: COVERS['cities'] },
     questions: [
       { chosung: true, answer: '부산', text: '해운대와 광안리가 있는 항구 도시' },
       { chosung: true, answer: '대구', text: '사과와 무더위로 유명한 경상도의 광역시' },
@@ -389,7 +388,7 @@ const QUIZZES = [
     desc: '닮은꼴 국기만 모았어요. 국기 1탄을 깼다면 도전!',
     category: '지리',
     perPlay: 10,
-    cover: { image: FLAG('td') },
+    cover: { flags: ['ro', 'td'], vs: true },
     questions: [
       { image: FLAG('id'), answer: '인도네시아' },
       { image: FLAG('mc'), answer: '모나코' },
@@ -476,7 +475,7 @@ const QUIZZES = [
     category: '언어',
     perPlay: 10,
     exact: true, // 오타 인정 없음 (틀린 표기가 정답 처리되지 않게)
-    cover: { text: '금세?', colors: ['#e17055', '#fab1a0'] },
+    cover: { image: COVERS['spelling'] },
     questions: [
       { text: '금새 / 금세', ask: '맞는 표기는?', answer: '금세', hint: "'금시에'가 줄어든 말이에요" },
       { text: '며칠 / 몇일', ask: '맞는 표기는?', answer: '며칠', hint: "'몇 일'로 쓰는 경우는 없어요" },
@@ -502,7 +501,7 @@ const QUIZZES = [
     desc: '보자마자 반대말이 떠오르나요?',
     category: '언어',
     perPlay: 10,
-    cover: { text: '↔', colors: ['#00a8a8', '#55efc4'] },
+    cover: { image: COVERS['antonyms'] },
     questions: [
       { big: '뜨겁다', text: '반대말은?', answer: '차갑다' },
       { big: '길다', text: '반대말은?', answer: '짧다' },
@@ -528,7 +527,7 @@ const QUIZZES = [
     desc: '올챙이부터 능소니까지',
     category: '동물',
     perPlay: 10,
-    cover: { text: '새끼?', colors: ['#fdcb6e', '#e17055'] },
+    cover: { image: COVERS['baby-animals'] },
     questions: [
       { text: '개구리의 새끼는?', answer: '올챙이' },
       { text: '닭의 새끼는?', answer: '병아리' },
@@ -551,7 +550,7 @@ const QUIZZES = [
     desc: '별걸 다 줄이는 요즘 말, 풀어서 써 보세요',
     category: '재미',
     perPlay: 10,
-    cover: { text: '별다줄', colors: ['#e84393', '#fd79a8'] },
+    cover: { image: COVERS['slang'] },
     questions: [
       { big: '소확행', text: '원래 말은?', answer: '소소하지만 확실한 행복' },
       { big: '워라밸', text: '원래 말은?', answer: '워크 라이프 밸런스', alias: ['일과 삶의 균형'] },
@@ -576,7 +575,7 @@ const QUIZZES = [
     desc: '숫자들 사이에 숨은 규칙을 찾아보세요',
     category: '수학',
     perPlay: 10,
-    cover: { text: '1, 1, 2, 3, ?', colors: ['#0f3057', '#00587a'] },
+    cover: { image: COVERS['sequence'] },
     questions: [
       { text: '2, 4, 6, 8, ?', ask: '?에 들어갈 수는?', answer: '10', numeric: true, hint: '2씩 커져요' },
       { text: '3, 6, 12, 24, ?', ask: '?에 들어갈 수는?', answer: '48', numeric: true, hint: '앞의 수의 2배예요' },
@@ -596,12 +595,66 @@ const QUIZZES = [
     ],
   },
   {
+    id: 'celebs',
+    title: '초성 보고 연예인 맞히기',
+    desc: '설명을 보고 누군지 떠올려 보세요',
+    category: '연예',
+    perPlay: 10,
+    cover: { image: COVERS.celebs },
+    questions: [
+      { chosung: true, answer: '싸이', alias: ['PSY'], text: "'강남스타일'로 전 세계를 들썩이게 한 가수" },
+      { chosung: true, answer: '아이유', alias: ['IU'], text: "'좋은 날' 3단 고음, 드라마 '나의 아저씨'의 가수 겸 배우" },
+      { chosung: true, answer: '유재석', text: "'무한도전'을 이끈 국민 MC" },
+      { chosung: true, answer: '송강호', text: "영화 '기생충'에서 기택 역을 맡은 배우" },
+      { chosung: true, answer: '윤여정', text: "영화 '미나리'로 아카데미 여우조연상을 받은 배우" },
+      { chosung: true, answer: '이정재', text: "'오징어 게임' 기훈 역으로 에미상 남우주연상을 받은 배우" },
+      { chosung: true, answer: '방탄소년단', alias: ['BTS', '방탄'], text: "'Dynamite'로 빌보드 핫100 1위에 오른 7인조 그룹" },
+      { chosung: true, answer: '블랙핑크', alias: ['BLACKPINK'], text: '지수·제니·로제·리사로 이루어진 걸그룹' },
+      { chosung: true, answer: '강호동', text: '씨름 천하장사 출신 예능인' },
+      { chosung: true, answer: '이효리', text: "핑클 출신, '텐 미닛'의 솔로 가수" },
+      { chosung: true, answer: '보아', alias: ['BoA'], text: "'No.1'을 부른 '아시아의 별'" },
+      { chosung: true, answer: '임영웅', text: "'미스터트롯' 초대 우승자" },
+      { chosung: true, answer: '박진영', alias: ['JYP'], text: 'JYP엔터테인먼트를 세운 가수 겸 프로듀서' },
+      { chosung: true, answer: '마동석', alias: ['돈 리'], text: "'범죄도시' 마석도 역의 배우" },
+      { chosung: true, answer: '공유', text: "드라마 '도깨비' 김신, 영화 '부산행' 석우 역의 배우" },
+      { chosung: true, answer: '전지현', text: "'엽기적인 그녀', '별에서 온 그대' 천송이 역의 배우" },
+      { chosung: true, answer: '이병헌', text: "'오징어 게임' 프론트맨 역의 배우" },
+    ],
+  },
+  {
+    id: 'movies',
+    title: '초성 보고 영화 제목 맞히기',
+    desc: '줄거리 한 줄로 영화를 맞혀 보세요',
+    category: '연예',
+    perPlay: 10,
+    cover: { image: COVERS.movies },
+    questions: [
+      { chosung: true, answer: '기생충', text: '반지하에 사는 가족이 부잣집에 하나둘 취직하며 벌어지는 이야기' },
+      { chosung: true, answer: '괴물', text: '한강에 나타난 괴생물체에게 딸을 빼앗긴 가족' },
+      { chosung: true, answer: '부산행', text: '좀비 바이러스가 퍼진 KTX 안에서 살아남기' },
+      { chosung: true, answer: '올드보이', text: '이유도 모른 채 15년 동안 갇혀 있던 남자의 복수' },
+      { chosung: true, answer: '명량', text: '이순신 장군이 12척의 배로 왜군을 막아 낸 해전' },
+      { chosung: true, answer: '극한직업', text: '잠복 수사를 위해 치킨집을 차린 마약반 형사들' },
+      { chosung: true, answer: '택시운전사', text: '1980년 광주로 외국인 기자를 태우고 간 서울 택시 기사' },
+      { chosung: true, answer: '국제시장', text: '흥남 철수부터 파독 광부까지, 한 아버지의 일생' },
+      { chosung: true, answer: '해운대', text: '부산 바닷가 도시에 초대형 쓰나미가 덮친다' },
+      { chosung: true, answer: '신과함께', alias: ['신과 함께'], text: '저승 차사들이 망자를 49일 동안 일곱 번의 재판에 데려간다' },
+      { chosung: true, answer: '타이타닉', text: '침몰하는 호화 여객선에서 피어난 잭과 로즈의 사랑' },
+      { chosung: true, answer: '아바타', text: '판도라 행성의 나비족과 그곳을 노리는 인간들' },
+      { chosung: true, answer: '겨울왕국', text: '손대는 것마다 얼려 버리는 언니 엘사와 동생 안나' },
+      { chosung: true, answer: '라이온 킹', alias: ['라이언 킹'], text: '아버지를 잃은 아기 사자 심바의 성장기' },
+      { chosung: true, answer: '쥬라기 공원', alias: ['쥐라기 공원'], text: '공룡을 되살린 테마파크가 통제 불능에 빠진다' },
+      { chosung: true, answer: '인터스텔라', text: '죽어 가는 지구를 떠나 웜홀 너머 새 행성을 찾는 우주 비행사들' },
+      { chosung: true, answer: '어벤져스', alias: ['어벤저스'], text: '아이언맨·토르·헐크 등 영웅들이 처음 한 팀으로 뭉친다' },
+    ],
+  },
+  {
     id: 'clock',
     title: '시계 보고 시간 맞히기',
     desc: '"3시 15분"처럼 써 보세요. 풀 때마다 새 시계!',
     category: '수학',
     perPlay: 10,
-    cover: { image: clockSvg(10, 10) },
+    cover: { image: COVERS.clock },
     generate(count) {
       const seen = new Set();
       const list = [];
