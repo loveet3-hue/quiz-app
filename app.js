@@ -105,7 +105,7 @@ function renderHome() {
     </div>
     <div class="grid"></div>
     <footer class="site-foot">
-      <a href="#/rank">랭킹</a> · <a href="privacy.html">개인정보 처리방침</a>
+      <a href="privacy.html">개인정보 처리방침</a>
     </footer>
   `;
 
@@ -180,7 +180,6 @@ function startQuiz(id) {
     phase: 'ask',
     feedbackAt: 0,
     startedAt: Date.now(),
-    submitted: false,
   };
   document.title = `${quiz.title} · 맞혀봐`;
   renderQuestion();
@@ -341,7 +340,6 @@ function renderResult() {
   const total = items.length;
   const score = items.filter((i) => i.result).length;
   const timeMs = Date.now() - play.startedAt;
-  play.finished = { score, total, timeMs };
 
   const stats = store.get();
   const prev = stats[quiz.id];
@@ -368,9 +366,7 @@ function renderResult() {
       <p class="best">걸린 시간 ${formatTime(timeMs)}</p>
     </section>
     <div class="result-actions">
-      <button class="btn" data-act="submit-rank">랭킹에 기록 남기기</button>
-      <button class="btn ghost" data-act="retry">다시 풀기</button>
-      <button class="btn ghost" data-act="rank">랭킹 보기</button>
+      <button class="btn" data-act="retry">다시 풀기</button>
       <button class="btn ghost" data-act="share">친구에게 공유</button>
       <button class="btn ghost" data-act="home">다른 퀴즈</button>
     </div>
@@ -404,8 +400,6 @@ function renderResult() {
     })
   );
   app.querySelector('[data-act="share"]').addEventListener('click', () => share(quiz, score, total));
-  app.querySelector('[data-act="rank"]').addEventListener('click', () => (location.hash = `#/rank/${quiz.id}`));
-  app.querySelector('[data-act="submit-rank"]').addEventListener('click', openRecordForm);
   window.scrollTo(0, 0);
 }
 
@@ -428,193 +422,20 @@ async function share(quiz, score, total) {
   }
 }
 
-/* ───────── 랭킹 ───────── */
-// 서버(Apps Script)는 이메일을 가린 채로만 돌려준다. 원래 이메일은 화면으로 절대 내려오지 않음.
-
-const rankOn = () => typeof CONFIG !== 'undefined' && !!CONFIG.RANK_API;
+/* ───────── 공통 표시 ───────── */
 
 function formatTime(ms) {
   const s = ms / 1000;
   return s < 60 ? `${s.toFixed(1)}초` : `${Math.floor(s / 60)}분 ${Math.round(s % 60)}초`;
 }
 
-// 구글 서버가 가끔 한 번씩 실패해서, 조회는 한 번 더 시도한다
-async function rankApi(params, body, retry = !body) {
-  try {
-    return await rankApiOnce(params, body);
-  } catch (e) {
-    if (!retry) throw e;
-    await new Promise((r) => setTimeout(r, 800));
-    return rankApiOnce(params, body);
-  }
-}
-
-async function rankApiOnce(params, body) {
-  const url = `${CONFIG.RANK_API}?${new URLSearchParams(params)}`;
-  const res = body
-    ? await fetch(url, { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'text/plain;charset=utf-8' } })
-    : await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  if (!data.ok) throw new Error(data.error || '알 수 없는 오류');
-  return data;
-}
-
-// 기기에 입력값 기억 (다음 등록 때 다시 안 쓰게). 막혀 있어도 그냥 넘어감.
-const profile = {
-  get() {
-    try { return JSON.parse(localStorage.getItem('quiz-profile') || '{}'); } catch { return {}; }
-  },
-  save(v) {
-    try { localStorage.setItem('quiz-profile', JSON.stringify(v)); } catch { /* 무시 */ }
-  },
-};
-
-function closeSheet() {
-  document.querySelector('.sheet-backdrop')?.remove();
-}
-
-function openRecordForm() {
-  if (!play?.finished) return;
-  if (play.submitted) {
-    toast('이번 기록은 이미 등록했어요');
-    return;
-  }
-  const { quiz } = play;
-  const { score, total, timeMs } = play.finished;
-  const saved = profile.get();
-  closeSheet();
-  const wrap = document.createElement('div');
-  wrap.className = 'sheet-backdrop';
-  wrap.innerHTML = `
-    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
-      <div class="sheet-head">
-        <h2 id="sheet-title">랭킹에 기록 남기기</h2>
-        <button class="icon-btn" data-act="close" aria-label="닫기">✕</button>
-      </div>
-      <p class="sheet-sub">${esc(quiz.title)} · <b>${score} / ${total}</b> · ${formatTime(timeMs)}</p>
-      ${rankOn() ? '' : '<p class="notice">랭킹 서버를 준비하고 있어요. 조금만 기다려 주세요.</p>'}
-      <form class="record-form" novalidate>
-        <label class="field">
-          <span>닉네임</span>
-          <input name="nickname" maxlength="12" autocomplete="nickname" placeholder="2~12자" value="${esc(saved.nickname || '')}" required>
-        </label>
-        <label class="field">
-          <span>이메일</span>
-          <input name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" placeholder="name@example.com" value="${esc(saved.email || '')}" required>
-          <small>랭킹에는 <b>lo***@g***.com</b>처럼 가려서 보여요</small>
-        </label>
-        <div class="consent">
-          <label class="check">
-            <input type="checkbox" name="agree" required>
-            <span><b>[필수]</b> 개인정보 수집·이용에 동의하며, 만 14세 이상입니다</span>
-          </label>
-          <details>
-            <summary>내용 보기</summary>
-            <table class="consent-table">
-              <tr><th>수집 항목</th><td>닉네임, 이메일 주소, 퀴즈 기록(점수·걸린 시간·등록 일시)</td></tr>
-              <tr><th>이용 목적</th><td>랭킹 기록 등록·표시, 같은 사람의 기록 구분, 부정 기록 방지, 문의 대응</td></tr>
-              <tr><th>보유 기간</th><td>등록일로부터 1년 (삭제를 요청하면 바로 삭제)</td></tr>
-            </table>
-            <p>동의하지 않을 수 있어요. 동의하지 않으면 랭킹에 기록을 남길 수 없지만, 퀴즈는 그대로 이용할 수 있어요.
-              자세한 내용은 <a href="privacy.html" target="_blank" rel="noopener">개인정보 처리방침</a>을 확인해 주세요.</p>
-          </details>
-        </div>
-        <p class="form-error" role="alert"></p>
-        <button class="btn block" type="submit" ${rankOn() ? '' : 'disabled'}>등록하기</button>
-      </form>
-    </div>`;
-  document.body.appendChild(wrap);
-
-  wrap.addEventListener('click', (e) => {
-    if (e.target === wrap || e.target.closest('[data-act="close"]')) closeSheet();
-  });
-  const form = wrap.querySelector('form');
-  const err = wrap.querySelector('.form-error');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nickname = form.nickname.value.trim();
-    const email = form.email.value.trim().toLowerCase();
-    if (nickname.length < 2 || nickname.length > 12) return (err.textContent = '닉네임은 2~12자로 써 주세요.');
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return (err.textContent = '이메일 주소를 확인해 주세요.');
-    if (!form.agree.checked) return (err.textContent = '개인정보 수집·이용에 동의해야 등록할 수 있어요.');
-    err.textContent = '';
-    const btn = form.querySelector('button[type="submit"]');
-    btn.disabled = true;
-    btn.textContent = '등록하는 중…';
-    try {
-      const data = await rankApi({ action: 'submit' }, { quizId: quiz.id, nickname, email, score, total, timeMs, agree: true });
-      profile.save({ nickname, email });
-      play.submitted = true;
-      closeSheet();
-      toast(data.improved === false ? `이전 기록이 더 좋아요 (현재 ${data.rank}위)` : `${data.rank}위로 등록됐어요!`);
-      location.hash = `#/rank/${quiz.id}`;
-    } catch (ex) {
-      err.textContent = `등록하지 못했어요: ${ex.message}`;
-      btn.disabled = false;
-      btn.textContent = '등록하기';
-    }
-  });
-  (saved.nickname ? form.agree : form.nickname).focus();
-}
-
-async function renderRank(id) {
-  const quiz = QUIZZES.find((q) => q.id === id) || QUIZZES[0];
-  document.title = `랭킹 · ${quiz.title} · 맞혀봐`;
-  app.innerHTML = `
-    <div class="play-head">
-      <button class="icon-btn" data-act="back" aria-label="뒤로">←</button>
-      <h1 class="page-title">랭킹</h1>
-    </div>
-    <label class="rank-select">
-      <span class="sr-only">퀴즈 고르기</span>
-      <select>${QUIZZES.map((q) => `<option value="${esc(q.id)}" ${q.id === quiz.id ? 'selected' : ''}>${esc(q.title)}</option>`).join('')}</select>
-    </label>
-    <div class="rank-body"><p class="empty">불러오는 중…</p></div>
-    <a class="btn block" href="#/q/${esc(quiz.id)}">이 퀴즈 풀기</a>
-  `;
-  app.querySelector('[data-act="back"]').addEventListener('click', () => history.length > 1 ? history.back() : (location.hash = '#/'));
-  app.querySelector('select').addEventListener('change', (e) => (location.hash = `#/rank/${e.target.value}`));
-
-  const body = app.querySelector('.rank-body');
-  if (!rankOn()) {
-    body.innerHTML = '<p class="empty">랭킹 서버를 준비하고 있어요.</p>';
-    return;
-  }
-  try {
-    const { rows } = await rankApi({ action: 'top', quiz: quiz.id });
-    if (!location.hash.startsWith(`#/rank/${quiz.id}`) && location.hash !== '#/rank') return; // 그새 다른 화면으로 감
-    if (!rows.length) {
-      body.innerHTML = '<p class="empty">아직 기록이 없어요. 첫 번째 주인공이 되어 보세요!</p>';
-      return;
-    }
-    body.innerHTML = `<ol class="rank-list">${rows
-      .map(
-        (r) => `
-        <li class="${r.rank <= 3 ? `top top${r.rank}` : ''}">
-          <span class="rk">${r.rank}</span>
-          <div class="who"><b>${esc(r.nickname)}</b><small>${esc(r.email)}</small></div>
-          <div class="sc"><b>${r.score}/${r.total}</b><small>${formatTime(r.timeMs)}</small></div>
-        </li>`
-      )
-      .join('')}</ol>`;
-  } catch (ex) {
-    body.innerHTML = `<p class="empty">랭킹을 불러오지 못했어요. (${esc(ex.message)})</p>`;
-  }
-}
-
 /* ───────── 주소 따라 화면 바꾸기 ───────── */
 
 function route() {
-  closeSheet();
   window.scrollTo(0, 0);
   const q = location.hash.match(/^#\/q\/([\w-]+)/);
-  const r = location.hash.match(/^#\/rank(?:\/([\w-]+))?/);
   if (q) startQuiz(q[1]);
-  else if (r) {
-    play = null;
-    renderRank(r[1]);
-  } else {
+  else {
     play = null;
     renderHome();
   }
