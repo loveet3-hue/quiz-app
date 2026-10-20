@@ -65,27 +65,47 @@ function countdown(overlay, done) {
   };
 }
 
+// 새로 나온 게임 (홈 '새로 나온 게임' 줄과 NEW 표시)
+const NEW_GAMES = ['lol', 'lots', 'bomb', 'teams', 'dice'];
+
+// 게임 참여 수는 퀴즈와 같은 집계 서버에 'game-<id>'로 셈 (하루 한 번, 익명)
+const gamePlays = (plays, g) => plays['game-' + g.id] || 0;
+function popularGames(plays, n) {
+  const order = new Map(GAMES.map((g, i) => [g.id, i]));
+  return [...GAMES].sort((a, b) => gamePlays(plays, b) - gamePlays(plays, a) || order.get(a.id) - order.get(b.id)).slice(0, n);
+}
+
+function gameCardHtml(g, { rank, plays = {} } = {}) {
+  const n = gamePlays(plays, g);
+  return `
+    <a class="card" href="/game/${g.id}/">
+      <div class="cover"><img class="full" src="${g.cover()}" alt="">${NEW_GAMES.includes(g.id) ? '<span class="new-tag">NEW</span>' : ''}${
+        rank ? `<span class="rank-no">${rank}</span>` : ''
+      }</div>
+      <div class="card-body">
+        <h2 class="card-title">${esc(g.title)}</h2>
+        <div class="card-meta">${esc(g.desc)}${n ? ` · 참여 ${fmtCount(n)}` : ''}</div>
+      </div>
+    </a>`;
+}
+
 function renderGamesHome() {
   document.title = '게임 · 맞혀봐';
+  const draw = () => {
+    const grid = app.querySelector('.games-grid');
+    if (grid) grid.innerHTML = GAMES.map((g) => gameCardHtml(g, { plays: counts.get() })).join('');
+  };
   app.innerHTML = `
     <div class="games-home">
       <section class="hero">
-        <h1>모일 때 꼭 필요한<br>뽑기 게임</h1>
+        <h1>모일 때 꼭 필요한<br>뽑기 게임 ${GAMES.length}가지</h1>
         <p>누가 쏠지, 누가 갈지 공정하게 정해 보세요</p>
       </section>
-      <div class="games-grid">
-        ${GAMES.map(
-          (g) => `
-          <a class="card" href="/game/${g.id}/">
-            <div class="cover"><img class="full" src="${g.cover()}" alt=""></div>
-            <div class="card-body">
-              <h2 class="card-title">${esc(g.title)}</h2>
-              <div class="card-meta">${esc(g.desc)}</div>
-            </div>
-          </a>`
-        ).join('')}
-      </div>
-    </div>`;
+      <div class="games-grid"></div>
+    </div>
+    ${SITE_FOOT}`;
+  draw();
+  counts.refresh().then((fresh) => fresh && draw());
 }
 
 function renderGame(id) {
@@ -96,6 +116,7 @@ function renderGame(id) {
     return;
   }
   document.title = `${game.title} · 맞혀봐`;
+  reportPlay('game-' + game.id);
   app.innerHTML = `
     <div class="play-head">
       <button class="icon-btn" data-act="home" aria-label="게임 목록으로">←</button>

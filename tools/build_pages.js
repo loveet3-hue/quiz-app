@@ -1,5 +1,5 @@
 // 퀴즈·게임마다 실제 페이지 파일을 만든다 (# 없는 주소 + 카톡·검색 미리보기).
-//   /q/<퀴즈>/index.html, /games/index.html, /game/<게임>/index.html, 404.html, sitemap.xml, robots.txt
+//   /quizzes/index.html, /q/<퀴즈>/index.html, /games/index.html, /game/<게임>/index.html, 404.html, sitemap.xml, robots.txt
 // index.html의 <!--META-->…<!--/META-->, <!--STATIC-->…<!--/STATIC--> 부분만 페이지마다 바꿔 끼운다.
 // 사용: node tools/build_pages.js   (python3 tools/bump_version.py 다음에 실행)
 const fs = require('fs');
@@ -84,6 +84,19 @@ for (const q of QUIZZES) {
   );
   urls.push(`/q/${q.id}/`);
 }
+
+// 퀴즈 탭 (전체 퀴즈 목록)
+write(
+  'quizzes/index.html',
+  page({
+    title: `퀴즈 ${QUIZZES.length}가지 - 맞혀봐`,
+    desc: `사진·초성·설명·멜로디를 보고 정답을 직접 써서 맞히는 주관식 퀴즈 ${QUIZZES.length}가지`,
+    url: `${SITE}/quizzes/`,
+    image: ogFile('home'),
+    body: `<h1>퀴즈 ${QUIZZES.length}가지</h1><ul>${QUIZZES.map((q) => `<li><a href="/q/${q.id}/">${esc(q.title)}</a> - ${esc(q.desc)}</li>`).join('')}</ul>`,
+  })
+);
+urls.push('/quizzes/');
 
 // 게임
 write(

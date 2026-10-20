@@ -1217,3 +1217,9 @@ a.btn { display: flex; align-items: center; justify-content: center; }
 .melody-btn.playing + .melody-eq i:nth-child(4) { animation-delay: .05s; }
 .melody-btn.playing + .melody-eq i:nth-child(5) { animation-delay: .18s; }
 @keyframes eq { from { height: 8px; } to { height: 34px; } }
+
+/* 홈 섹션 머리: 제목 + 전체 보기 */
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.sec-head .sec-title { margin-right: auto; }
+.sec-more { flex: none; font-size: 14px; font-weight: 700; color: var(--text-3); }
+.sec-more:hover { color: var(--primary); }

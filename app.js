@@ -233,24 +233,55 @@ function popularQuizzes(plays, n) {
   return [...QUIZZES].sort((a, b) => (plays[b.id] || 0) - (plays[a.id] || 0) || order.get(a.id) - order.get(b.id)).slice(0, n);
 }
 
+const SITE_FOOT = `
+    <footer class="site-foot">
+      <a href="/about.html">소개</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a>
+    </footer>`;
+
+// 홈: 오늘의 퀴즈 · 인기 퀴즈 · 새로 나온 퀴즈 · 인기 게임 · 새로 나온 게임
 function renderHome() {
   document.title = '맞혀봐';
   app.innerHTML = `
     <section class="hero">
       <h1>보고, 떠올리고,<br>직접 써서 맞혀 보세요</h1>
-      <p>객관식 없이 정답을 직접 입력하는 퀴즈 ${QUIZZES.length}가지</p>
+      <p>객관식 없이 정답을 직접 입력하는 퀴즈 ${QUIZZES.length}가지 · 뽑기 게임 ${GAMES.length}가지</p>
     </section>
     <section class="home-sec" data-sec="today"></section>
     <section class="home-sec">
-      <h2 class="sec-title">🔥 인기 퀴즈</h2>
+      <div class="sec-head"><h2 class="sec-title">🔥 인기 퀴즈</h2><a class="sec-more" href="/quizzes/">전체 보기 ›</a></div>
       <div class="row" data-row="popular"></div>
     </section>
     <section class="home-sec">
-      <h2 class="sec-title">✨ 새로 나온 퀴즈</h2>
+      <div class="sec-head"><h2 class="sec-title">✨ 새로 나온 퀴즈</h2><a class="sec-more" href="/quizzes/">전체 보기 ›</a></div>
       <div class="row" data-row="new"></div>
     </section>
+    <section class="home-sec">
+      <div class="sec-head"><h2 class="sec-title">🎲 인기 게임</h2><a class="sec-more" href="/games/">전체 보기 ›</a></div>
+      <div class="row" data-row="popular-games"></div>
+    </section>
+    <section class="home-sec">
+      <div class="sec-head"><h2 class="sec-title">🆕 새로 나온 게임</h2><a class="sec-more" href="/games/">전체 보기 ›</a></div>
+      <div class="row" data-row="new-games"></div>
+    </section>
+    ${adHtml('homeBottom')}
+    ${SITE_FOOT}
+  `;
+  renderSections();
+  fillAds();
+  counts.refresh().then((fresh) => {
+    if (fresh && app.querySelector('[data-row="popular"]') && !play) renderSections();
+  });
+}
+
+// 퀴즈 탭: 전체 퀴즈 (검색 + 분류)
+function renderQuizList() {
+  document.title = '퀴즈 · 맞혀봐';
+  app.innerHTML = `
+    <section class="hero">
+      <h1>퀴즈 ${QUIZZES.length}가지</h1>
+      <p>사진·초성·설명·멜로디를 보고 정답을 직접 써 보세요</p>
+    </section>
     <section class="home-sec" id="all">
-      <h2 class="sec-title">전체 퀴즈</h2>
       <input class="search" type="search" placeholder="퀴즈 찾기" value="${esc(home.query)}" aria-label="퀴즈 찾기">
       <div class="chips" role="group" aria-label="카테고리">
         ${CATEGORIES.map((c) => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === home.category}">${esc(c)}</button>`).join('')}
@@ -258,11 +289,8 @@ function renderHome() {
       <div class="grid"></div>
     </section>
     ${adHtml('homeBottom')}
-    <footer class="site-foot">
-      <a href="/about.html">소개</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a>
-    </footer>
+    ${SITE_FOOT}
   `;
-
   app.querySelector('.search').addEventListener('input', (e) => {
     home.query = e.target.value;
     renderGrid();
@@ -274,14 +302,10 @@ function renderHome() {
       renderGrid();
     })
   );
-  renderSections();
   renderGrid();
   fillAds();
   counts.refresh().then((fresh) => {
-    if (fresh && app.querySelector('.grid') && !play) {
-      renderSections();
-      renderGrid();
-    }
+    if (fresh && app.querySelector('.grid') && !play) renderGrid();
   });
 }
 
@@ -309,6 +333,10 @@ function renderSections() {
     const list = (typeof NEW_QUIZZES !== 'undefined' ? NEW_QUIZZES : []).map((id) => QUIZZES.find((q) => q.id === id)).filter(Boolean);
     fresh.innerHTML = list.slice(0, 8).map((q) => cardHtml(q, { stats, plays })).join('');
   }
+  const popG = app.querySelector('[data-row="popular-games"]');
+  if (popG) popG.innerHTML = popularGames(plays, 8).map((g, i) => gameCardHtml(g, { rank: i + 1, plays })).join('');
+  const newG = app.querySelector('[data-row="new-games"]');
+  if (newG) newG.innerHTML = NEW_GAMES.map((id) => GAMES.find((g) => g.id === id)).filter(Boolean).map((g) => gameCardHtml(g, { plays })).join('');
 }
 
 function renderGrid() {
@@ -544,7 +572,7 @@ function renderQuestion() {
   app.querySelector('[data-act="quit"]').addEventListener('click', () => {
     if (play.idx === 0 || confirm('퀴즈를 그만할까요? 지금까지 푼 기록은 남지 않아요.')) {
       play = null;
-      nav('/');
+      nav('/quizzes/');
     }
   });
 }
@@ -696,7 +724,7 @@ function renderResult() {
   app.querySelectorAll('[data-act="home"]').forEach((b) =>
     b.addEventListener('click', () => {
       play = null;
-      nav('/');
+      nav('/quizzes/');
     })
   );
   app.querySelector('[data-act="share"]').addEventListener('click', () => share(quiz, score, total));
@@ -742,6 +770,7 @@ function legacyHashToPath(hash) {
   const h = hash.replace(/^#/, '');
   if (/^\/q\/[\w-]+/.test(h) || /^\/game\/[\w-]+/.test(h)) return h.replace(/\/?$/, '/');
   if (h.startsWith('/games')) return '/games/';
+  if (h.startsWith('/quizzes')) return '/quizzes/';
   return '/';
 }
 
@@ -753,9 +782,9 @@ function route() {
   const path = location.pathname.replace(/\/+$/, '') || '/';
   const q = path.match(/^\/q\/([\w-]+)$/);
   const g = path.match(/^\/game\/([\w-]+)$/);
-  const onGames = !!g || path === '/games';
+  const tab = g || path === '/games' ? 'games' : q || path === '/quizzes' ? 'quiz' : 'home';
   document.querySelectorAll('.top-tabs a').forEach((el) => {
-    if ((el.dataset.tab === 'games') === onGames) el.setAttribute('aria-current', 'page');
+    if (el.dataset.tab === tab) el.setAttribute('aria-current', 'page');
     else el.removeAttribute('aria-current');
   });
   if (q) startQuiz(q[1]);
@@ -765,6 +794,9 @@ function route() {
   } else if (path === '/games') {
     play = null;
     renderGamesHome();
+  } else if (path === '/quizzes') {
+    play = null;
+    renderQuizList();
   } else {
     play = null;
     renderHome();
