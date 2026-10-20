@@ -2,6 +2,26 @@
 'use strict';
 
 const app = document.getElementById('app');
+
+// 스토어 앱으로 열렸는지: 앱은 시작 주소에 ?app=android 를 붙여 연다 (한 번 보면 이 기기에 기억).
+// 안드로이드 앱(TWA)은 첫 화면의 referrer가 android-app:// 으로도 온다.
+const IN_APP = (() => {
+  try {
+    const params = new URLSearchParams(location.search);
+    const p = params.get('app');
+    if (p) {
+      localStorage.setItem('in-app', p);
+      params.delete('app');
+      history.replaceState(null, '', location.pathname + (params.toString() ? `?${params}` : '') + location.hash);
+    } else if (document.referrer.startsWith('android-app://')) localStorage.setItem('in-app', 'android');
+    return !!localStorage.getItem('in-app');
+  } catch {
+    return false;
+  }
+})();
+// 앱에서는 appHidden 퀴즈(실존 인물 사진 등)를 아예 목록에서 뺀다 → 주소로 들어와도 '없는 퀴즈'
+if (IN_APP) for (let i = QUIZZES.length - 1; i >= 0; i--) if (QUIZZES[i].appHidden) QUIZZES.splice(i, 1);
+
 const CATEGORIES = ['전체', ...new Set(QUIZZES.map((q) => q.category))];
 
 /* ───────── 공통 도구 ───────── */

@@ -12,6 +12,7 @@
 //   exact     true면 오타를 봐주지 않음 (맞춤법 퀴즈)
 //   guide     문제 아래에 보여줄 답 쓰는 방법 안내
 //   generate  questions 대신 쓰는 함수. 풀 때마다 문제를 새로 만들어 냄 (암산 등)
+//   appHidden true면 스토어 앱(안드로이드 등)으로 열었을 때 목록에서 숨김
 //
 // 문제 하나 (필요한 것만 쓰면 됨):
 //   image     보여줄 사진 주소
@@ -669,6 +670,7 @@ const QUIZZES = [
     id: 'celeb-photos',
     guide: '활동명(예명)으로 써 보세요',
     noAds: true, // 실존 인물 사진이라 광고를 붙이지 않음 (초상권·퍼블리시티권)
+    appHidden: true, // 스토어 앱에서는 숨김 (실존 인물 사진 — 앱 심사·초상권)
     title: '사진 보고 연예인 맞히기',
     desc: '누군지 한눈에 알아보시겠어요?',
     category: '연예',
