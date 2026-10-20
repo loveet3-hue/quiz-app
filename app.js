@@ -259,7 +259,7 @@ function renderHome() {
     </section>
     ${adHtml('homeBottom')}
     <footer class="site-foot">
-      <a href="privacy.html">개인정보 처리방침</a> · <a href="credits.html">사진 출처</a>
+      <a href="/about.html">소개</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a>
     </footer>
   `;
 

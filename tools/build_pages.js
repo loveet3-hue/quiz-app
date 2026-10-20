@@ -54,7 +54,7 @@ const ogFile = (name) => (fs.existsSync(path.join(ROOT, 'og', name + '.jpg')) ? 
 const urls = [];
 
 // 홈 (검색엔진용으로 퀴즈 목록을 글로도 넣어 둠 — 화면은 앱이 다시 그림)
-const homeBody = `<h1>맞혀봐 - 직접 써서 맞히는 퀴즈</h1><ul>${QUIZZES.map((q) => `<li><a href="/q/${q.id}/">${esc(q.title)}</a> - ${esc(q.desc)}</li>`).join('')}</ul><p><a href="/games/">뽑기 게임</a></p>`;
+const homeBody = `<h1>맞혀봐 - 직접 써서 맞히는 퀴즈</h1><ul>${QUIZZES.map((q) => `<li><a href="/q/${q.id}/">${esc(q.title)}</a> - ${esc(q.desc)}</li>`).join('')}</ul><p><a href="/games/">뽑기 게임</a> · <a href="/about.html">소개</a> · <a href="/privacy.html">개인정보 처리방침</a></p>`;
 const homeHtml = page({
   title: '맞혀봐 - 직접 써서 맞히는 퀴즈',
   desc: `사진 보고, 초성 보고, 정답을 직접 입력하는 주관식 퀴즈 ${QUIZZES.length}가지와 뽑기 게임. 국기·명화·자동차·연예인·MBTI 등`,
@@ -110,6 +110,7 @@ for (const g of GAMES) {
 
 // 사이트맵 · robots
 const today = new Date().toISOString().slice(0, 10);
+urls.push('/about.html', '/privacy.html', '/credits.html');
 write(
   'sitemap.xml',
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
