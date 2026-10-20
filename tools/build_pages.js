@@ -41,7 +41,7 @@ function meta({ title, desc, url, image }) {
 function page({ title, desc, url, image, body }) {
   return tpl
     .replace(/<!--META-->[\s\S]*?<!--\/META-->/, meta({ title, desc, url, image }))
-    .replace(/<!--STATIC-->[\s\S]*?<!--\/STATIC-->/, `<!--STATIC-->${body}<!--/STATIC-->`);
+    .replace(/<!--STATIC-->[\s\S]*?<!--\/STATIC-->/, `<!--STATIC--><div class="seo-static">${body}</div><!--/STATIC-->`);
 }
 
 function write(rel, html) {

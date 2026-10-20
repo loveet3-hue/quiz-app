@@ -1113,3 +1113,21 @@ a.btn { display: flex; align-items: center; justify-content: center; }
 .coin-face.front { background: radial-gradient(circle at 35% 30%, #fff3b0, #f2b51d 60%, #c98a0b); color: #7a4b00; box-shadow: inset 0 0 0 8px rgba(255, 255, 255, .35), 0 8px 18px rgba(0, 0, 0, .3); }
 .coin-face.back { transform: rotateY(180deg); background: radial-gradient(circle at 35% 30%, #fff, #c9ccd6 60%, #8d93a3); color: #3a3f4f; box-shadow: inset 0 0 0 8px rgba(255, 255, 255, .4), 0 8px 18px rgba(0, 0, 0, .3); }
 .dice-history { margin: 0; min-height: 20px; text-align: center; font-size: 14px; color: var(--text-3); word-break: keep-all; }
+
+/* 새로 고침 때: 검색엔진용 글은 화면에 안 보이게 숨기고, 앱이 뜰 때까지 로딩 표시만 */
+.seo-static {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+#app:has(> .seo-static)::before {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 36px;
+  margin: 30vh auto 0;
+  border: 4px solid var(--primary-soft);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
