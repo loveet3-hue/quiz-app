@@ -300,6 +300,54 @@ const COVERS = (() => {
       ${[0, 1, 2, 3].map((r) => [0, 1].map((c) => `<rect x="${300 + c * 12}" y="${70 + r * 42 + (c % 2 ? 21 : 0)}" width="12" height="21" fill="#2d3142"/>`).join('')).join('')}
       ${[[230, '#ff6b6b', 1], [270, '#4f8cff', 2], [180, '#ffcc33', 3], [205, '#7c5cff', 4]].map(([x, col, n], i) => `<circle cx="${x}" cy="${91 + i * 42}" r="15" fill="${col}" stroke="#fff" stroke-width="3"/><text x="${x}" y="${97 + i * 42}" font-family="${NUM}" font-size="16" font-weight="700" fill="#fff" text-anchor="middle">${n}</text>`).join('')}`),
 
+    // 뽑기 게임: 제비뽑기 상자
+    'game-lots': make('#fff6cf', '#ffd68f', `
+      ${shadow(200, 254, 100)}
+      <g transform="rotate(-14 160 110)"><rect x="140" y="64" width="40" height="108" rx="6" fill="#fff" stroke="#e8d7a8" stroke-width="2"/></g>
+      <g transform="rotate(9 236 112)"><rect x="216" y="68" width="40" height="108" rx="6" fill="#fff" stroke="#e8d7a8" stroke-width="2"/></g>
+      <rect x="180" y="56" width="40" height="108" rx="6" fill="#fff" stroke="#e8d7a8" stroke-width="2"/>
+      <path d="M114 146h172l-14 102h-144z" fill="#ff8a7a"/>
+      <rect x="104" y="132" width="192" height="24" rx="8" fill="#ff6b6b"/>
+      <text x="200" y="214" font-family="${KO}" font-size="30" font-weight="800" fill="#fff" text-anchor="middle">뽑기</text>
+      <g transform="rotate(16 272 92)"><rect x="232" y="70" width="80" height="44" rx="8" fill="#ffd93d" stroke="#e0a800" stroke-width="2"/>
+      <text x="272" y="100" font-family="${KO}" font-size="20" font-weight="800" fill="#7a4b00" text-anchor="middle">당첨</text></g>`),
+
+    // 뽑기 게임: 폭탄 돌리기
+    'game-bomb': make('#ffe3df', '#ffb4a2', `
+      ${shadow(190, 258, 90)}
+      <path d="M244 92q18-32 46-26" fill="none" stroke="#8a6a3f" stroke-width="7" stroke-linecap="round"/>
+      <path d="M292 38l6 14 15 2-11 10 3 15-13-8-13 8 3-15-11-10 15-2z" fill="#ffd93d"/>
+      <circle cx="292" cy="58" r="6" fill="#fff"/>
+      <g stroke="#ff6b6b" stroke-width="5" stroke-linecap="round"><line x1="268" y1="34" x2="260" y2="22"/><line x1="314" y1="40" x2="326" y2="30"/><line x1="318" y1="70" x2="330" y2="76"/></g>
+      <rect x="214" y="84" width="40" height="28" rx="6" fill="#5f5b70" transform="rotate(40 234 98)"/>
+      <circle cx="184" cy="170" r="80" fill="#2d3142"/>
+      <ellipse cx="152" cy="136" rx="22" ry="13" fill="#fff" opacity=".25" transform="rotate(-35 152 136)"/>`),
+
+    // 뽑기 게임: 팀 나누기
+    'game-teams': make('#e0f2ff', '#ffd6e0', `
+      ${shadow(200, 252, 120)}
+      <rect x="82" y="80" width="108" height="160" rx="18" fill="#fff" opacity=".65"/>
+      <rect x="210" y="80" width="108" height="160" rx="18" fill="#fff" opacity=".65"/>
+      ${[[114, 112, '#ff8a7a'], [158, 112, '#ff8a7a'], [136, 162, '#ff6b6b'], [242, 112, '#6fc8ff'], [286, 112, '#6fc8ff'], [264, 162, '#4f8cff']]
+        .map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="14" fill="${c}"/><path d="M${x - 22} ${y + 52}c0-24 9-32 22-32s22 8 22 32z" fill="${c}"/>`)
+        .join('')}
+      <circle cx="200" cy="160" r="24" fill="#2d3142"/>
+      <text x="200" y="168" font-family="${NUM}" font-size="20" font-weight="700" fill="#fff" text-anchor="middle">VS</text>`),
+
+    // 뽑기 게임: 주사위·동전
+    'game-dice': make('#d9fbea', '#9eefcf', `
+      ${shadow(200, 256, 110)}
+      <g transform="rotate(-12 150 168)">
+        <rect x="104" y="122" width="92" height="92" rx="18" fill="#fff" stroke="#cfd8d3" stroke-width="3"/>
+        ${[[128, 146], [172, 146], [150, 168], [128, 190], [172, 190]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="8" fill="#2d3142"/>`).join('')}
+      </g>
+      <g transform="rotate(12 250 132)">
+        <rect x="210" y="92" width="80" height="80" rx="16" fill="#fff" stroke="#cfd8d3" stroke-width="3"/>
+        ${[[230, 112], [250, 132], [270, 152]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="8" fill="#2d3142"/>`).join('')}
+      </g>
+      <circle cx="268" cy="214" r="30" fill="#f2b51d" stroke="#c98a0b" stroke-width="4"/>
+      <text x="268" y="224" font-family="${KO}" font-size="26" font-weight="800" fill="#7a4b00" text-anchor="middle">앞</text>`),
+
     // MBTI: 알파벳 네 칸 + 물음표
     mbti: make('#ffe9f3', '#c9b6ff', `
       ${shadow(200, 248, 130)}
