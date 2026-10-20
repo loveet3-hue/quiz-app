@@ -147,7 +147,7 @@ for (const b of RANKINGS) {
       desc: `${b.items.slice(1, 4).map((it, k) => `${k + 2}위 ${it[0]}`).join(', ')}… 그럼 1위는? ${b.q}`,
       url: `${SITE}/ranking/${b.id}/`,
       image: ogFile('rank-' + b.group),
-      body: `<h1>${esc(b.title)}</h1><p>${esc(b.q)}</p><ol>${b.items.map((it) => `<li><a href="${esc(rankLink(it[0], b))}" rel="noopener">${esc(it[0])}</a>${it[1] ? ` (${esc(it[1])})` : ''}</li>`).join('')}</ol><p><a href="/rankings/">다른 랭킹 보기</a></p>`,
+      body: `<h1>${esc(b.title)}</h1><p>${esc(b.q)}</p><ol>${b.items.map((it) => `<li><a href="${esc(it[2] || rankLink(it[0], b))}" rel="noopener">${esc(it[0])}</a>${it[1] ? ` (${esc(it[1])})` : ''}</li>`).join('')}</ol><p><a href="/rankings/">다른 랭킹 보기</a></p>`,
     })
   );
   urls.push(`/ranking/${b.id}/`);

@@ -188,11 +188,11 @@ function renderRanking(id) {
   const g = groupOf(b.group);
   document.title = `${b.title} 1위는? · 맞혀봐 랭킹`;
   const row = (it, i, reveal) => {
-    const [name, val] = it;
+    const [name, val, url] = it;
     const hidden = i === 0 && !reveal;
     return `<li class="rank-row${i === 0 ? ' first' : ''}${hidden ? ' hidden' : ''}">
       <span class="rk-no">${i + 1}</span>
-      ${hidden ? '<span class="rank-name">???</span>' : `<a class="rank-name" href="${esc(rankLink(name, b))}" target="_blank" rel="noopener">${esc(name)} <span aria-hidden="true">↗</span></a>`}
+      ${hidden ? '<span class="rank-name">???</span>' : `<a class="rank-name" href="${esc(url || rankLink(name, b))}" target="_blank" rel="noopener">${esc(name)} <span aria-hidden="true">↗</span></a>`}
       ${val && !hidden ? `<span class="rank-val">${esc(val)}</span>` : ''}
     </li>`;
   };

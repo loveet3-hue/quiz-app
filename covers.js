@@ -472,6 +472,16 @@ const COVERS = (() => {
       <rect x="236" y="192" width="72" height="58" rx="8" fill="#e0a26a"/><text x="272" y="232" font-family="${NUM}" font-size="30" font-weight="700" fill="#fff" text-anchor="middle">3</text>
       <rect x="160" y="54" width="80" height="58" rx="8" fill="#fff" stroke="#7c5cff" stroke-width="4"/><circle cx="172" cy="64" r="3" fill="#ff6b6b"/><circle cx="182" cy="64" r="3" fill="#ffd93d"/><circle cx="192" cy="64" r="3" fill="#4fd18b"/><path d="M192 80l20 12-20 12z" fill="#ff4f5e"/>`),
 
+    // 쉬운 상식: 웃는 별 + '쉬움' 리본
+    'trivia-easy': make('#fff6cf', '#c8f0d8', `
+      ${shadow(200, 254, 100)}
+      <path d="M200 52l28 58 64 8-47 44 12 63-57-31-57 31 12-63-47-44 64-8z" fill="#ffd93d" stroke="#e8a900" stroke-width="5" stroke-linejoin="round"/>
+      <circle cx="182" cy="140" r="7" fill="#5a3300"/><circle cx="218" cy="140" r="7" fill="#5a3300"/>
+      <path d="M178 160q22 22 44 0" fill="none" stroke="#5a3300" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="166" cy="158" r="8" fill="#ff9b8a" opacity=".7"/><circle cx="234" cy="158" r="8" fill="#ff9b8a" opacity=".7"/>
+      <rect x="140" y="222" width="120" height="34" rx="17" fill="#4fd18b"/>
+      <text x="200" y="246" font-family="${KO}" font-size="20" font-weight="800" fill="#fff" text-anchor="middle">쉬움</text>`),
+
     // 일반 상식: 펼친 책 + 전구
     trivia: make('#e3f0ff', '#b8d4ff', `
       ${shadow(200, 254, 120)}
