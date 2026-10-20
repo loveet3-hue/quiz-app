@@ -432,6 +432,46 @@ const COVERS = (() => {
       <rect x="236" y="56" width="92" height="48" rx="16" fill="#fff"/><path d="M252 104l-6 16 22-16z" fill="#fff"/>
       <text x="282" y="90" font-family="${KO}" font-size="26" font-weight="800" fill="#ff6b6b" text-anchor="middle">ㅋㅋㅋ</text>`),
 
+    // 랭킹: 시상대 + 주제 그림
+    'rank-world': make('#dfe9ff', '#ffe3a3', `
+      ${shadow(200, 256, 120)}
+      <rect x="92" y="170" width="72" height="80" rx="8" fill="#cfd5e2"/><text x="128" y="222" font-family="${NUM}" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+      <rect x="164" y="132" width="72" height="118" rx="8" fill="#ffc83d"/><text x="200" y="200" font-family="${NUM}" font-size="40" font-weight="700" fill="#fff" text-anchor="middle">?</text>
+      <rect x="236" y="192" width="72" height="58" rx="8" fill="#e0a26a"/><text x="272" y="232" font-family="${NUM}" font-size="30" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+      <path d="M150 120l34-58 22 34 12-18 32 42z" fill="#6b7fa8"/><path d="M184 62l11 19-7-3-6 6-6-5-5 2z" fill="#fff"/><path d="M218 78l7 11-5-1-3 4-4-3-3 1z" fill="#fff"/><path d="M196 48v-16l14 5-14 5" fill="#ff5a5a" stroke="#2d3142" stroke-width="2"/>`),
+
+    // 랭킹: 시상대 + 주제 그림
+    'rank-sales': make('#fff1d6', '#ffc46b', `
+      ${shadow(200, 256, 120)}
+      <rect x="92" y="170" width="72" height="80" rx="8" fill="#cfd5e2"/><text x="128" y="222" font-family="${NUM}" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+      <rect x="164" y="132" width="72" height="118" rx="8" fill="#ffc83d"/><text x="200" y="200" font-family="${NUM}" font-size="40" font-weight="700" fill="#fff" text-anchor="middle">?</text>
+      <rect x="236" y="192" width="72" height="58" rx="8" fill="#e0a26a"/><text x="272" y="232" font-family="${NUM}" font-size="30" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+      <rect x="176" y="62" width="48" height="52" rx="6" fill="#ff6b6b"/><path d="M186 62v-8a14 14 0 0 1 28 0v8" fill="none" stroke="#c0392b" stroke-width="5"/><text x="200" y="98" font-family="${NUM}" font-size="22" font-weight="700" fill="#fff" text-anchor="middle">$</text>`),
+
+    // 랭킹: 시상대 + 주제 그림
+    'rank-speed': make('#e0f7ff', '#ffd6a3', `
+      ${shadow(200, 256, 120)}
+      <rect x="92" y="170" width="72" height="80" rx="8" fill="#cfd5e2"/><text x="128" y="222" font-family="${NUM}" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+      <rect x="164" y="132" width="72" height="118" rx="8" fill="#ffc83d"/><text x="200" y="200" font-family="${NUM}" font-size="40" font-weight="700" fill="#fff" text-anchor="middle">?</text>
+      <rect x="236" y="192" width="72" height="58" rx="8" fill="#e0a26a"/><text x="272" y="232" font-family="${NUM}" font-size="30" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+      <g stroke="#4f8cff" stroke-width="6" stroke-linecap="round"><line x1="140" y1="74" x2="176" y2="74"/><line x1="130" y1="92" x2="172" y2="92"/><line x1="146" y1="110" x2="176" y2="110"/></g><path d="M214 56l-26 40h20l-12 32 34-46h-20l14-26z" fill="#ffd93d" stroke="#e8a900" stroke-width="3"/>`),
+
+    // 랭킹: 시상대 + 주제 그림
+    'rank-sports': make('#e3f7ec', '#ffd36b', `
+      ${shadow(200, 256, 120)}
+      <rect x="92" y="170" width="72" height="80" rx="8" fill="#cfd5e2"/><text x="128" y="222" font-family="${NUM}" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+      <rect x="164" y="132" width="72" height="118" rx="8" fill="#ffc83d"/><text x="200" y="200" font-family="${NUM}" font-size="40" font-weight="700" fill="#fff" text-anchor="middle">?</text>
+      <rect x="236" y="192" width="72" height="58" rx="8" fill="#e0a26a"/><text x="272" y="232" font-family="${NUM}" font-size="30" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+      <path d="M176 58h48v18a24 24 0 0 1-48 0z" fill="#ffd93d" stroke="#e8a900" stroke-width="3"/><path d="M176 64h-12a12 12 0 0 0 14 18M224 64h12a12 12 0 0 1-14 18" fill="none" stroke="#e8a900" stroke-width="4"/><rect x="194" y="98" width="12" height="12" fill="#e8a900"/><rect x="184" y="110" width="32" height="8" rx="3" fill="#c98a0b"/>`),
+
+    // 랭킹: 시상대 + 주제 그림
+    'rank-web': make('#efe7ff', '#ffd2a6', `
+      ${shadow(200, 256, 120)}
+      <rect x="92" y="170" width="72" height="80" rx="8" fill="#cfd5e2"/><text x="128" y="222" font-family="${NUM}" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+      <rect x="164" y="132" width="72" height="118" rx="8" fill="#ffc83d"/><text x="200" y="200" font-family="${NUM}" font-size="40" font-weight="700" fill="#fff" text-anchor="middle">?</text>
+      <rect x="236" y="192" width="72" height="58" rx="8" fill="#e0a26a"/><text x="272" y="232" font-family="${NUM}" font-size="30" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+      <rect x="160" y="54" width="80" height="58" rx="8" fill="#fff" stroke="#7c5cff" stroke-width="4"/><circle cx="172" cy="64" r="3" fill="#ff6b6b"/><circle cx="182" cy="64" r="3" fill="#ffd93d"/><circle cx="192" cy="64" r="3" fill="#4fd18b"/><path d="M192 80l20 12-20 12z" fill="#ff4f5e"/>`),
+
     // MBTI: 알파벳 네 칸 + 물음표
     mbti: make('#ffe9f3', '#c9b6ff', `
       ${shadow(200, 248, 130)}

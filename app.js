@@ -171,6 +171,7 @@ const home = { category: '전체', query: '' };
 const CAT_COLORS = {
   지리: ['#dfe9ff', '#b9ccff'],
   음악: ['#ffe6f7', '#d9b8ff'],
+  랭킹: ['#fff3c4', '#ffc46b'],
   언어: ['#efe7ff', '#c8b4ff'],
   재미: ['#fff6cf', '#ffd68f'],
   음식: ['#ffe3df', '#ffb4a2'],
