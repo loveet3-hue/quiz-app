@@ -78,6 +78,28 @@ function rankCardHtml(b) {
     </a>`;
 }
 
+// 제목 "세계 방문자 사이트 (2026.9)" → ['세계 방문자 사이트', '2026.9']
+const splitTitle = (t) => {
+  const m = t.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
+  return m ? [m[1], m[2]] : [t, ''];
+};
+
+// 목록 한 줄: 제목 · 기준 시점 · 2·3위 미리보기 · 맞힘 표시
+function rankRowHtml(b) {
+  const done = rankStore.get()[b.id];
+  const [name, when] = splitTitle(b.title);
+  const preview = b.items.slice(1, 3).map((it, k) => `${k + 2}위 ${esc(it[0])}`).join(' · ');
+  return `
+    <li><a class="rk-item" href="/ranking/${b.id}/">
+      <span class="rk-badge${done === 1 ? ' ok' : done === 0 ? ' no' : ''}">${done === 1 ? '✓' : done === 0 ? '✕' : '1'}</span>
+      <span class="rk-main">
+        <b>${esc(name)}</b>
+        <small>${when ? `<em>${esc(when)}</em>` : ''}${preview}</small>
+      </span>
+      <span class="rk-go" aria-hidden="true">›</span>
+    </a></li>`;
+}
+
 function renderRankings() {
   document.title = '랭킹 · 맞혀봐';
   const solved = rankStore.get();
@@ -92,25 +114,44 @@ function renderRankings() {
       ${['전체', ...RANK_GROUPS.map((g) => g.id)]
         .map((id) => {
           const g = groupOf(id);
-          return `<button class="chip" data-g="${id}" aria-pressed="${id === rankList.group}">${g ? `${g.emoji} ${esc(g.title)}` : '전체'}</button>`;
+          return `<button class="chip" data-g="${id}" aria-pressed="${id === rankList.group}">${g ? esc(g.title) : '전체'}</button>`;
         })
         .join('')}
     </div>
     <div class="rank-sections"></div>
     ${adHtml('homeBottom')}
     ${SITE_FOOT}`;
+  const PREVIEW = 6; // '전체'에서는 분류마다 6개만 보여 주고 '모두 보기'
   const draw = () => {
     const q = normalize(rankList.query);
+    const all = rankList.group === '전체' && !q;
     const groups = RANK_GROUPS.filter((g) => rankList.group === '전체' || rankList.group === g.id);
     const html = groups
       .map((g) => {
         const list = RANKINGS.filter((b) => b.group === g.id && (!q || normalize(b.title + b.q + b.items.slice(1).map((i) => i[0]).join('')).includes(q)));
         if (!list.length) return '';
-        return `<section class="home-sec"><h2 class="sec-title">${g.emoji} ${esc(g.title)} <small>${list.length}</small></h2>
-          <p class="sec-desc">${esc(g.desc)}</p><div class="rank-grid">${list.map(rankCardHtml).join('')}</div></section>`;
+        const shown = all ? list.slice(0, PREVIEW) : list;
+        return `<section class="rk-sec">
+          <div class="rk-sec-head">
+            <span class="rk-emoji" aria-hidden="true">${g.emoji}</span>
+            <div><h2>${esc(g.title)}</h2><p>${esc(g.desc)}</p></div>
+            <span class="rk-count">${list.length}개</span>
+          </div>
+          <ul class="rk-list">${shown.map(rankRowHtml).join('')}</ul>
+          ${all && list.length > PREVIEW ? `<button class="rk-more" data-more="${g.id}">${esc(g.title)} ${list.length}개 모두 보기 ›</button>` : ''}
+        </section>`;
       })
       .join('');
-    app.querySelector('.rank-sections').innerHTML = html || '<p class="empty">찾는 랭킹이 없어요</p>';
+    const box = app.querySelector('.rank-sections');
+    box.innerHTML = html || '<p class="empty">찾는 랭킹이 없어요</p>';
+    box.querySelectorAll('[data-more]').forEach((btn) =>
+      btn.addEventListener('click', () => {
+        rankList.group = btn.dataset.more;
+        app.querySelectorAll('[data-g]').forEach((x) => x.setAttribute('aria-pressed', x.dataset.g === rankList.group));
+        draw();
+        window.scrollTo({ top: app.querySelector('.chips').offsetTop - 70 });
+      })
+    );
   };
   app.querySelector('.search').addEventListener('input', (e) => {
     rankList.query = e.target.value;

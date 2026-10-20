@@ -1290,3 +1290,57 @@ a.rank-name:hover { color: var(--primary); }
 .rank-guess[hidden] { display: none; }
 .rank-src { margin: 0; font-size: 12px; text-align: center; color: var(--text-3); }
 .game-actions[hidden] { display: none; }
+
+/* 랭킹 목록: 한 줄에 하나씩 (읽기 쉽게) */
+.rank-sections { display: grid; gap: 28px; margin-top: 18px; }
+.rk-sec-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.rk-emoji { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: var(--surface-2); font-size: 22px; }
+.rk-sec-head h2 { margin: 0; font-size: 20px; font-weight: 900; letter-spacing: -0.03em; }
+.rk-sec-head p { margin: 2px 0 0; font-size: 13px; color: var(--text-3); }
+.rk-count { margin-left: auto; flex: none; font-size: 13px; font-weight: 700; color: var(--text-3); }
+.rk-list { margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); overflow: hidden; }
+.rk-list li + li { border-top: 1px solid var(--line); }
+@media (min-width: 760px) {
+  .rk-list { display: grid; grid-template-columns: 1fr 1fr; }
+  .rk-list li + li { border-top: 0; }
+  .rk-list li:nth-child(n + 3) { border-top: 1px solid var(--line); }
+  .rk-list li:nth-child(even) { border-left: 1px solid var(--line); }
+}
+.rk-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; min-height: 64px; }
+.rk-item:hover { background: var(--surface-2); }
+.rk-badge {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffd93d;
+  color: #5a3300;
+  font-size: 14px;
+  font-weight: 900;
+}
+.rk-badge.ok { background: #2bb24c; color: #fff; }
+.rk-badge.no { background: var(--surface-2); color: var(--text-3); }
+.rk-main { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.rk-main b { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.35; word-break: keep-all; }
+.rk-main small { font-size: 13px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rk-main em { font-style: normal; font-weight: 700; color: var(--primary); margin-right: 6px; }
+.rk-go { flex: none; font-size: 22px; color: var(--text-3); }
+.rk-more {
+  width: 100%;
+  margin-top: 8px;
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-2);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.rk-more:hover { color: var(--primary); }
+/* 홈 '오늘의 랭킹' 카드 글씨 키우기 */
+.rank-card h3 { font-size: 15px; }
+.rank-card li { font-size: 14px; }
