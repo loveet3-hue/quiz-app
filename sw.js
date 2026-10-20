@@ -1,6 +1,6 @@
 // 오프라인에서도 열리도록 앱 파일을 저장해 두는 서비스 워커.
 // 파일을 고치면 VERSION 숫자를 올려야 사용자 기기에 새 버전이 반영된다.
-const VERSION = 'v30';
+const VERSION = 'v31';
 const SHELL = [
   './',
   'index.html',
@@ -89,7 +89,7 @@ self.addEventListener('fetch', (e) => {
           caches.open(VERSION).then((c) => c.put(e.request, copy));
           return res;
         })
-        .catch(() => caches.match(e.request))
+        .catch(() => caches.match(e.request).then((hit) => hit || (e.request.mode === 'navigate' ? caches.match('/index.html') : undefined)))
     );
     return;
   }

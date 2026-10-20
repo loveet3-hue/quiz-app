@@ -88,7 +88,7 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
 }
 
-const quizUrl = (id) => `${location.origin}${location.pathname}#/q/${id}`;
+const quizUrl = (id) => `${location.origin}/q/${id}/`;
 
 /* ───────── 참여 수 (익명 집계) ───────── */
 // 퀴즈를 끝까지 풀면 퀴즈 id만 보낸다. 같은 기기에서 같은 퀴즈는 하루 한 번만 센다.
@@ -205,7 +205,7 @@ function cardHtml(quiz, { rank, stats, plays } = {}) {
   const pool = quiz.generate ? '매번 새 문제' : `전체 ${quiz.questions.length}문제`;
   const played = plays?.[quiz.id];
   return `
-    <a class="card" href="#/q/${esc(quiz.id)}">
+    <a class="card" href="/q/${esc(quiz.id)}/">
       <div class="cover">${coverHtml(quiz)}<span class="badge">${esc(quiz.category)}</span>${
         quiz.isNew ? '<span class="new-tag">NEW</span>' : ''
       }${rank ? `<span class="rank-no">${rank}</span>` : ''}</div>
@@ -291,7 +291,7 @@ function renderSections() {
   const today = app.querySelector('[data-sec="today"]');
   if (today && t) {
     today.innerHTML = `
-      <a class="today-card" href="#/q/${esc(t.id)}">
+      <a class="today-card" href="/q/${esc(t.id)}/">
         <div class="cover">${coverHtml(t)}</div>
         <div class="today-body">
           <span class="today-tag">오늘의 퀴즈</span>
@@ -387,7 +387,7 @@ let autoNextTimer;
 function startQuiz(id) {
   const quiz = QUIZZES.find((q) => q.id === id);
   if (!quiz) {
-    location.hash = '#/';
+    nav('/');
     return;
   }
   const picked = quiz.generate ? quiz.generate(quiz.perPlay) : pickFresh(quiz);
@@ -480,7 +480,7 @@ function renderQuestion() {
   app.querySelector('[data-act="quit"]').addEventListener('click', () => {
     if (play.idx === 0 || confirm('퀴즈를 그만할까요? 지금까지 푼 기록은 남지 않아요.')) {
       play = null;
-      location.hash = '#/';
+      nav('/');
     }
   });
 }
@@ -632,7 +632,7 @@ function renderResult() {
   app.querySelectorAll('[data-act="home"]').forEach((b) =>
     b.addEventListener('click', () => {
       play = null;
-      location.hash = '#/';
+      nav('/');
     })
   );
   app.querySelector('[data-act="share"]').addEventListener('click', () => share(quiz, score, total));
@@ -667,13 +667,28 @@ function formatTime(ms) {
 }
 
 /* ───────── 주소 따라 화면 바꾸기 ───────── */
+// 주소: /  ·  /q/<퀴즈>/  ·  /games/  ·  /game/<게임>/   (예전 #/… 주소는 자동으로 바꿔 줌)
+
+function nav(path) {
+  if (path !== location.pathname) history.pushState(null, '', path);
+  route();
+}
+
+function legacyHashToPath(hash) {
+  const h = hash.replace(/^#/, '');
+  if (/^\/q\/[\w-]+/.test(h) || /^\/game\/[\w-]+/.test(h)) return h.replace(/\/?$/, '/');
+  if (h.startsWith('/games')) return '/games/';
+  return '/';
+}
 
 function route() {
+  if (location.hash.startsWith('#/')) history.replaceState(null, '', legacyHashToPath(location.hash));
   window.scrollTo(0, 0);
   if (typeof stopGame === 'function') stopGame();
-  const q = location.hash.match(/^#\/q\/([\w-]+)/);
-  const g = location.hash.match(/^#\/game\/([\w-]+)/);
-  const onGames = !!g || location.hash.startsWith('#/games');
+  const path = location.pathname.replace(/\/+$/, '') || '/';
+  const q = path.match(/^\/q\/([\w-]+)$/);
+  const g = path.match(/^\/game\/([\w-]+)$/);
+  const onGames = !!g || path === '/games';
   document.querySelectorAll('.top-tabs a').forEach((el) => {
     if ((el.dataset.tab === 'games') === onGames) el.setAttribute('aria-current', 'page');
     else el.removeAttribute('aria-current');
@@ -682,7 +697,7 @@ function route() {
   else if (g) {
     play = null;
     renderGame(g[1]);
-  } else if (location.hash.startsWith('#/games')) {
+  } else if (path === '/games') {
     play = null;
     renderGamesHome();
   } else {
@@ -691,5 +706,15 @@ function route() {
   }
 }
 
-window.addEventListener('hashchange', route);
+// 사이트 안 링크는 새로고침 없이 화면만 바꿈
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a[href]');
+  if (!a) return;
+  const href = a.getAttribute('href');
+  if (!href.startsWith('/') || href.startsWith('//') || a.target || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  if (/\.(html|xml|txt|png|jpg|svg)$/.test(href)) return;
+  e.preventDefault();
+  nav(href);
+});
+window.addEventListener('popstate', route);
 route();

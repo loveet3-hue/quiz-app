@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>미리보기 이미지 만들기</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  body { margin: 0; padding: 12px; font: 14px/1.4 "Pretendard Variable", sans-serif; background: #eee; }
+  #log { white-space: pre-wrap; }
+  canvas { width: 600px; height: 315px; display: block; margin-top: 8px; border: 1px solid #ccc; }
+</style>
+</head>
+<body>
+<!-- 카톡·SNS 미리보기 이미지(1200×630)를 퀴즈·게임마다 그려서 저장 서버(og-saver, 8791)로 보낸다.
+     사용: og-saver를 띄운 뒤 이 페이지를 열면 자동으로 전부 만든다. ?only=flags,cars 로 일부만. -->
+<div id="log">준비 중…</div>
+<canvas id="c" width="1200" height="630"></canvas>
+<script>
+const SAVER = 'http://localhost:8791/';
+const W = 1200, H = 630;
+const CAT_COLORS = {
+  지리: ['#dfe9ff', '#b9ccff'], 언어: ['#efe7ff', '#c8b4ff'], 재미: ['#fff6cf', '#ffd68f'], 음식: ['#ffe3df', '#ffb4a2'],
+  수학: ['#e8ebf3', '#c2cde2'], 과학: ['#e6e3ff', '#b9b0f5'], 역사: ['#f7ead9', '#e2c49f'], 예술: ['#fff1d6', '#ffc98f'],
+  동물: ['#d9fbea', '#9eefcf'], 연예: ['#ffe2f1', '#ffb0d6'], 탈것: ['#d8edff', '#9ccfff'], 자연: ['#e3f7ec', '#a8e6c5'],
+  '게임·만화': ['#e0f2ff', '#9fd4ff'], 게임: ['#efe7ff', '#c8b4ff'],
+};
+const log = (s) => (document.getElementById('log').textContent += '\n' + s);
+const ctx = document.getElementById('c').getContext('2d');
+
+function loadImg(src) {
+  return new Promise((ok) => {
+    const im = new Image();
+    im.crossOrigin = 'anonymous';
+    // 바깥 사진은 저장 서버를 거쳐 받음 (그림판에 그린 뒤 저장할 수 있게)
+    if (/^https?:/.test(src) && !src.startsWith(location.origin)) src = SAVER + 'img?u=' + encodeURIComponent(src);
+    im.onload = () => ok(im);
+    im.onerror = () => ok(null);
+    im.src = src;
+  });
+}
+function rr(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function drawFit(im, x, y, w, h, mode = 'cover') {
+  if (!im) return;
+  const s = mode === 'cover' ? Math.max(w / im.width, h / im.height) : Math.min(w / im.width, h / im.height);
+  const dw = im.width * s, dh = im.height * s;
+  ctx.drawImage(im, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+}
+function wrap(text, maxW, maxLines) {
+  // 띄어쓰기 단위로 줄 바꿈 (한 낱말이 너무 길면 그 낱말만 글자 단위로)
+  const words = text.split(' ');
+  const out = [];
+  let line = '';
+  for (const w of words) {
+    const test = line ? line + ' ' + w : w;
+    if (ctx.measureText(test).width <= maxW) { line = test; continue; }
+    if (line) out.push(line);
+    line = w;
+    while (ctx.measureText(line).width > maxW) {
+      let cut = line.length - 1;
+      while (cut > 1 && ctx.measureText(line.slice(0, cut)).width > maxW) cut--;
+      out.push(line.slice(0, cut));
+      line = line.slice(cut);
+    }
+  }
+  if (line) out.push(line);
+  if (out.length > maxLines) {
+    out.length = maxLines;
+    out[maxLines - 1] = out[maxLines - 1].replace(/.$/, '…');
+  }
+  return out;
+}
+
+// 표지 상자 그리기: tiles = [{src}] 1개(큰 표지) 또는 4개(2×2), flags = 국기 코드 목록
+async function drawCover(box, { src, tiles, flags, vs }) {
+  const { x, y, w, h } = box;
+  ctx.save();
+  rr(x, y, w, h, 30);
+  ctx.shadowColor = 'rgba(40,20,80,.25)';
+  ctx.shadowBlur = 30;
+  ctx.shadowOffsetY = 10;
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.restore();
+  ctx.save();
+  rr(x, y, w, h, 30);
+  ctx.clip();
+  if (flags) {
+    ctx.fillStyle = '#eef2ff';
+    ctx.fillRect(x, y, w, h);
+    const ims = await Promise.all(flags.map((c) => loadImg(`https://flagcdn.com/w640/${c}.png`)));
+    if (vs) {
+      const fw = (w - 120) / 2, fh = fw * 2 / 3;
+      ims.forEach((im, i) => { ctx.save(); rr(x + 40 + i * (fw + 40), y + (h - fh) / 2, fw, fh, 12); ctx.clip(); drawFit(im, x + 40 + i * (fw + 40), y + (h - fh) / 2, fw, fh); ctx.restore(); });
+      ctx.fillStyle = '#b4610a';
+      ctx.font = '900 48px "Pretendard Variable"';
+      ctx.textAlign = 'center';
+      ctx.fillText('?', x + w / 2, y + h / 2 + 16);
+    } else {
+      const g = 22, fw = (w - g * 3) / 2, fh = (h - g * 3) / 2;
+      ims.slice(0, 4).forEach((im, i) => {
+        const fx = x + g + (i % 2) * (fw + g), fy = y + g + Math.floor(i / 2) * (fh + g);
+        ctx.save(); rr(fx, fy, fw, fh, 14); ctx.clip(); drawFit(im, fx, fy, fw, fh); ctx.restore();
+      });
+    }
+  } else if (tiles) {
+    const g = 14, tw = (w - g * 3) / 2, th = (h - g * 3) / 2;
+    ctx.fillStyle = '#f3f0ff';
+    ctx.fillRect(x, y, w, h);
+    const ims = await Promise.all(tiles.map(loadImg));
+    ims.forEach((im, i) => {
+      const tx = x + g + (i % 2) * (tw + g), ty = y + g + Math.floor(i / 2) * (th + g);
+      ctx.save(); rr(tx, ty, tw, th, 18); ctx.clip(); drawFit(im, tx, ty, tw, th); ctx.restore();
+    });
+  } else {
+    const im = await loadImg(src);
+    drawFit(im, x, y, w, h, 'cover');
+  }
+  ctx.restore();
+}
+
+async function card({ name, title, desc, category, cover, cta }) {
+  const [c1, c2] = CAT_COLORS[category] || ['#ece9f7', '#cfc8ec'];
+  const g = ctx.createLinearGradient(0, 0, W, H);
+  g.addColorStop(0, c1);
+  g.addColorStop(1, c2);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(255,255,255,.25)';
+  ctx.beginPath(); ctx.arc(60, 40, 170, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(1160, 620, 220, 0, Math.PI * 2); ctx.fill();
+
+  await drawCover({ x: 56, y: 105, w: 560, h: 420 }, cover);
+
+  // 오른쪽 글
+  const X = 668, MAXW = 480;
+  const logo = await loadImg('/icons/logo.svg');
+  if (logo) ctx.drawImage(logo, X, 92, 64, 64);
+  ctx.fillStyle = '#1d1b26';
+  ctx.textAlign = 'left';
+  ctx.font = '800 36px "Pretendard Variable"';
+  ctx.fillText('맞혀봐', X + 78, 138);
+  if (category) {
+    ctx.font = '700 22px "Pretendard Variable"';
+    const tw = ctx.measureText(category).width + 28;
+    rr(X, 186, tw, 38, 19);
+    ctx.fillStyle = 'rgba(29,27,38,.75)';
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.fillText(category, X + 14, 213);
+  }
+  ctx.fillStyle = '#1d1b26';
+  ctx.font = '800 54px "Pretendard Variable"';
+  const tl = wrap(title, MAXW, 3);
+  tl.forEach((l, i) => ctx.fillText(l, X, 296 + i * 66));
+  ctx.fillStyle = '#4a4560';
+  ctx.font = '500 26px "Pretendard Variable"';
+  const dy = 296 + tl.length * 66 + 8;
+  wrap(desc, MAXW, 2).forEach((l, i) => ctx.fillText(l, X, dy + i * 38));
+  // 버튼
+  ctx.font = '800 26px "Pretendard Variable"';
+  const label = cta || '직접 써서 맞혀 보기 →';
+  const bw = ctx.measureText(label).width + 56;
+  rr(X, 512, bw, 62, 31);
+  ctx.fillStyle = '#7c5cff';
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.fillText(label, X + 28, 552);
+  ctx.fillStyle = 'rgba(29,27,38,.55)';
+  ctx.font = '600 20px "Pretendard Variable"';
+  ctx.textAlign = 'right';
+  ctx.fillText('quizbwa.co.kr', W - 40, H - 24);
+
+  const png = document.getElementById('c').toDataURL('image/png');
+  const r = await fetch(SAVER, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, png }) });
+  log(`${r.ok ? '✓' : '✗'} ${name}`);
+}
+
+async function main() {
+  // index.html과 같은 스크립트를 불러옴 (app.js 제외)
+  const html = await (await fetch('/index.html')).text();
+  const files = [...html.matchAll(/<script src="(\/[^"?]+\.js)/g)].map((m) => m[1]).filter((f) => !f.endsWith('/app.js'));
+  for (const f of files) {
+    await new Promise((ok) => { const s = document.createElement('script'); s.src = f; s.onload = s.onerror = ok; document.head.appendChild(s); });
+  }
+  await document.fonts.load('800 54px "Pretendard Variable"');
+  await document.fonts.load('500 26px "Pretendard Variable"');
+  const only = new URLSearchParams(location.search).get('only');
+  const want = (n) => !only || only.split(',').includes(n);
+  const coverOf = (q) => (q.cover.flags ? { flags: q.cover.flags, vs: q.cover.vs } : { src: q.cover.image });
+
+  if (want('home')) await card({
+    name: 'home', title: '보고, 떠올리고, 직접 써서 맞혀 보세요', category: '',
+    desc: `주관식 퀴즈 ${QUIZZES.length}가지 + 뽑기 게임`,
+    cover: { tiles: [COVERS.mbti, COVERS['game-marble'], COVERS.nonsense, COVERS.foods] }, cta: '지금 풀어 보기 →',
+  });
+  if (want('games')) await card({
+    name: 'games', title: '모일 때 꼭 필요한 뽑기 게임', category: '게임',
+    desc: GAMES.map((g) => g.title).join(' · '), cover: { tiles: GAMES.slice(0, 4).map((g) => g.cover()) }, cta: '바로 뽑기 →',
+  });
+  for (const g of GAMES) if (want('game-' + g.id)) await card({ name: 'game-' + g.id, title: g.title, desc: g.desc, category: '게임', cover: { src: g.cover() }, cta: '바로 시작 →' });
+  for (const q of QUIZZES) {
+    if (!want(q.id)) continue;
+    const n = q.generate ? '매번 새 문제' : `${q.questions.length}문제`;
+    await card({ name: q.id, title: q.title, desc: `${q.desc} · ${n}`, category: q.category, cover: coverOf(q) });
+  }
+  log('끝');
+  window.DONE = true;
+}
+main().catch((e) => { log('오류: ' + e.message); window.DONE = 'error'; });
+</script>
+</body>
+</html>

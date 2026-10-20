@@ -1,5 +1,5 @@
 // 뽑기 게임 4종: 구슬 추첨 · 경주마 · 사다리 타기 · 돌림판.
-// 주소: #/games (목록), #/game/marble · #/game/horse · #/game/ladder · #/game/wheel
+// 주소: /games/ (목록), /game/marble/ · /game/horse/ · /game/ladder/ · /game/wheel/
 // 모든 게임에 '다시 시작' 버튼, 구슬·경주마는 3·2·1 카운트다운 + 중계 문구 + 막판 슬로모션.
 'use strict';
 
@@ -71,7 +71,7 @@ function renderGamesHome() {
       <div class="games-grid">
         ${GAMES.map(
           (g) => `
-          <a class="card" href="#/game/${g.id}">
+          <a class="card" href="/game/${g.id}/">
             <div class="cover"><img class="full" src="${g.cover()}" alt=""></div>
             <div class="card-body">
               <h2 class="card-title">${esc(g.title)}</h2>
@@ -87,7 +87,7 @@ function renderGame(id) {
   stopGame();
   const game = GAMES.find((g) => g.id === id);
   if (!game) {
-    location.hash = '#/games';
+    nav('/games/');
     return;
   }
   document.title = `${game.title} · 맞혀봐`;
@@ -97,7 +97,7 @@ function renderGame(id) {
       <h1 class="page-title">${esc(game.title)}</h1>
     </div>
     <div class="game-body"></div>`;
-  app.querySelector('[data-act="home"]').addEventListener('click', () => (location.hash = '#/games'));
+  app.querySelector('[data-act="home"]').addEventListener('click', () => nav('/games/'));
   const body = app.querySelector('.game-body');
   ({ wheel: renderWheel, ladder: renderLadder, marble: renderMarble, horse: renderHorse })[id](body);
 }

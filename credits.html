@@ -20,7 +20,7 @@
   </style>
 </head>
 <body>
-  <header class="topbar"><div class="topbar-inner"><a class="logo" href="./#/"><img src="icons/icon-192.png" alt="" width="28" height="28"><span>맞혀봐</span></a></div></header>
+  <header class="topbar"><div class="topbar-inner"><a class="logo" href="/"><img src="/icons/icon-192.png" alt="" width="28" height="28"><span>맞혀봐</span></a></div></header>
   <main class="container credits">
     <h1>사진 출처</h1>
     <p class="meta">문제에 쓰인 사진은 위키미디어 공용(Wikimedia Commons)의 퍼블릭 도메인 또는
@@ -28,15 +28,15 @@
       화면에 맞게 크기만 줄여 사용합니다. 국기 이미지는 <a href="https://flagcdn.com" target="_blank" rel="noopener">flagcdn.com</a>,
       명화·우주 사진은 퍼블릭 도메인입니다. 사진 이름을 누르면 원본 페이지로 이동합니다.</p>
     <div id="list"><p class="meta">불러오는 중…</p></div>
-    <p class="meta" style="text-align:center"><a href="./#/">← 퀴즈로 돌아가기</a></p>
+    <p class="meta" style="text-align:center"><a href="/">← 퀴즈로 돌아가기</a></p>
   </main>
-  <script src="config.js"></script>
-  <script src="data/_init.js"></script>
-  <script src="covers.js"></script>
+  <script src="/config.js"></script>
+  <script src="/data/_init.js"></script>
+  <script src="/covers.js"></script>
   <script>
     // index.html과 같은 data 파일 목록을 읽어 와서 불러온다
-    fetch('index.html').then((r) => r.text()).then((html) => {
-      const files = [...html.matchAll(/src="(data\/[^"?]+\.js)/g)].map((m) => m[1]).filter((f) => !f.endsWith('_init.js'));
+    fetch('/index.html').then((r) => r.text()).then((html) => {
+      const files = [...html.matchAll(/src="\/?(data\/[^"?]+\.js)/g)].map((m) => m[1]).filter((f) => !f.endsWith('_init.js'));
       let left = files.length;
       files.forEach((f) => {
         const s = document.createElement('script');
