@@ -1131,3 +1131,24 @@ a.btn { display: flex; align-items: center; justify-content: center; }
   animation: spin .8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* 롤 내전 팀 짜기 */
+.lol-board { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lol-board[hidden] { display: none; }
+.lol-team { padding: 12px; border-radius: 16px; color: #fff; }
+.lol-team.blue { background: linear-gradient(160deg, #3d7bff, #2a4fb8); }
+.lol-team.red { background: linear-gradient(160deg, #ff5a5a, #b83232); }
+.lol-team h3 { margin: 0 0 8px; font-size: 18px; font-weight: 900; text-align: center; }
+.lol-team ol { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.lol-team li { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 7px 10px; border-radius: 10px; background: rgba(255, 255, 255, .16); }
+.lol-team li b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
+.lol-team li.spin b { opacity: .55; }
+.lol-team li.pop { animation: pop .35s ease both; }
+.lol-team .lol-lane { flex: none; width: 34px; font-size: 12px; font-weight: 800; opacity: .85; }
+.lol-inputs input { width: 100%; min-width: 0; height: 42px; padding: 0 10px; border: 2px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--text); font: inherit; font-size: 16px; outline: none; }
+.lol-inputs input:focus { border-color: var(--primary); }
+.lol-inputs.fixed { display: grid; gap: 8px; }
+.lol-row { display: grid; grid-template-columns: 44px 1fr 1fr; gap: 8px; align-items: center; }
+.lol-row .lol-lane { font-size: 14px; font-weight: 800; }
+.lol-hint { margin: 0 0 6px; font-size: 14px; font-weight: 700; }
+.lol-free { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }

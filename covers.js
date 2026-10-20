@@ -334,6 +334,15 @@ const COVERS = (() => {
       <circle cx="200" cy="160" r="24" fill="#2d3142"/>
       <text x="200" y="168" font-family="${NUM}" font-size="20" font-weight="700" fill="#fff" text-anchor="middle">VS</text>`),
 
+    // 뽑기 게임: 롤 내전 팀 짜기 (블루 방패 vs 레드 방패 + 라인 막대)
+    'game-lol': make('#dbe6ff', '#ffd3d3', `
+      ${shadow(200, 254, 120)}
+      ${[['#3d7bff', '#2a5bd7', 136], ['#ff5a5a', '#d63c3c', 264]].map(([c, d, x]) => `
+        <path d="M${x} 66l52 18v52c0 40-26 66-52 80-26-14-52-40-52-80v-52z" fill="${c}" stroke="${d}" stroke-width="5"/>
+        ${[0, 1, 2, 3, 4].map((k) => `<rect x="${x - 26}" y="${100 + k * 18}" width="52" height="9" rx="4.5" fill="#fff" opacity="${0.95 - k * 0.12}"/>`).join('')}`).join('')}
+      <circle cx="200" cy="150" r="24" fill="#2d3142"/>
+      <text x="200" y="158" font-family="${NUM}" font-size="20" font-weight="700" fill="#fff" text-anchor="middle">VS</text>`),
+
     // 뽑기 게임: 주사위·동전
     'game-dice': make('#d9fbea', '#9eefcf', `
       ${shadow(200, 256, 110)}

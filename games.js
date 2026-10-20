@@ -1,4 +1,4 @@
-// 뽑기 게임 8종: 구슬 추첨 · 경주마 · 사다리 타기 · 돌림판 · 제비뽑기 · 폭탄 돌리기 · 팀 나누기 · 주사위·동전.
+// 뽑기 게임 9종: 구슬 추첨 · 경주마 · 사다리 타기 · 돌림판 · 제비뽑기 · 폭탄 돌리기 · 팀 나누기 · 롤 내전 팀 짜기 · 주사위·동전.
 // 주소: /games/ (목록), /game/<게임 id>/
 // 모든 게임에 '다시 시작' 버튼, 구슬·경주마는 3·2·1 카운트다운 + 중계 문구 + 막판 슬로모션.
 'use strict';
@@ -11,6 +11,7 @@ const GAMES = [
   { id: 'lots', title: '제비뽑기', desc: '종이를 하나씩 펼쳐서 당첨 찾기', cover: () => COVERS['game-lots'] },
   { id: 'bomb', title: '폭탄 돌리기', desc: '폰을 돌리다 터지면 벌칙!', cover: () => COVERS['game-bomb'] },
   { id: 'teams', title: '팀 나누기', desc: '이름만 넣으면 공평하게 팀 배정', cover: () => COVERS['game-teams'] },
+  { id: 'lol', title: '롤 내전 팀 짜기', desc: '블루·레드 팀을 라인별로 섞기', cover: () => COVERS['game-lol'] },
   { id: 'dice', title: '주사위·동전', desc: '주사위 굴리기와 동전 던지기', cover: () => COVERS['game-dice'] },
 ];
 
@@ -103,7 +104,7 @@ function renderGame(id) {
     <div class="game-body"></div>`;
   app.querySelector('[data-act="home"]').addEventListener('click', () => nav('/games/'));
   const body = app.querySelector('.game-body');
-  ({ wheel: renderWheel, ladder: renderLadder, marble: renderMarble, horse: renderHorse, lots: renderLots, bomb: renderBomb, teams: renderTeams, dice: renderDice })[id](body);
+  ({ wheel: renderWheel, ladder: renderLadder, marble: renderMarble, horse: renderHorse, lots: renderLots, bomb: renderBomb, teams: renderTeams, lol: renderLol, dice: renderDice })[id](body);
 }
 
 /* ═════════════════════ 돌림판 ═════════════════════ */
@@ -1679,5 +1680,142 @@ function renderDice(root) {
     })
   );
   setup();
+  gameCleanup = clear;
+}
+
+/* ═════════════════════ 롤 내전 팀 짜기 ═════════════════════ */
+
+const LOL_LANES = ['탑', '정글', '미드', '원딜', '서폿'];
+
+function renderLol(root) {
+  const saved = gameStore.get('lol') || { names: Array(10).fill(''), fixed: true };
+  let names = saved.names.slice(0, 10);
+  while (names.length < 10) names.push('');
+  root.innerHTML = `
+    <div class="lol-board" hidden>
+      <div class="lol-team blue"><h3>블루팀</h3><ol></ol></div>
+      <div class="lol-team red"><h3>레드팀</h3><ol></ol></div>
+    </div>
+    <p class="game-result" role="status"></p>
+    <div class="game-actions">
+      <button class="btn block" data-act="shuffle">섞기</button>
+      <button class="btn ghost block" data-act="reset">다시 시작</button>
+    </div>
+    <button class="btn ghost block" data-act="copy" hidden>결과 복사하기 (단톡방에 붙여 넣기)</button>
+    <label class="check"><input type="checkbox" data-k="fixed" ${saved.fixed ? 'checked' : ''}> 라인 고정 (라인은 그대로, 블루·레드만 섞기)</label>
+    <div class="lol-inputs"></div>`;
+  const board = root.querySelector('.lol-board');
+  const resultEl = root.querySelector('.game-result');
+  const shuffleBtn = root.querySelector('[data-act="shuffle"]');
+  const copyBtn = root.querySelector('[data-act="copy"]');
+  const fixedEl = root.querySelector('[data-k="fixed"]');
+  const inputsEl = root.querySelector('.lol-inputs');
+  let timers = [];
+  let last = null;
+  const clear = () => {
+    timers.forEach(clearTimeout);
+    timers.forEach(clearInterval);
+    timers = [];
+  };
+
+  // 입력 칸 10개: 라인 고정이면 라인마다 2명씩, 해제면 그냥 참가자 10명
+  function drawInputs() {
+    const fixed = fixedEl.checked;
+    inputsEl.className = 'lol-inputs' + (fixed ? ' fixed' : '');
+    inputsEl.innerHTML = fixed
+      ? LOL_LANES.map(
+          (lane, l) => `
+          <div class="lol-row">
+            <span class="lol-lane">${lane}</span>
+            ${[0, 1].map((k) => `<input type="text" maxlength="12" data-i="${l * 2 + k}" placeholder="${lane} ${k + 1}" value="${esc(names[l * 2 + k])}">`).join('')}
+          </div>`
+        ).join('')
+      : `<p class="lol-hint">참가자 10명 (라인도 무작위로 정해져요)</p><div class="lol-free">${names
+          .map((v, i) => `<input type="text" maxlength="12" data-i="${i}" placeholder="참가자 ${i + 1}" value="${esc(v)}">`)
+          .join('')}</div>`;
+    resultEl.textContent = fixed ? '라인별로 2명씩 넣고 섞기를 눌러 보세요.' : '10명을 넣고 섞기를 눌러 보세요.';
+  }
+
+  const save = () => gameStore.save('lol', { names, fixed: fixedEl.checked });
+  const nameOf = (i) => names[i].trim() || inputsEl.querySelector(`[data-i="${i}"]`).placeholder;
+
+  // 결과: blue/red = 라인 순서대로 사람 번호 5개씩
+  function makeTeams() {
+    const blue = [];
+    const red = [];
+    if (fixedEl.checked) {
+      for (let l = 0; l < 5; l++) {
+        const pair = Math.random() < 0.5 ? [l * 2, l * 2 + 1] : [l * 2 + 1, l * 2];
+        blue.push(pair[0]);
+        red.push(pair[1]);
+      }
+    } else {
+      const order = shuffle([...Array(10).keys()]);
+      blue.push(...order.slice(0, 5));
+      red.push(...order.slice(5));
+    }
+    return { blue, red };
+  }
+
+  function paint(t, final) {
+    const row = (i, l) => `<li${final ? ` style="animation-delay:${l * 90}ms"` : ''} class="${final ? 'pop' : 'spin'}"><span class="lol-lane">${LOL_LANES[l]}</span><b>${esc(nameOf(i))}</b></li>`;
+    board.querySelector('.blue ol').innerHTML = t.blue.map(row).join('');
+    board.querySelector('.red ol').innerHTML = t.red.map(row).join('');
+  }
+
+  function doShuffle() {
+    clear();
+    save();
+    board.hidden = false;
+    copyBtn.hidden = true;
+    shuffleBtn.disabled = true;
+    resultEl.textContent = '섞는 중…';
+    const iv = setInterval(() => paint(makeTeams(), false), 70);
+    timers.push(iv);
+    timers.push(
+      setTimeout(() => {
+        clearInterval(iv);
+        last = makeTeams();
+        paint(last, true);
+        shuffleBtn.disabled = false;
+        shuffleBtn.textContent = '다시 섞기';
+        copyBtn.hidden = false;
+        resultEl.textContent = '⚔️ 팀이 정해졌어요!';
+        buzz(40);
+      }, 1100)
+    );
+  }
+
+  function reset() {
+    clear();
+    board.hidden = true;
+    copyBtn.hidden = true;
+    shuffleBtn.disabled = false;
+    shuffleBtn.textContent = '섞기';
+    last = null;
+    drawInputs();
+  }
+
+  inputsEl.addEventListener('input', (e) => {
+    const i = e.target.dataset.i;
+    if (i === undefined) return;
+    names[+i] = e.target.value;
+    save();
+  });
+  fixedEl.addEventListener('change', () => {
+    save();
+    reset();
+  });
+  shuffleBtn.addEventListener('click', doShuffle);
+  root.querySelector('[data-act="reset"]').addEventListener('click', reset);
+  copyBtn.addEventListener('click', () => {
+    if (!last) return;
+    const line = (team, list) => `[${team}] ` + list.map((i, l) => `${LOL_LANES[l]} ${nameOf(i)}`).join(' / ');
+    navigator.clipboard?.writeText(`${line('블루', last.blue)}\n${line('레드', last.red)}`).then(
+      () => (resultEl.textContent = '복사했어요! 단톡방에 붙여 넣어 보세요.'),
+      () => (resultEl.textContent = '복사가 안 돼요. 화면을 캡처해 주세요.')
+    );
+  });
+  drawInputs();
   gameCleanup = clear;
 }
