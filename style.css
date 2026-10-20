@@ -854,10 +854,10 @@ a.btn { display: flex; align-items: center; justify-content: center; }
   background: linear-gradient(90deg, #c98a4b, #b9773a);
 }
 .lane { display: grid; grid-template-columns: 24px 1fr 34px; align-items: center; gap: 6px; }
-.lane-no { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 12px; font-weight: 800; }
+.lane-no { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; color: #2d2440; font-size: 12px; font-weight: 800; }
 .lane-run {
   position: relative;
-  height: 38px;
+  height: 50px;
   border-bottom: 2px dashed rgba(255, 255, 255, .45);
   background: repeating-linear-gradient(90deg, transparent 0 calc(100% - 8px), #fff calc(100% - 8px) 100%);
 }
@@ -865,14 +865,23 @@ a.btn { display: flex; align-items: center; justify-content: center; }
   position: absolute;
   left: 0;
   bottom: 0;
-  transform: translateX(calc(var(--x) * (100cqw - 44px)));
+  transform: translateX(calc(var(--x) * (100cqw - 58px)));
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 44px;
+  width: 58px;
 }
 .lane-run { container-type: inline-size; }
-.horse-emoji { font-size: 26px; line-height: 1; transform: scaleX(-1); }
+.pony { display: block; overflow: visible; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .25)); }
+.pony g, .pony .tail { transform-box: fill-box; transform-origin: 50% 10%; }
+.track.running .pony { animation: gallop .32s ease-in-out infinite; }
+.track.running .pony .leg-f, .track.running .pony .leg-b2 { animation: legA .32s ease-in-out infinite; }
+.track.running .pony .leg-b, .track.running .pony .leg-f2 { animation: legB .32s ease-in-out infinite; }
+.track.running .pony .tail { animation: tail .32s ease-in-out infinite; }
+@keyframes gallop { 50% { transform: translateY(-4px) rotate(-3deg); } }
+@keyframes legA { 0%, 100% { transform: rotate(28deg); } 50% { transform: rotate(-24deg); } }
+@keyframes legB { 0%, 100% { transform: rotate(-24deg); } 50% { transform: rotate(28deg); } }
+@keyframes tail { 50% { transform: rotate(-18deg); } }
 .horse-name { font-size: 10px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.5); white-space: nowrap; }
 .lane-place { color: #fff; font-weight: 800; font-size: 13px; text-align: right; }
 .pick-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }

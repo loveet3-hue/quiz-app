@@ -798,8 +798,14 @@ function renderMarble(root) {
       ctx.lineWidth = 1.5;
       ctx.strokeStyle = 'rgba(0,0,0,.25)';
       ctx.stroke();
-      ctx.fillStyle = '#1d1b26';
-      ctx.fillText(m.name.length > 4 ? m.name.slice(0, 4) : m.name, m.x, m.y - R - 3);
+      // 이름: 흰 글씨 + 진한 테두리 (밝은·어두운 화면 모두 잘 보이게)
+      const label = m.name.length > 4 ? m.name.slice(0, 4) : m.name;
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(20,16,36,.85)';
+      ctx.strokeText(label, m.x, m.y - R - 3);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(label, m.x, m.y - R - 3);
     }
   }
 
@@ -940,6 +946,44 @@ function renderMarble(root) {
 
 /* ═════════════════════ 경주마 ═════════════════════ */
 
+// 말마다 한눈에 구분되는 몸 색 / 갈기 색
+const HORSE_COLORS = [
+  { color: '#ff8a7a', mane: '#c2413a' },
+  { color: '#ffd166', mane: '#c98a00' },
+  { color: '#7ad98f', mane: '#2f9a55' },
+  { color: '#6fc8ff', mane: '#2a7fc4' },
+  { color: '#b79bff', mane: '#6c4bd8' },
+  { color: '#ff9ad5', mane: '#c4458f' },
+  { color: '#f4f1ea', mane: '#8a7a66' },
+  { color: '#a87b5a', mane: '#5a3a24' },
+  { color: '#9aa3b5', mane: '#4a5266' },
+  { color: '#ffb36b', mane: '#c4661a' },
+];
+
+// 귀여운 말 (오른쪽을 봄). 다리는 달릴 때 움직임
+function horseSvg(h) {
+  return `<svg class="pony" viewBox="0 0 66 52" width="58" height="46" aria-hidden="true" style="--c:${h.color};--m:${h.mane}">
+    <path class="tail" d="M13 22c-7-2-11 4-9 11 1-4 4-6 8-5" fill="var(--m)"/>
+    <g class="leg-b"><rect x="15" y="31" width="6" height="15" rx="3" fill="var(--c)"/><rect x="15" y="42" width="6" height="5" rx="2" fill="#4a3b33"/></g>
+    <g class="leg-b2"><rect x="23" y="31" width="6" height="14" rx="3" fill="var(--c)" opacity=".8"/><rect x="23" y="41" width="6" height="5" rx="2" fill="#4a3b33" opacity=".8"/></g>
+    <g class="leg-f"><rect x="36" y="31" width="6" height="15" rx="3" fill="var(--c)"/><rect x="36" y="42" width="6" height="5" rx="2" fill="#4a3b33"/></g>
+    <g class="leg-f2"><rect x="43" y="31" width="6" height="14" rx="3" fill="var(--c)" opacity=".8"/><rect x="43" y="41" width="6" height="5" rx="2" fill="#4a3b33" opacity=".8"/></g>
+    <ellipse cx="31" cy="27" rx="20" ry="12" fill="var(--c)"/>
+    <path d="M42 20c2-8 6-12 12-12l2 13-12 6z" fill="var(--c)"/>
+    <ellipse cx="53" cy="15" rx="10" ry="9" fill="var(--c)"/>
+    <ellipse cx="60" cy="19" rx="5.5" ry="4.5" fill="#fff" opacity=".55"/>
+    <circle cx="61" cy="18.5" r="0.9" fill="#4a3b33"/>
+    <path d="M47 8l2-7 4 6z" fill="var(--c)"/>
+    <path d="M44 9c-4 3-5 8-4 13l4-2c-1-4 0-8 3-10z" fill="var(--m)"/>
+    <path d="M47 6c2-2 5-2 7 0-2 1-5 1-7 0z" fill="var(--m)"/>
+    <circle cx="53.5" cy="13" r="2.4" fill="#2d2440"/>
+    <circle cx="54.3" cy="12.2" r="0.8" fill="#fff"/>
+    <ellipse cx="56" cy="18" rx="2.2" ry="1.4" fill="#ff7aa8" opacity=".7"/>
+    <rect x="23" y="17" width="14" height="11" rx="3" fill="#fff"/>
+    <text x="30" y="25.5" text-anchor="middle" font-family="Arial Rounded MT Bold, Arial, sans-serif" font-size="9" font-weight="700" fill="#2d2440">${h.i + 1}</text>
+  </svg>`;
+}
+
 function renderHorse(root) {
   const saved = gameStore.get('horse') || { names: '번개\n질풍\n천둥\n바람\n별빛\n달빛' };
   root.innerHTML = `
@@ -974,7 +1018,7 @@ function renderHorse(root) {
   function setup() {
     stop();
     const names = parseNames(ta.value, 10);
-    horses = names.map((name, i) => ({ name, i, p: 0, v: 0, target: 0, next: 0, burst: 0, place: 0, color: gameColor(i, names.length) }));
+    horses = names.map((name, i) => ({ name, i, p: 0, v: 0, target: 0, next: 0, burst: 0, place: 0, ...HORSE_COLORS[i % HORSE_COLORS.length] }));
     if (pick >= horses.length) pick = -1;
     track.innerHTML = horses
       .map(
@@ -983,7 +1027,7 @@ function renderHorse(root) {
           <span class="lane-no" style="background:${h.color}">${h.i + 1}</span>
           <div class="lane-run">
             <div class="horse" style="--x:0">
-              <span class="horse-emoji" aria-hidden="true">🏇</span>
+              ${horseSvg(h)}
               <span class="horse-name">${esc(h.name)}</span>
             </div>
           </div>
@@ -1017,6 +1061,7 @@ function renderHorse(root) {
     if (cancelCount) cancelCount();
     cancelCount = null;
     running = false;
+    track.classList.remove('running');
   }
 
   function start() {
@@ -1043,6 +1088,7 @@ function renderHorse(root) {
 
   function race() {
     running = true;
+    track.classList.add('running');
     let finished = 0;
     let last = performance.now();
     let t = 0;
@@ -1107,6 +1153,7 @@ function renderHorse(root) {
 
   function end() {
     running = false;
+    track.classList.remove('running');
     slowEl.hidden = true;
     const winner = horses.find((h) => h.place === 1);
     const mine = horses[pick];
