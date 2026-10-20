@@ -189,15 +189,19 @@ const catBg = (cat) => {
   return `background:linear-gradient(160deg,${a},${b})`;
 };
 
+// 표지 사진은 사이트에 둔 작은 사진(thumbs/, tools/make_thumbs.py로 만듦)을 먼저 쓰고, 없으면 원래 주소로
+const thumbImg = (local, remote, cls) =>
+  `<img${cls ? ` class="${cls}"` : ''} src="${esc(local)}" data-remote="${esc(remote)}" alt="" loading="lazy" decoding="async" onerror="if(this.dataset.remote&&this.src!==this.dataset.remote){this.src=this.dataset.remote}">`;
+
 function coverHtml(quiz) {
   if (quiz.cover.flags) {
     return `<div class="flag-grid${quiz.cover.vs ? ' vs' : ''}" style="${catBg(quiz.category)}">${quiz.cover.flags
-      .map((c) => `<img src="${esc(FLAG(c))}" alt="" loading="lazy">`)
+      .map((c) => thumbImg(`/thumbs/flag-${c}.webp`, FLAG(c)))
       .join(quiz.cover.vs ? '<span class="vs-mark">?</span>' : '')}</div>`;
   }
   const src = quiz.cover.image || '';
   if (src.startsWith('data:')) return `<img class="full" src="${esc(src)}" alt="" loading="lazy">`;
-  return `<div class="framed" style="${catBg(quiz.category)}"><img class="inset" src="${esc(src)}" alt="" loading="lazy"></div>`;
+  return `<div class="framed" style="${catBg(quiz.category)}">${thumbImg(`/thumbs/${quiz.id}.webp`, src, 'inset')}</div>`;
 }
 
 function cardHtml(quiz, { rank, stats, plays } = {}) {
