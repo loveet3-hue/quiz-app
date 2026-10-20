@@ -98,7 +98,7 @@ function renderGamesHome() {
   app.innerHTML = `
     <div class="games-home">
       <section class="hero">
-        <h1>모일 때 꼭 필요한<br>뽑기 게임 ${GAMES.length}가지</h1>
+        <h1>모일 때 꼭 필요한<br>뽑기 게임</h1>
         <p>누가 쏠지, 누가 갈지 공정하게 정해 보세요</p>
       </section>
       <div class="games-grid"></div>

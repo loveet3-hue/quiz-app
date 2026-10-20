@@ -58,6 +58,24 @@ function clockSvg(h, m) {
 
 const QUIZZES = [
   {
+    id: 'trivia',
+    title: '일반 상식 퀴즈',
+    desc: '사회·문화·경제·스포츠, 알아 두면 쓸모 있는 상식',
+    category: '상식',
+    perPlay: 10,
+    cover: { image: COVERS.trivia },
+    questions: [],
+  },
+  {
+    id: 'life-trivia',
+    title: '생활·과학 상식 퀴즈',
+    desc: '물은 몇 도에서 끓을까? 일상 속 과학 상식',
+    category: '상식',
+    perPlay: 10,
+    cover: { image: COVERS['life-trivia'] },
+    questions: [],
+  },
+  {
     id: 'flags',
     guide: '나라 이름을 써 보세요',
     title: '국기 보고 나라 맞히기',
@@ -917,7 +935,7 @@ for (const quiz of QUIZZES) {
   if (QUESTIONS[quiz.id] && QUESTIONS[quiz.id].length) quiz.questions = QUESTIONS[quiz.id];
 }
 // 새로 나온 퀴즈 (홈 '새로 나온 퀴즈' 줄과 NEW 표시)
-const NEW_QUIZZES = ['lol-champs', 'melody', 'songs', 'char-colors', 'plots', 'movie-ratings', 'dialect', 'memes', 'mbti', 'cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
+const NEW_QUIZZES = ['trivia', 'life-trivia', 'lol-champs', 'melody', 'songs', 'char-colors', 'plots', 'movie-ratings', 'dialect', 'memes', 'mbti', 'cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
 for (const quiz of QUIZZES) if (NEW_QUIZZES.includes(quiz.id)) quiz.isNew = true;
 // 표지를 첫 문제 사진으로 쓰는 퀴즈
 for (const quiz of QUIZZES) {

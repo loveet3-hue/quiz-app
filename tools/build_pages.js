@@ -62,7 +62,7 @@ const urls = [];
 const homeBody = `<h1>맞혀봐 - 직접 써서 맞히는 퀴즈</h1><ul>${QUIZZES.map((q) => `<li><a href="/q/${q.id}/">${esc(q.title)}</a> - ${esc(q.desc)}</li>`).join('')}</ul><p><a href="/games/">뽑기 게임</a> · <a href="/about.html">소개</a> · <a href="/privacy.html">개인정보 처리방침</a></p>`;
 const homeHtml = page({
   title: '맞혀봐 - 직접 써서 맞히는 퀴즈',
-  desc: `사진 보고, 초성 보고, 정답을 직접 입력하는 주관식 퀴즈 ${QUIZZES.length}가지와 뽑기 게임. 국기·명화·자동차·연예인·MBTI 등`,
+  desc: `사진 보고, 초성 보고, 정답을 직접 입력하는 주관식 퀴즈와 뽑기 게임, 1위 맞히기 랭킹. 국기·명화·자동차·연예인·MBTI 등`,
   url: `${SITE}/`,
   image: ogFile('home'),
   body: homeBody,
@@ -92,11 +92,11 @@ for (const q of QUIZZES) {
 write(
   'quizzes/index.html',
   page({
-    title: `퀴즈 ${QUIZZES.length}가지 - 맞혀봐`,
-    desc: `사진·초성·설명·멜로디를 보고 정답을 직접 써서 맞히는 주관식 퀴즈 ${QUIZZES.length}가지`,
+    title: `퀴즈 - 맞혀봐`,
+    desc: `사진·초성·설명·멜로디를 보고 정답을 직접 써서 맞히는 주관식 퀴즈 모음`,
     url: `${SITE}/quizzes/`,
     image: ogFile('home'),
-    body: `<h1>퀴즈 ${QUIZZES.length}가지</h1><ul>${QUIZZES.map((q) => `<li><a href="/q/${q.id}/">${esc(q.title)}</a> - ${esc(q.desc)}</li>`).join('')}</ul>`,
+    body: `<h1>퀴즈</h1><ul>${QUIZZES.map((q) => `<li><a href="/q/${q.id}/">${esc(q.title)}</a> - ${esc(q.desc)}</li>`).join('')}</ul>`,
   })
 );
 urls.push('/quizzes/');
@@ -131,8 +131,8 @@ for (const g of GAMES) {
 write(
   'rankings/index.html',
   page({
-    title: `랭킹 ${RANKINGS.length}개 · 1위를 맞혀 보세요 - 맞혀봐`,
-    desc: `사이트·앱, 판매·흥행, 우승 횟수, 세계·자연, 가장 빠른 것까지 랭킹 ${RANKINGS.length}개. 2·3위를 보고 1위를 맞혀 보세요`,
+    title: `랭킹 · 1위를 맞혀 보세요 - 맞혀봐`,
+    desc: `사이트·앱, 판매·흥행, 우승 횟수, 세계·자연, 가장 빠른 것까지 여러 랭킹. 2·3위를 보고 1위를 맞혀 보세요`,
     url: `${SITE}/rankings/`,
     image: ogFile('rank-web'),
     body: `<h1>랭킹</h1>${RANK_GROUPS.map((g) => `<h2>${esc(g.title)}</h2><ul>${RANKINGS.filter((b) => b.group === g.id).map((b) => `<li><a href="/ranking/${b.id}/">${esc(b.title)}</a></li>`).join('')}</ul>`).join('')}`,

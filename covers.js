@@ -472,6 +472,28 @@ const COVERS = (() => {
       <rect x="236" y="192" width="72" height="58" rx="8" fill="#e0a26a"/><text x="272" y="232" font-family="${NUM}" font-size="30" font-weight="700" fill="#fff" text-anchor="middle">3</text>
       <rect x="160" y="54" width="80" height="58" rx="8" fill="#fff" stroke="#7c5cff" stroke-width="4"/><circle cx="172" cy="64" r="3" fill="#ff6b6b"/><circle cx="182" cy="64" r="3" fill="#ffd93d"/><circle cx="192" cy="64" r="3" fill="#4fd18b"/><path d="M192 80l20 12-20 12z" fill="#ff4f5e"/>`),
 
+    // 일반 상식: 펼친 책 + 전구
+    trivia: make('#e3f0ff', '#b8d4ff', `
+      ${shadow(200, 254, 120)}
+      <path d="M200 110c-30-18-70-22-110-14v128c40-8 80-4 110 14z" fill="#fff" stroke="#c9d6ef" stroke-width="3"/>
+      <path d="M200 110c30-18 70-22 110-14v128c-40-8-80-4-110 14z" fill="#fff" stroke="#c9d6ef" stroke-width="3"/>
+      <line x1="200" y1="110" x2="200" y2="238" stroke="#c9d6ef" stroke-width="3"/>
+      ${[0, 1, 2, 3].map((i) => `<rect x="${108}" y="${130 + i * 20}" width="${[70, 60, 74, 50][i]}" height="6" rx="3" fill="#d9e3f5"/><rect x="${222}" y="${130 + i * 20}" width="${[66, 74, 52, 70][i]}" height="6" rx="3" fill="#d9e3f5"/>`).join('')}
+      <circle cx="200" cy="72" r="30" fill="#ffd93d" stroke="#e8a900" stroke-width="4"/>
+      <rect x="188" y="100" width="24" height="12" rx="3" fill="#8f8aa3"/>
+      <text x="200" y="84" font-family="${NUM}" font-size="34" font-weight="700" fill="#7a4b00" text-anchor="middle">?</text>`),
+
+    // 생활·과학 상식: 플라스크 + 집
+    'life-trivia': make('#e3f7ec', '#b8e6ff', `
+      ${shadow(200, 254, 120)}
+      <path d="M118 150l52-44 52 44v84h-104z" fill="#fff" stroke="#9fc9b3" stroke-width="4"/>
+      <path d="M106 156l64-56 64 56" fill="none" stroke="#ff8a7a" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="156" y="190" width="28" height="44" rx="4" fill="#ffd166"/>
+      <path d="M262 92v40l-30 70a14 14 0 0 0 13 20h66a14 14 0 0 0 13-20l-30-70v-40z" fill="#fff" stroke="#6b7fa8" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M246 170h64l14 32a8 8 0 0 1-7 12h-78a8 8 0 0 1-7-12z" fill="#4fd18b"/>
+      <rect x="254" y="84" width="48" height="10" rx="5" fill="#6b7fa8"/>
+      <circle cx="270" cy="190" r="5" fill="#fff" opacity=".8"/><circle cx="288" cy="200" r="4" fill="#fff" opacity=".8"/>`),
+
     // MBTI: 알파벳 네 칸 + 물음표
     mbti: make('#ffe9f3', '#c9b6ff', `
       ${shadow(200, 248, 130)}

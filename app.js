@@ -169,6 +169,7 @@ const home = { category: '전체', query: '' };
 
 // 카테고리별 표지 바탕색 (사진 표지도 그림 표지와 같은 틀로 보이게)
 const CAT_COLORS = {
+  상식: ['#e3f0ff', '#b8d4ff'],
   지리: ['#dfe9ff', '#b9ccff'],
   음악: ['#ffe6f7', '#d9b8ff'],
   랭킹: ['#fff3c4', '#ffc46b'],
@@ -249,7 +250,7 @@ function renderHome() {
   app.innerHTML = `
     <section class="hero">
       <h1>보고, 떠올리고,<br>직접 써서 맞혀 보세요</h1>
-      <p>객관식 없이 정답을 직접 입력하는 퀴즈 ${QUIZZES.length}가지 · 뽑기 게임 ${GAMES.length}가지 · 랭킹 ${RANKINGS.length}개</p>
+      <p>객관식 없이 정답을 직접 입력하는 퀴즈, 모일 때 쓰는 뽑기 게임, 1위 맞히기 랭킹</p>
     </section>
     <section class="home-sec" data-sec="today"></section>
     <section class="home-sec">
@@ -287,7 +288,7 @@ function renderQuizList() {
   document.title = '퀴즈 · 맞혀봐';
   app.innerHTML = `
     <section class="hero">
-      <h1>퀴즈 ${QUIZZES.length}가지</h1>
+      <h1>퀴즈</h1>
       <p>사진·초성·설명·멜로디를 보고 정답을 직접 써 보세요</p>
     </section>
     <section class="home-sec" id="all">

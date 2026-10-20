@@ -107,7 +107,7 @@ function renderRankings() {
   app.innerHTML = `
     <section class="hero">
       <h1>1위를 맞혀 보세요</h1>
-      <p>랭킹 ${RANKINGS.length}개 · 2·3위를 보고 1위를 떠올려 보세요${nSolved ? ` · 지금까지 <b>${nSolved}개</b> 맞힘` : ''}</p>
+      <p>2·3위를 보고 1위를 떠올려 보세요${nSolved ? ` · 지금까지 <b>${nSolved}개</b> 맞힘` : ''}</p>
     </section>
     <input class="search" type="search" placeholder="랭킹 찾기 (예: 유튜브, 롤드컵)" value="${esc(rankList.query)}" aria-label="랭킹 찾기">
     <div class="chips" role="group" aria-label="분류">

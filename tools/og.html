@@ -19,7 +19,7 @@
 const SAVER = 'http://localhost:8791/';
 const W = 1200, H = 630;
 const CAT_COLORS = {
-  지리: ['#dfe9ff', '#b9ccff'], 음악: ['#ffe6f7', '#d9b8ff'], 랭킹: ['#fff3c4', '#ffc46b'], 언어: ['#efe7ff', '#c8b4ff'], 재미: ['#fff6cf', '#ffd68f'], 음식: ['#ffe3df', '#ffb4a2'],
+  상식: ['#e3f0ff', '#b8d4ff'], 지리: ['#dfe9ff', '#b9ccff'], 음악: ['#ffe6f7', '#d9b8ff'], 랭킹: ['#fff3c4', '#ffc46b'], 언어: ['#efe7ff', '#c8b4ff'], 재미: ['#fff6cf', '#ffd68f'], 음식: ['#ffe3df', '#ffb4a2'],
   수학: ['#e8ebf3', '#c2cde2'], 과학: ['#e6e3ff', '#b9b0f5'], 역사: ['#f7ead9', '#e2c49f'], 예술: ['#fff1d6', '#ffc98f'],
   동물: ['#d9fbea', '#9eefcf'], 연예: ['#ffe2f1', '#ffb0d6'], 탈것: ['#d8edff', '#9ccfff'], 자연: ['#e3f7ec', '#a8e6c5'],
   '게임·만화': ['#e0f2ff', '#9fd4ff'], 게임: ['#efe7ff', '#c8b4ff'],
@@ -198,7 +198,7 @@ async function main() {
 
   if (want('home')) await card({
     name: 'home', title: '보고, 떠올리고, 직접 써서 맞혀 보세요', category: '',
-    desc: `주관식 퀴즈 ${QUIZZES.length}가지 + 뽑기 게임`,
+    desc: '주관식 퀴즈 · 뽑기 게임 · 1위 맞히기 랭킹',
     cover: { tiles: [COVERS.mbti, COVERS['game-marble'], COVERS.nonsense, COVERS.foods] }, cta: '지금 풀어 보기 →',
   });
   if (want('games')) await card({
