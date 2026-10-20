@@ -5,7 +5,7 @@ const CONFIG = {
 
   // 광고 (Google 애드센스). 승인 후 client와 슬롯 번호를 넣으면 실제 광고가 나온다.
   ADS: {
-    client: '', // 예: 'ca-pub-1234567890123456'
+    client: 'ca-pub-3499693117852626', // 애드센스 게시자 번호 (광고 단위 번호는 아래 slots에)
     slots: {
       homeFeed: '', // 목록 중간 (카드 6개 뒤)
       homeBottom: '', // 목록 맨 아래

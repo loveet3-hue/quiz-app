@@ -38,8 +38,10 @@ function meta({ title, desc, url, image }) {
   <!--/META-->`;
 }
 
-function page({ title, desc, url, image, body }) {
-  return tpl
+function page({ title, desc, url, image, body, noAds }) {
+  // 광고 없는 퀴즈(실존 인물 사진)는 애드센스 스크립트를 빼고 계정 확인용 meta만 남김
+  const t = noAds ? tpl.replace(/<script async id="adsense-js"[^>]*><\/script>\n\s*/, '') : tpl;
+  return t
     .replace(/<!--META-->[\s\S]*?<!--\/META-->/, meta({ title, desc, url, image }))
     .replace(/<!--STATIC-->[\s\S]*?<!--\/STATIC-->/, `<!--STATIC--><div class="seo-static">${body}</div><!--/STATIC-->`);
 }
@@ -77,6 +79,7 @@ for (const q of QUIZZES) {
       url: `${SITE}/q/${q.id}/`,
       image: ogFile(q.id),
       body: `<h1>${esc(q.title)}</h1><p>${esc(q.desc)} · ${n}</p><p><a href="/">다른 퀴즈 보기</a></p>`,
+      noAds: q.noAds,
     })
   );
   urls.push(`/q/${q.id}/`);
