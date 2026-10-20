@@ -1144,11 +1144,47 @@ a.btn { display: flex; align-items: center; justify-content: center; }
 .lol-team li b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
 .lol-team li.spin b { opacity: .55; }
 .lol-team li.pop { animation: pop .35s ease both; }
-.lol-team .lol-lane { flex: none; width: 34px; font-size: 12px; font-weight: 800; opacity: .85; }
+.lol-team .lol-lane { flex: none; width: 46px; font-size: 12px; font-weight: 800; opacity: .85; }
 .lol-inputs input { width: 100%; min-width: 0; height: 42px; padding: 0 10px; border: 2px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--text); font: inherit; font-size: 16px; outline: none; }
 .lol-inputs input:focus { border-color: var(--primary); }
-.lol-inputs.fixed { display: grid; gap: 8px; }
-.lol-row { display: grid; grid-template-columns: 44px 1fr 1fr; gap: 8px; align-items: center; }
-.lol-row .lol-lane { font-size: 14px; font-weight: 800; }
-.lol-hint { margin: 0 0 6px; font-size: 14px; font-weight: 700; }
-.lol-free { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lol-inputs { display: grid; gap: 8px; }
+.lol-row { display: grid; grid-template-columns: 66px 1fr 1fr; gap: 8px; align-items: center; }
+.lol-lock {
+  display: grid;
+  place-items: center;
+  height: 42px;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-2);
+  font: inherit;
+  line-height: 1.1;
+  cursor: pointer;
+}
+.lol-lock b { font-size: 14px; font-weight: 900; }
+.lol-lock small { font-size: 10px; font-weight: 700; }
+.lol-lock[aria-pressed="true"] { border-color: var(--text); background: var(--text); color: var(--bg); }
+.lol-hint { margin: 0; font-size: 13px; line-height: 1.5; color: var(--text-3); text-align: center; word-break: keep-all; }
+.lol-person { position: relative; min-width: 0; }
+.lol-person input { padding-right: 46px; }
+.lol-pin {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  bottom: 6px;
+  width: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: var(--surface-2);
+  color: var(--text-3);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.lol-pin[data-k="lane"] { background: var(--text); color: var(--bg); }
+.lol-pin[data-k="blue"] { background: #3d7bff; color: #fff; }
+.lol-pin[data-k="red"] { background: #ff5a5a; color: #fff; }
+.lol-team li i { flex: none; margin-left: auto; font-style: normal; font-size: 11px; opacity: .8; }

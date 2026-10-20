@@ -1686,11 +1686,25 @@ function renderDice(root) {
 /* ═════════════════════ 롤 내전 팀 짜기 ═════════════════════ */
 
 const LOL_LANES = ['탑', '정글', '미드', '원딜', '서폿'];
+// 사람별 고정: 자유 → 라인 고정 → 블루 고정 → 레드 고정 순서로 바뀜
+const LOL_PINS = [
+  { k: '', label: '자유' },
+  { k: 'lane', label: '라인' },
+  { k: 'blue', label: '블루' },
+  { k: 'red', label: '레드' },
+];
 
+// 라인마다 2명씩 입력.
+//   라인 이름 버튼 = 그 라인 두 사람 모두 그 라인 그대로 (블루·레드만 나눔)
+//   사람 옆 버튼 = 그 사람만 라인 고정 / 블루팀 고정 / 레드팀 고정
+//   나머지는 모두 무작위. 조건에 맞는 배치를 무작위로 찾는다.
 function renderLol(root) {
-  const saved = gameStore.get('lol') || { names: Array(10).fill(''), fixed: true };
-  let names = saved.names.slice(0, 10);
+  const saved = gameStore.get('lol') || {};
+  const names = (saved.names || []).slice(0, 10);
   while (names.length < 10) names.push('');
+  // 예전 저장값(fixed: true/false)도 이어서 씀
+  let locked = Array.isArray(saved.locked) ? saved.locked.slice(0, 5) : Array(5).fill(saved.fixed !== false);
+  let pins = Array.isArray(saved.pins) ? saved.pins.slice(0, 10) : Array(10).fill('');
   root.innerHTML = `
     <div class="lol-board" hidden>
       <div class="lol-team blue"><h3>블루팀</h3><ol></ol></div>
@@ -1702,13 +1716,30 @@ function renderLol(root) {
       <button class="btn ghost block" data-act="reset">다시 시작</button>
     </div>
     <button class="btn ghost block" data-act="copy" hidden>결과 복사하기 (단톡방에 붙여 넣기)</button>
-    <label class="check"><input type="checkbox" data-k="fixed" ${saved.fixed ? 'checked' : ''}> 라인 고정 (라인은 그대로, 블루·레드만 섞기)</label>
-    <div class="lol-inputs"></div>`;
+    <div class="opt-row" role="group" aria-label="고정 한 번에 바꾸기">
+      <button class="chip" data-all="lock">🔒 모든 라인 고정</button>
+      <button class="chip" data-all="free">🔀 고정 전부 풀기</button>
+    </div>
+    <p class="lol-hint"><b>라인 이름</b>을 누르면 그 라인 두 명이 라인 고정,
+      이름 옆 <b>작은 버튼</b>을 누르면 그 사람만 <b>라인 → 블루 → 레드</b> 고정이에요. 나머지는 다 섞여요.</p>
+    <div class="lol-inputs">
+      ${LOL_LANES.map(
+        (lane, l) => `
+        <div class="lol-row">
+          <button class="lol-lock" data-l="${l}"></button>
+          ${[0, 1]
+            .map((k) => {
+              const i = l * 2 + k;
+              return `<div class="lol-person"><input type="text" maxlength="12" data-i="${i}" placeholder="${lane} ${k + 1}" value="${esc(names[i])}"><button class="lol-pin" data-p="${i}"></button></div>`;
+            })
+            .join('')}
+        </div>`
+      ).join('')}
+    </div>`;
   const board = root.querySelector('.lol-board');
   const resultEl = root.querySelector('.game-result');
   const shuffleBtn = root.querySelector('[data-act="shuffle"]');
   const copyBtn = root.querySelector('[data-act="copy"]');
-  const fixedEl = root.querySelector('[data-k="fixed"]');
   const inputsEl = root.querySelector('.lol-inputs');
   let timers = [];
   let last = null;
@@ -1718,47 +1749,80 @@ function renderLol(root) {
     timers = [];
   };
 
-  // 입력 칸 10개: 라인 고정이면 라인마다 2명씩, 해제면 그냥 참가자 10명
-  function drawInputs() {
-    const fixed = fixedEl.checked;
-    inputsEl.className = 'lol-inputs' + (fixed ? ' fixed' : '');
-    inputsEl.innerHTML = fixed
-      ? LOL_LANES.map(
-          (lane, l) => `
-          <div class="lol-row">
-            <span class="lol-lane">${lane}</span>
-            ${[0, 1].map((k) => `<input type="text" maxlength="12" data-i="${l * 2 + k}" placeholder="${lane} ${k + 1}" value="${esc(names[l * 2 + k])}">`).join('')}
-          </div>`
-        ).join('')
-      : `<p class="lol-hint">참가자 10명 (라인도 무작위로 정해져요)</p><div class="lol-free">${names
-          .map((v, i) => `<input type="text" maxlength="12" data-i="${i}" placeholder="참가자 ${i + 1}" value="${esc(v)}">`)
-          .join('')}</div>`;
-    resultEl.textContent = fixed ? '라인별로 2명씩 넣고 섞기를 눌러 보세요.' : '10명을 넣고 섞기를 눌러 보세요.';
-  }
-
-  const save = () => gameStore.save('lol', { names, fixed: fixedEl.checked });
+  const save = () => gameStore.save('lol', { names, locked, pins });
   const nameOf = (i) => names[i].trim() || inputsEl.querySelector(`[data-i="${i}"]`).placeholder;
 
-  // 결과: blue/red = 라인 순서대로 사람 번호 5개씩
-  function makeTeams() {
-    const blue = [];
-    const red = [];
-    if (fixedEl.checked) {
-      for (let l = 0; l < 5; l++) {
-        const pair = Math.random() < 0.5 ? [l * 2, l * 2 + 1] : [l * 2 + 1, l * 2];
-        blue.push(pair[0]);
-        red.push(pair[1]);
-      }
-    } else {
-      const order = shuffle([...Array(10).keys()]);
-      blue.push(...order.slice(0, 5));
-      red.push(...order.slice(5));
+  function drawLocks() {
+    root.querySelectorAll('.lol-lock').forEach((b) => {
+      const l = +b.dataset.l;
+      b.setAttribute('aria-pressed', locked[l]);
+      b.innerHTML = `<b>${LOL_LANES[l]}</b><small>${locked[l] ? '🔒 고정' : '🔀 섞기'}</small>`;
+      b.setAttribute('aria-label', `${LOL_LANES[l]} 라인 ${locked[l] ? '고정됨' : '섞기'} (눌러서 바꾸기)`);
+    });
+    root.querySelectorAll('.lol-pin').forEach((b) => {
+      const i = +b.dataset.p;
+      const laneLocked = locked[Math.floor(i / 2)];
+      // 라인 전체가 고정이면 '라인' 상태는 의미가 없어서 건너뜀
+      if (laneLocked && pins[i] === 'lane') pins[i] = '';
+      const pin = LOL_PINS.find((p) => p.k === pins[i]) || LOL_PINS[0];
+      b.dataset.k = pin.k;
+      b.textContent = pin.label;
+      b.setAttribute('aria-label', `${nameOf(i)} 고정: ${pin.label} (눌러서 바꾸기)`);
+    });
+    const v = check();
+    if (v) resultEl.textContent = v;
+    else {
+      const parts = [];
+      const nl = locked.filter(Boolean).length;
+      if (nl === 5) parts.push('모든 라인 고정');
+      else if (nl) parts.push(`${LOL_LANES.filter((_, l) => locked[l]).join('·')} 라인 고정`);
+      const np = pins.filter(Boolean).length;
+      if (np) parts.push(`개인 고정 ${np}명`);
+      resultEl.textContent = parts.length ? `${parts.join(' · ')}, 나머지는 섞어요.` : '고정 없이 팀도 라인도 전부 무작위예요.';
     }
-    return { blue, red };
+  }
+
+  // 사람마다 갈 수 있는 자리(팀×라인 10칸) 목록
+  function allowedSlots(i) {
+    const row = Math.floor(i / 2);
+    const laneFixed = locked[row] || pins[i] === 'lane';
+    const team = pins[i] === 'blue' ? 0 : pins[i] === 'red' ? 1 : -1;
+    const out = [];
+    for (let t = 0; t < 2; t++) for (let l = 0; l < 5; l++) if ((!laneFixed || l === row) && (team < 0 || t === team)) out.push(t * 5 + l);
+    return out;
+  }
+
+  // 조건에 맞는 배치를 무작위로 하나 찾음 (없으면 null). 칸 번호: 블루 0~4, 레드 5~9
+  function solve() {
+    const people = shuffle([...Array(10).keys()]).map((i) => ({ i, slots: shuffle(allowedSlots(i)) }));
+    people.sort((a, b) => a.slots.length - b.slots.length);
+    const seat = Array(10).fill(-1);
+    const go = (k) => {
+      if (k === people.length) return true;
+      for (const s of people[k].slots) {
+        if (seat[s] !== -1) continue;
+        seat[s] = people[k].i;
+        if (go(k + 1)) return true;
+        seat[s] = -1;
+      }
+      return false;
+    };
+    return go(0) ? { blue: seat.slice(0, 5), red: seat.slice(5) } : null;
+  }
+
+  // 조건이 서로 안 맞으면 이유를 돌려줌
+  function check() {
+    if (pins.filter((p) => p === 'blue').length > 5) return '⚠️ 블루 고정이 5명을 넘었어요.';
+    if (pins.filter((p) => p === 'red').length > 5) return '⚠️ 레드 고정이 5명을 넘었어요.';
+    if (!solve()) return '⚠️ 고정 조건이 서로 안 맞아요. (예: 같은 라인 두 명을 같은 팀에 고정)';
+    return '';
   }
 
   function paint(t, final) {
-    const row = (i, l) => `<li${final ? ` style="animation-delay:${l * 90}ms"` : ''} class="${final ? 'pop' : 'spin'}"><span class="lol-lane">${LOL_LANES[l]}</span><b>${esc(nameOf(i))}</b></li>`;
+    const row = (i, l) =>
+      `<li${final ? ` style="animation-delay:${l * 90}ms"` : ''} class="${final ? 'pop' : 'spin'}"><span class="lol-lane">${LOL_LANES[l]}</span><b>${esc(nameOf(i))}</b>${
+        locked[Math.floor(i / 2)] || pins[i] ? '<i aria-label="고정">🔒</i>' : ''
+      }</li>`;
     board.querySelector('.blue ol').innerHTML = t.blue.map(row).join('');
     board.querySelector('.red ol').innerHTML = t.red.map(row).join('');
   }
@@ -1766,16 +1830,21 @@ function renderLol(root) {
   function doShuffle() {
     clear();
     save();
+    const problem = check();
+    if (problem) {
+      resultEl.textContent = problem;
+      return;
+    }
     board.hidden = false;
     copyBtn.hidden = true;
     shuffleBtn.disabled = true;
     resultEl.textContent = '섞는 중…';
-    const iv = setInterval(() => paint(makeTeams(), false), 70);
+    const iv = setInterval(() => paint(solve(), false), 70);
     timers.push(iv);
     timers.push(
       setTimeout(() => {
         clearInterval(iv);
-        last = makeTeams();
+        last = solve();
         paint(last, true);
         shuffleBtn.disabled = false;
         shuffleBtn.textContent = '다시 섞기';
@@ -1793,7 +1862,7 @@ function renderLol(root) {
     shuffleBtn.disabled = false;
     shuffleBtn.textContent = '섞기';
     last = null;
-    drawInputs();
+    drawLocks();
   }
 
   inputsEl.addEventListener('input', (e) => {
@@ -1802,10 +1871,29 @@ function renderLol(root) {
     names[+i] = e.target.value;
     save();
   });
-  fixedEl.addEventListener('change', () => {
+  inputsEl.addEventListener('click', (e) => {
+    const lock = e.target.closest('.lol-lock');
+    const pin = e.target.closest('.lol-pin');
+    if (lock) locked[+lock.dataset.l] = !locked[+lock.dataset.l];
+    else if (pin) {
+      const i = +pin.dataset.p;
+      const order = LOL_PINS.map((p) => p.k).filter((k) => !(k === 'lane' && locked[Math.floor(i / 2)]));
+      pins[i] = order[(order.indexOf(pins[i]) + 1) % order.length];
+    } else return;
     save();
     reset();
   });
+  root.querySelectorAll('[data-all]').forEach((b) =>
+    b.addEventListener('click', () => {
+      if (b.dataset.all === 'lock') locked = Array(5).fill(true);
+      else {
+        locked = Array(5).fill(false);
+        pins = Array(10).fill('');
+      }
+      save();
+      reset();
+    })
+  );
   shuffleBtn.addEventListener('click', doShuffle);
   root.querySelector('[data-act="reset"]').addEventListener('click', reset);
   copyBtn.addEventListener('click', () => {
@@ -1816,6 +1904,6 @@ function renderLol(root) {
       () => (resultEl.textContent = '복사가 안 돼요. 화면을 캡처해 주세요.')
     );
   });
-  drawInputs();
+  drawLocks();
   gameCleanup = clear;
 }
