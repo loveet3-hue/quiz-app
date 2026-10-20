@@ -1188,3 +1188,32 @@ a.btn { display: flex; align-items: center; justify-content: center; }
 .lol-pin[data-k="blue"] { background: #3d7bff; color: #fff; }
 .lol-pin[data-k="red"] { background: #ff5a5a; color: #fff; }
 .lol-team li i { flex: none; margin-left: auto; font-style: normal; font-size: 11px; opacity: .8; }
+
+/* 멜로디 문제 */
+.qmedia.melody { align-content: center; gap: 14px; }
+.melody-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 60px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(124, 92, 255, .35);
+}
+.melody-btn:active { background: var(--primary-press); }
+.melody-btn.playing .melody-ico { animation: blink .6s ease-in-out infinite; }
+.melody-eq { display: flex; align-items: flex-end; gap: 5px; height: 34px; }
+.melody-eq i { width: 8px; height: 8px; border-radius: 4px; background: var(--primary-soft); }
+.melody-btn.playing + .melody-eq i { background: var(--primary); animation: eq .5s ease-in-out infinite alternate; }
+.melody-btn.playing + .melody-eq i:nth-child(2) { animation-delay: .1s; }
+.melody-btn.playing + .melody-eq i:nth-child(3) { animation-delay: .25s; }
+.melody-btn.playing + .melody-eq i:nth-child(4) { animation-delay: .05s; }
+.melody-btn.playing + .melody-eq i:nth-child(5) { animation-delay: .18s; }
+@keyframes eq { from { height: 8px; } to { height: 34px; } }

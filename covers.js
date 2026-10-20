@@ -357,6 +357,81 @@ const COVERS = (() => {
       <circle cx="268" cy="214" r="30" fill="#f2b51d" stroke="#c98a0b" stroke-width="4"/>
       <text x="268" y="224" font-family="${KO}" font-size="26" font-weight="800" fill="#7a4b00" text-anchor="middle">앞</text>`),
 
+    // 롤 챔피언: 방패 + 엇갈린 칼 + 물음표 (게임 로고는 쓰지 않음)
+    'lol-champs': make('#e3e9ff', '#b9c6f2', `
+      ${shadow(200, 256, 100)}
+      <g stroke="#8b97b5" stroke-width="10" stroke-linecap="round"><line x1="110" y1="70" x2="290" y2="236"/><line x1="290" y1="70" x2="110" y2="236"/></g>
+      <g stroke="#c9a227" stroke-width="12" stroke-linecap="round"><line x1="120" y1="226" x2="140" y2="206"/><line x1="280" y1="226" x2="260" y2="206"/></g>
+      <path d="M200 60l78 26v64c0 52-36 84-78 102-42-18-78-50-78-102V86z" fill="#1f3a6e" stroke="#c9a227" stroke-width="7"/>
+      <path d="M200 84l56 19v47c0 38-26 62-56 76-30-14-56-38-56-76v-47z" fill="#2b5aa8"/>
+      <text x="200" y="186" font-family="${NUM}" font-size="78" font-weight="700" fill="#f3d36b" text-anchor="middle">?</text>`),
+
+    // 멜로디: 오선 위 음표 + 스피커
+    melody: make('#ffe6f7', '#d9b8ff', `
+      ${shadow(200, 256, 110)}
+      <rect x="84" y="70" width="232" height="150" rx="18" fill="#fff" opacity=".85"/>
+      ${[0, 1, 2, 3, 4].map((i) => `<line x1="100" y1="${104 + i * 18}" x2="300" y2="${104 + i * 18}" stroke="#c9b8e8" stroke-width="2.5"/>`).join('')}
+      ${[[132, 176], [178, 158], [224, 140], [270, 122]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="13" ry="10" transform="rotate(-20 ${x} ${y})" fill="#7c5cff"/><line x1="${x + 11}" y1="${y - 3}" x2="${x + 11}" y2="${y - 58}" stroke="#7c5cff" stroke-width="4"/>`).join('')}
+      <path d="M233 82l48-18v10l-48 18z" fill="#7c5cff"/>
+      <path d="M90 236h14l18 14v-40l-18 14h-14z" fill="#2d3142"/>
+      <path d="M132 220q8 10 0 20M142 214q14 16 0 32" fill="none" stroke="#2d3142" stroke-width="4" stroke-linecap="round"/>`),
+
+    // 노래 제목: 마이크 + 음표
+    songs: make('#ffe2f1', '#c9b6ff', `
+      ${shadow(200, 256, 90)}
+      <rect x="168" y="60" width="64" height="104" rx="32" fill="#2d3142"/>
+      <g stroke="#5f5b70" stroke-width="3">${[80, 96, 112, 128, 144].map((y) => `<line x1="174" y1="${y}" x2="226" y2="${y}"/>`).join('')}</g>
+      <path d="M148 132v12c0 30 24 52 52 52s52-22 52-52v-12" fill="none" stroke="#2d3142" stroke-width="8" stroke-linecap="round"/>
+      <line x1="200" y1="196" x2="200" y2="236" stroke="#2d3142" stroke-width="8"/><rect x="164" y="232" width="72" height="12" rx="6" fill="#2d3142"/>
+      <g fill="#ff5fa2"><ellipse cx="112" cy="128" rx="13" ry="10"/><rect x="121" y="78" width="5" height="52"/><path d="M121 78q18 6 22 26q-10-12-22-12z"/></g>
+      <g fill="#7c5cff"><ellipse cx="284" cy="112" rx="12" ry="9"/><ellipse cx="316" cy="104" rx="12" ry="9"/><rect x="292" y="62" width="5" height="50"/><rect x="324" y="54" width="5" height="50"/><path d="M292 62l37-8v10l-37 8z"/></g>`),
+
+    // 색 조합: 색 띠 + 물음표
+    'char-colors': make('#fff1d6', '#ffc6d9', `
+      ${shadow(200, 256, 120)}
+      <g transform="rotate(-6 200 150)">
+        <rect x="86" y="80" width="228" height="140" rx="20" fill="#fff"/>
+        ${['#f6d21b', '#e3350d', '#2b2b2b', '#4f8cff', '#4fd18b'].map((c, i) => `<rect x="${98 + i * 41}" y="92" width="41" height="116" fill="${c}"/>`).join('')}
+      </g>
+      <circle cx="304" cy="84" r="30" fill="#2d3142"/>
+      <text x="304" y="98" font-family="${NUM}" font-size="40" font-weight="700" fill="#fff" text-anchor="middle">?</text>`),
+
+    // 줄거리: 대본(책) + 필름
+    plots: make('#e3e6ff', '#ffd1e3', `
+      ${shadow(200, 256, 110)}
+      <g transform="rotate(-8 150 150)"><rect x="96" y="70" width="120" height="160" rx="10" fill="#fff" stroke="#c9c3e6" stroke-width="3"/>
+        ${[0, 1, 2, 3, 4, 5].map((i) => `<rect x="114" y="${98 + i * 20}" width="${[84, 70, 84, 60, 80, 50][i]}" height="7" rx="3.5" fill="#d9d4ef"/>`).join('')}</g>
+      <g transform="rotate(10 258 150)"><rect x="214" y="78" width="88" height="150" rx="8" fill="#2d3142"/>
+        ${[0, 1, 2, 3, 4, 5].map((i) => `<rect x="220" y="${88 + i * 23}" width="10" height="12" rx="2" fill="#fff"/><rect x="286" y="${88 + i * 23}" width="10" height="12" rx="2" fill="#fff"/>`).join('')}
+        <rect x="238" y="92" width="40" height="56" rx="4" fill="#ffb0d6"/><rect x="238" y="156" width="40" height="56" rx="4" fill="#aab3ff"/></g>`),
+
+    // 관람등급: 동그란 등급 표시 4개
+    'movie-ratings': make('#e8ebf3', '#c2cde2', `
+      ${shadow(200, 252, 130)}
+      ${[['ALL', '#2bb24c'], ['12', '#f2b51d'], ['15', '#f07d1a'], ['19', '#e0312b']].map(([t, c], i) => `
+        <circle cx="${110 + (i % 2) * 180}" cy="${100 + Math.floor(i / 2) * 104}" r="44" fill="${c}" stroke="#fff" stroke-width="6"/>
+        <text x="${110 + (i % 2) * 180}" y="${100 + Math.floor(i / 2) * 104 + (t === 'ALL' ? 11 : 15)}" font-family="${NUM}" font-size="${t === 'ALL' ? 30 : 42}" font-weight="700" fill="#fff" text-anchor="middle">${t}</text>`).join('')}
+      <circle cx="200" cy="152" r="26" fill="#2d3142"/>
+      <text x="200" y="166" font-family="${NUM}" font-size="34" font-weight="700" fill="#fff" text-anchor="middle">?</text>`),
+
+    // 사투리: 말풍선 두 개
+    dialect: make('#efe7ff', '#c8b4ff', `
+      ${shadow(200, 256, 120)}
+      <path d="M84 72h132a18 18 0 0 1 18 18v52a18 18 0 0 1-18 18h-96l-26 22 6-22h-16a18 18 0 0 1-18-18v-52a18 18 0 0 1 18-18z" fill="#fff"/>
+      <text x="150" y="126" font-family="${KO}" font-size="28" font-weight="800" fill="#7c5cff" text-anchor="middle">머라카노</text>
+      <path d="M184 150h132a18 18 0 0 1 18 18v52a18 18 0 0 1-18 18h-16l6 22-26-22h-96a18 18 0 0 1-18-18v-52a18 18 0 0 1 18-18z" fill="#2d3142"/>
+      <text x="250" y="204" font-family="${KO}" font-size="28" font-weight="800" fill="#ffd166" text-anchor="middle">했당께</text>`),
+
+    // 밈: 웃는 얼굴 + ㅋㅋㅋ
+    memes: make('#fff6cf', '#ffd68f', `
+      ${shadow(176, 256, 90)}
+      <circle cx="176" cy="160" r="82" fill="#ffd93d" stroke="#e8a900" stroke-width="5"/>
+      <path d="M134 140q12-16 24 0M194 140q12-16 24 0" fill="none" stroke="#2d3142" stroke-width="7" stroke-linecap="round"/>
+      <path d="M128 170q48 56 96 0z" fill="#2d3142"/><path d="M146 194q30 20 60 0q-30 8-60 0z" fill="#ff6b6b"/>
+      <path d="M112 128q-10 18 2 30" fill="none" stroke="#4fb6ff" stroke-width="6" stroke-linecap="round"/>
+      <rect x="236" y="56" width="92" height="48" rx="16" fill="#fff"/><path d="M252 104l-6 16 22-16z" fill="#fff"/>
+      <text x="282" y="90" font-family="${KO}" font-size="26" font-weight="800" fill="#ff6b6b" text-anchor="middle">ㅋㅋㅋ</text>`),
+
     // MBTI: 알파벳 네 칸 + 물음표
     mbti: make('#ffe9f3', '#c9b6ff', `
       ${shadow(200, 248, 130)}

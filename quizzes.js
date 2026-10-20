@@ -797,6 +797,80 @@ const QUIZZES = [
     questions: [],
   },
   {
+    id: 'lol-champs',
+    title: '칭호 보고 롤 챔피언 맞히기',
+    desc: '"구미호"는 누구? 리그 오브 레전드 챔피언 이름을 써 보세요',
+    category: '게임·만화',
+    perPlay: 10,
+    cover: { image: COVERS['lol-champs'] },
+    questions: [],
+  },
+  {
+    id: 'melody',
+    title: '멜로디 듣고 곡 제목 맞히기',
+    desc: '클래식·민요 멜로디를 듣고 제목을 써 보세요 (소리 켜기!)',
+    category: '음악',
+    perPlay: 10,
+    guide: '▶ 멜로디 듣기를 눌러 보세요 · 여러 번 들어도 돼요',
+    cover: { image: COVERS.melody },
+    questions: [],
+  },
+  {
+    id: 'songs',
+    title: '가수·초성 보고 노래 제목 맞히기',
+    desc: '아이유부터 뉴진스까지, 초성만 보고 노래 제목을 떠올려 보세요',
+    category: '음악',
+    perPlay: 10,
+    cover: { image: COVERS.songs },
+    questions: [],
+  },
+  {
+    id: 'char-colors',
+    title: '색 조합 보고 캐릭터 맞히기',
+    desc: '그림 없이 색깔만! 어떤 캐릭터일까요?',
+    category: '게임·만화',
+    perPlay: 10,
+    cover: { image: COVERS['char-colors'] },
+    questions: [],
+  },
+  {
+    id: 'plots',
+    title: '줄거리 보고 영화·드라마 맞히기',
+    desc: '초성 힌트 없이 줄거리만 보고 제목을 맞혀 보세요',
+    category: '연예',
+    perPlay: 10,
+    cover: { image: COVERS.plots },
+    questions: [],
+  },
+  {
+    id: 'movie-ratings',
+    title: '영화 관람등급 맞히기',
+    desc: '전체·12세·15세·청불 중 몇 세 관람가였을까요?',
+    category: '연예',
+    perPlay: 10,
+    guide: "'전체', '12', '15', '19' 중 하나로 써 보세요 (청불 = 19)",
+    cover: { image: COVERS['movie-ratings'] },
+    questions: [],
+  },
+  {
+    id: 'dialect',
+    title: '사투리 보고 표준어 맞히기',
+    desc: '"정구지"가 뭐게? 지역 사투리를 표준어로 바꿔 보세요',
+    category: '언어',
+    perPlay: 10,
+    cover: { image: COVERS.dialect },
+    questions: [],
+  },
+  {
+    id: 'memes',
+    title: '밈 퀴즈',
+    desc: '무야호부터 요즘 밈까지, 인터넷 유행어 얼마나 알아요?',
+    category: '재미',
+    perPlay: 10,
+    cover: { image: COVERS.memes },
+    questions: [],
+  },
+  {
     id: 'mbti',
     title: '성격 보고 MBTI 맞히기',
     desc: '이 사람, 무슨 유형일까요?',
@@ -843,7 +917,7 @@ for (const quiz of QUIZZES) {
   if (QUESTIONS[quiz.id] && QUESTIONS[quiz.id].length) quiz.questions = QUESTIONS[quiz.id];
 }
 // 새로 나온 퀴즈 (홈 '새로 나온 퀴즈' 줄과 NEW 표시)
-const NEW_QUIZZES = ['mbti', 'cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
+const NEW_QUIZZES = ['lol-champs', 'melody', 'songs', 'char-colors', 'plots', 'movie-ratings', 'dialect', 'memes', 'mbti', 'cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
 for (const quiz of QUIZZES) if (NEW_QUIZZES.includes(quiz.id)) quiz.isNew = true;
 // 표지를 첫 문제 사진으로 쓰는 퀴즈
 for (const quiz of QUIZZES) {

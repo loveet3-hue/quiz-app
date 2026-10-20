@@ -170,6 +170,7 @@ const home = { category: '전체', query: '' };
 // 카테고리별 표지 바탕색 (사진 표지도 그림 표지와 같은 틀로 보이게)
 const CAT_COLORS = {
   지리: ['#dfe9ff', '#b9ccff'],
+  음악: ['#ffe6f7', '#d9b8ff'],
   언어: ['#efe7ff', '#c8b4ff'],
   재미: ['#fff6cf', '#ffd68f'],
   음식: ['#ffe3df', '#ffb4a2'],
@@ -403,7 +404,59 @@ function startQuiz(id) {
   renderQuestion();
 }
 
+// 멜로디 문제: 'C4 D4:0.5 R:1' 처럼 음이름+옥타브(:박자, 기본 1박), R은 쉼표. 사이트에서 직접 연주 (음원 파일 없음)
+const NOTE_IDX = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+function noteFreq(n) {
+  const m = n.match(/^([A-G])([#b]?)(\d)$/);
+  if (!m) return 0;
+  const semi = NOTE_IDX[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0) + (m[3] - 4) * 12 - 9;
+  return 440 * Math.pow(2, semi / 12);
+}
+let melodyStop = null;
+function stopMelody() {
+  if (melodyStop) melodyStop();
+  melodyStop = null;
+}
+function playMelody(spec, bpm, btn) {
+  stopMelody();
+  gameAudio.unlock();
+  const c = gameAudio.ctx;
+  if (!c) return;
+  const beat = 60 / (bpm || 110);
+  let t = c.currentTime + 0.08;
+  const start = t;
+  const oscs = [];
+  for (const tok of spec.trim().split(/\s+/)) {
+    const [n, d = '1'] = tok.split(':');
+    const dur = parseFloat(d) * beat;
+    const f = n === 'R' ? 0 : noteFreq(n);
+    if (f) {
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.type = 'triangle';
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.3, t + 0.02);
+      g.gain.setValueAtTime(0.3, t + dur * 0.75);
+      g.gain.linearRampToValueAtTime(0, t + dur * 0.97);
+      o.connect(g).connect(c.destination);
+      o.start(t);
+      o.stop(t + dur);
+      oscs.push(o);
+    }
+    t += dur;
+  }
+  btn?.classList.add('playing');
+  const timer = setTimeout(stopMelody, (t - start) * 1000 + 150);
+  melodyStop = () => {
+    clearTimeout(timer);
+    oscs.forEach((o) => { try { o.stop(); } catch { /* 이미 끝남 */ } });
+    btn?.classList.remove('playing');
+  };
+}
+
 function mediaHtml(q) {
+  if (q.melody) return `<div class="qmedia melody"><button class="melody-btn" data-act="melody" type="button"><span class="melody-ico" aria-hidden="true">▶</span> 멜로디 듣기</button><div class="melody-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div></div>`;
   if (q.image) {
     const drawn = q.image.startsWith('data:') ? ' class="drawn"' : '';
     return `<div class="qmedia photo"><img${drawn} src="${esc(q.image)}" alt="문제 사진" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'사진을 불러오지 못했어요',className:'qhint'}))"></div>`;
@@ -415,6 +468,7 @@ function mediaHtml(q) {
 
 function renderQuestion() {
   clearTimeout(autoNextTimer);
+  stopMelody();
   const { quiz, items, idx } = play;
   const item = items[idx];
   const q = item.q;
@@ -456,6 +510,16 @@ function renderQuestion() {
 
   const input = app.querySelector('.answer-input');
   input.focus();
+
+  const melodyBtn = app.querySelector('[data-act="melody"]');
+  if (melodyBtn) {
+    melodyBtn.addEventListener('click', () => {
+      playMelody(q.melody, q.bpm, melodyBtn);
+      input.focus();
+    });
+    // 소리가 이미 켜진 상태(앞 문제에서 한 번 눌렀음)면 자동으로 들려줌
+    if (gameAudio.ctx?.state === 'running') playMelody(q.melody, q.bpm, melodyBtn);
+  }
 
   input.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229) return;
@@ -612,7 +676,7 @@ function renderResult() {
         .map(({ q, input, result }) => {
           const thumb = q.image
             ? `<img src="${esc(q.image)}" alt="">`
-            : esc(q.chosung ? chosung(q.answer) : (q.big || 'Q'));
+            : esc(q.chosung ? chosung(q.answer) : (q.big || (q.melody ? '🎵' : 'Q')));
           return `
           <li>
             <span class="thumb">${thumb}</span>
@@ -685,6 +749,7 @@ function route() {
   if (location.hash.startsWith('#/')) history.replaceState(null, '', legacyHashToPath(location.hash));
   window.scrollTo(0, 0);
   if (typeof stopGame === 'function') stopGame();
+  stopMelody();
   const path = location.pathname.replace(/\/+$/, '') || '/';
   const q = path.match(/^\/q\/([\w-]+)$/);
   const g = path.match(/^\/game\/([\w-]+)$/);
