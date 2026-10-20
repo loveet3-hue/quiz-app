@@ -249,7 +249,7 @@ function renderHome() {
   app.innerHTML = `
     <section class="hero">
       <h1>보고, 떠올리고,<br>직접 써서 맞혀 보세요</h1>
-      <p>객관식 없이 정답을 직접 입력하는 퀴즈 ${QUIZZES.length}가지 · 뽑기 게임 ${GAMES.length}가지</p>
+      <p>객관식 없이 정답을 직접 입력하는 퀴즈 ${QUIZZES.length}가지 · 뽑기 게임 ${GAMES.length}가지 · 랭킹 ${RANKINGS.length}개</p>
     </section>
     <section class="home-sec" data-sec="today"></section>
     <section class="home-sec">
@@ -259,6 +259,10 @@ function renderHome() {
     <section class="home-sec">
       <div class="sec-head"><h2 class="sec-title">✨ 새로 나온 퀴즈</h2><a class="sec-more" href="/quizzes/">전체 보기 ›</a></div>
       <div class="row" data-row="new"></div>
+    </section>
+    <section class="home-sec">
+      <div class="sec-head"><h2 class="sec-title">🏆 오늘의 랭킹 · 1위는?</h2><a class="sec-more" href="/rankings/">전체 보기 ›</a></div>
+      <div class="rank-grid" data-row="rankings"></div>
     </section>
     <section class="home-sec">
       <div class="sec-head"><h2 class="sec-title">🎲 인기 게임</h2><a class="sec-more" href="/games/">전체 보기 ›</a></div>
@@ -338,6 +342,8 @@ function renderSections() {
     const list = (typeof NEW_QUIZZES !== 'undefined' ? NEW_QUIZZES : []).map((id) => QUIZZES.find((q) => q.id === id)).filter(Boolean);
     fresh.innerHTML = list.slice(0, 8).map((q) => cardHtml(q, { stats, plays })).join('');
   }
+  const rk = app.querySelector('[data-row="rankings"]');
+  if (rk) rk.innerHTML = todaysRankings(4).map(rankCardHtml).join('');
   const popG = app.querySelector('[data-row="popular-games"]');
   if (popG) popG.innerHTML = popularGames(plays, 8).map((g, i) => gameCardHtml(g, { rank: i + 1, plays })).join('');
   const newG = app.querySelector('[data-row="new-games"]');
@@ -776,6 +782,7 @@ function legacyHashToPath(hash) {
   if (/^\/q\/[\w-]+/.test(h) || /^\/game\/[\w-]+/.test(h)) return h.replace(/\/?$/, '/');
   if (h.startsWith('/games')) return '/games/';
   if (h.startsWith('/quizzes')) return '/quizzes/';
+  if (h.startsWith('/rankings')) return '/rankings/';
   return '/';
 }
 
@@ -787,12 +794,26 @@ function route() {
   const path = location.pathname.replace(/\/+$/, '') || '/';
   const q = path.match(/^\/q\/([\w-]+)$/);
   const g = path.match(/^\/game\/([\w-]+)$/);
-  const tab = g || path === '/games' ? 'games' : q || path === '/quizzes' ? 'quiz' : 'home';
+  const r = path.match(/^\/ranking\/([\w-]+)$/);
+  const tab = g || path === '/games' ? 'games' : r || path === '/rankings' ? 'rank' : q || path === '/quizzes' ? 'quiz' : 'home';
   document.querySelectorAll('.top-tabs a').forEach((el) => {
     if (el.dataset.tab === tab) el.setAttribute('aria-current', 'page');
     else el.removeAttribute('aria-current');
   });
+  // 예전 랭킹 퀴즈 주소(/q/rank-…)는 랭킹 탭으로
+  if (q && q[1].startsWith('rank-')) {
+    history.replaceState(null, '', '/rankings/');
+    route();
+    return;
+  }
   if (q) startQuiz(q[1]);
+  else if (r) {
+    play = null;
+    renderRanking(r[1]);
+  } else if (path === '/rankings') {
+    play = null;
+    renderRankings();
+  }
   else if (g) {
     play = null;
     renderGame(g[1]);

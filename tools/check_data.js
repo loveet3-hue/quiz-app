@@ -7,7 +7,7 @@ const vm = require('vm');
 const dir = path.join(__dirname, '..', 'data');
 const ids = process.argv.slice(2).length
   ? process.argv.slice(2)
-  : fs.readdirSync(dir).filter((f) => f.endsWith('.js') && !f.startsWith('_')).map((f) => f.slice(0, -3));
+  : fs.readdirSync(dir).filter((f) => f.endsWith('.js') && !f.startsWith('_') && f !== 'rankings.js').map((f) => f.slice(0, -3));
 
 const normalize = (s) => String(s ?? '').normalize('NFC').toLowerCase().replace(/[^0-9a-z가-힣ㄱ-ㅎ]/g, '');
 

@@ -797,56 +797,6 @@ const QUIZZES = [
     questions: [],
   },
   {
-    id: 'rank-world',
-    title: '세계 1위 맞히기',
-    desc: '가장 높은 산, 가장 큰 나라… 2·3위를 보고 1위를 맞혀 보세요',
-    category: '랭킹',
-    perPlay: 10,
-    guide: '1위 칸에 들어갈 이름을 써 보세요 · 막히면 힌트!',
-    cover: { image: COVERS['rank-world'] },
-    questions: [],
-  },
-  {
-    id: 'rank-sales',
-    title: '판매·흥행 1위 맞히기',
-    desc: '가장 많이 팔린 차, 가장 많이 본 영화는? 1위를 맞혀 보세요',
-    category: '랭킹',
-    perPlay: 10,
-    guide: '1위 칸에 들어갈 이름을 써 보세요 · 막히면 힌트!',
-    cover: { image: COVERS['rank-sales'] },
-    questions: [],
-  },
-  {
-    id: 'rank-speed',
-    title: '가장 빠른 1위 맞히기',
-    desc: '동물·자동차·기차·육상 기록, 제일 빠른 건 누구?',
-    category: '랭킹',
-    perPlay: 10,
-    guide: '1위 칸에 들어갈 이름을 써 보세요 · 막히면 힌트!',
-    cover: { image: COVERS['rank-speed'] },
-    questions: [],
-  },
-  {
-    id: 'rank-sports',
-    title: '우승 횟수 1위 맞히기',
-    desc: '롤드컵·월드컵·챔스… 가장 많이 우승한 팀은?',
-    category: '랭킹',
-    perPlay: 10,
-    guide: '1위 칸에 들어갈 이름을 써 보세요 · 막히면 힌트!',
-    cover: { image: COVERS['rank-sports'] },
-    questions: [],
-  },
-  {
-    id: 'rank-web',
-    title: '사이트·앱 1위 맞히기',
-    desc: '방문자 1위 사이트, 구독자 1위 유튜브 채널은?',
-    category: '랭킹',
-    perPlay: 10,
-    guide: '1위 칸에 들어갈 이름을 써 보세요 · 막히면 힌트!',
-    cover: { image: COVERS['rank-web'] },
-    questions: [],
-  },
-  {
     id: 'lol-champs',
     title: '칭호 보고 롤 챔피언 맞히기',
     desc: '"구미호"는 누구? 리그 오브 레전드 챔피언 이름을 써 보세요',
@@ -967,7 +917,7 @@ for (const quiz of QUIZZES) {
   if (QUESTIONS[quiz.id] && QUESTIONS[quiz.id].length) quiz.questions = QUESTIONS[quiz.id];
 }
 // 새로 나온 퀴즈 (홈 '새로 나온 퀴즈' 줄과 NEW 표시)
-const NEW_QUIZZES = ['rank-world', 'rank-sales', 'rank-speed', 'rank-sports', 'rank-web', 'lol-champs', 'melody', 'songs', 'char-colors', 'plots', 'movie-ratings', 'dialect', 'memes', 'mbti', 'cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
+const NEW_QUIZZES = ['lol-champs', 'melody', 'songs', 'char-colors', 'plots', 'movie-ratings', 'dialect', 'memes', 'mbti', 'cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
 for (const quiz of QUIZZES) if (NEW_QUIZZES.includes(quiz.id)) quiz.isNew = true;
 // 표지를 첫 문제 사진으로 쓰는 퀴즈
 for (const quiz of QUIZZES) {

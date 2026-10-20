@@ -1,5 +1,5 @@
 // 퀴즈·게임마다 실제 페이지 파일을 만든다 (# 없는 주소 + 카톡·검색 미리보기).
-//   /quizzes/index.html, /q/<퀴즈>/index.html, /games/index.html, /game/<게임>/index.html, 404.html, sitemap.xml, robots.txt
+//   /quizzes/index.html, /rankings/index.html, /ranking/<id>/index.html, /q/<퀴즈>/index.html, /games/index.html, /game/<게임>/index.html, 404.html, sitemap.xml, robots.txt
 // index.html의 <!--META-->…<!--/META-->, <!--STATIC-->…<!--/STATIC--> 부분만 페이지마다 바꿔 끼운다.
 // 사용: node tools/build_pages.js   (python3 tools/bump_version.py 다음에 실행)
 const fs = require('fs');
@@ -15,9 +15,12 @@ const tpl = read('index.html');
 const scripts = [...tpl.matchAll(/<script src="\/([^"?]+\.js)/g)].map((m) => m[1]).filter((f) => f !== 'app.js');
 const ctx = { localStorage: { getItem: () => null, setItem() {} }, console };
 vm.createContext(ctx);
-vm.runInContext(scripts.map((f) => read(f)).join('\n;\n') + '\n;this.Q = QUIZZES; this.G = GAMES;', ctx);
+vm.runInContext(scripts.map((f) => read(f)).join('\n;\n') + '\n;this.Q = QUIZZES; this.G = GAMES; this.R = RANKINGS; this.RG = RANK_GROUPS; this.RL = rankLink;', ctx);
 const QUIZZES = ctx.Q;
 const GAMES = ctx.G;
+const RANKINGS = ctx.R;
+const RANK_GROUPS = ctx.RG;
+const rankLink = ctx.RL;
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -124,6 +127,32 @@ for (const g of GAMES) {
   urls.push(`/game/${g.id}/`);
 }
 
+// 랭킹 탭 (/rankings/) · 순위표마다 한 페이지 (/ranking/<id>/) — 검색엔진용으로 전체 순위와 링크를 글로 넣어 둠
+write(
+  'rankings/index.html',
+  page({
+    title: `랭킹 ${RANKINGS.length}개 · 1위를 맞혀 보세요 - 맞혀봐`,
+    desc: `사이트·앱, 판매·흥행, 우승 횟수, 세계·자연, 가장 빠른 것까지 랭킹 ${RANKINGS.length}개. 2·3위를 보고 1위를 맞혀 보세요`,
+    url: `${SITE}/rankings/`,
+    image: ogFile('rank-web'),
+    body: `<h1>랭킹</h1>${RANK_GROUPS.map((g) => `<h2>${esc(g.title)}</h2><ul>${RANKINGS.filter((b) => b.group === g.id).map((b) => `<li><a href="/ranking/${b.id}/">${esc(b.title)}</a></li>`).join('')}</ul>`).join('')}`,
+  })
+);
+urls.push('/rankings/');
+for (const b of RANKINGS) {
+  write(
+    `ranking/${b.id}/index.html`,
+    page({
+      title: `${b.title} 1위는? - 맞혀봐 랭킹`,
+      desc: `${b.items.slice(1, 4).map((it, k) => `${k + 2}위 ${it[0]}`).join(', ')}… 그럼 1위는? ${b.q}`,
+      url: `${SITE}/ranking/${b.id}/`,
+      image: ogFile('rank-' + b.group),
+      body: `<h1>${esc(b.title)}</h1><p>${esc(b.q)}</p><ol>${b.items.map((it) => `<li><a href="${esc(rankLink(it[0], b))}" rel="noopener">${esc(it[0])}</a>${it[1] ? ` (${esc(it[1])})` : ''}</li>`).join('')}</ol><p><a href="/rankings/">다른 랭킹 보기</a></p>`,
+    })
+  );
+  urls.push(`/ranking/${b.id}/`);
+}
+
 // 사이트맵 · robots
 const today = new Date().toISOString().slice(0, 10);
 urls.push('/about.html', '/privacy.html', '/credits.html');
@@ -135,4 +164,4 @@ write(
 );
 write('robots.txt', `User-agent: *\nAllow: /\nDisallow: /tools/\n\nSitemap: ${SITE}/sitemap.xml\n`);
 
-console.log(`페이지 ${urls.length}개 만듦 (퀴즈 ${QUIZZES.length}, 게임 ${GAMES.length}) + 404.html, sitemap.xml, robots.txt`);
+console.log(`페이지 ${urls.length}개 만듦 (퀴즈 ${QUIZZES.length}, 게임 ${GAMES.length}, 랭킹 ${RANKINGS.length}) + 404.html, sitemap.xml, robots.txt`);

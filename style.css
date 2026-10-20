@@ -1223,3 +1223,70 @@ a.btn { display: flex; align-items: center; justify-content: center; }
 .sec-head .sec-title { margin-right: auto; }
 .sec-more { flex: none; font-size: 14px; font-weight: 700; color: var(--text-3); }
 .sec-more:hover { color: var(--primary); }
+
+/* 상단 메뉴 4개: 좁은 화면에서도 한 줄에 */
+@media (max-width: 480px) {
+  .top-tabs { gap: 2px; padding: 3px; }
+  .top-tabs a { padding: 0 11px; font-size: 13px; }
+}
+@media (max-width: 370px) {
+  .logo span { display: none; }
+}
+
+/* 랭킹 */
+.sec-title small { font-size: 14px; font-weight: 700; color: var(--text-3); }
+.sec-desc { margin: -6px 0 10px; font-size: 13px; color: var(--text-3); }
+.rank-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 640px) { .rank-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.rank-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.rank-card-head { display: flex; justify-content: space-between; gap: 6px; font-size: 11px; font-weight: 700; color: var(--text-3); }
+.rank-card-head b { font-size: 11px; }
+.rank-card-head b.ok { color: #2bb24c; }
+.rank-card-head b.no { color: #e0312b; }
+.rank-card h3 { margin: 0; font-size: 14px; font-weight: 800; line-height: 1.35; letter-spacing: -0.02em; word-break: keep-all; }
+.rank-card ol { display: grid; gap: 4px; margin: 2px 0 0; padding: 0; list-style: none; }
+.rank-card li { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; font-weight: 600; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-card li i { flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--surface-2); font-style: normal; font-size: 11px; font-weight: 800; color: var(--text-3); }
+.rank-card li.q { color: var(--primary); font-weight: 800; }
+.rank-card li.q i { background: #ffd93d; color: #5a3300; }
+
+.rank-board { padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.rank-board h2 { margin: 0 0 4px; font-size: 19px; font-weight: 900; letter-spacing: -0.02em; word-break: keep-all; }
+.rank-q { margin: 0 0 12px; font-size: 14px; color: var(--text-3); }
+.rank-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+}
+.rk-no { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--surface-2); font-weight: 900; font-size: 14px; color: var(--text-2); }
+.rank-row:nth-child(2) .rk-no { background: #a7b0c0; color: #fff; }
+.rank-row:nth-child(3) .rk-no { background: #cd8a4f; color: #fff; }
+.rank-row.first .rk-no { background: #ffd93d; color: #5a3300; }
+.rank-name { flex: 1; min-width: 0; font-size: 16px; font-weight: 800; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+a.rank-name span { font-size: 12px; color: var(--text-3); }
+a.rank-name:hover { color: var(--primary); }
+.rank-val { flex: none; font-size: 13px; font-weight: 600; color: var(--text-3); }
+.rank-row.first.hidden { border-color: var(--primary); background: var(--primary-soft); }
+.rank-row.first.hidden .rank-name { color: var(--primary); font-size: 20px; letter-spacing: .1em; }
+.rank-row.first.ok { border-color: #2bb24c; background: rgba(43, 178, 76, .12); animation: pop .4s ease; }
+.rank-row.first.no { border-color: #e0312b; background: rgba(224, 49, 43, .1); animation: pop .4s ease; }
+.rank-guess { display: grid; gap: 8px; }
+.rank-guess[hidden] { display: none; }
+.rank-src { margin: 0; font-size: 12px; text-align: center; color: var(--text-3); }
+.game-actions[hidden] { display: none; }
