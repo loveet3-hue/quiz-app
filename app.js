@@ -167,18 +167,95 @@ function fillAds() {
 
 const home = { category: '전체', query: '' };
 
+// 카테고리별 표지 바탕색 (사진 표지도 그림 표지와 같은 틀로 보이게)
+const CAT_COLORS = {
+  지리: ['#dfe9ff', '#b9ccff'],
+  언어: ['#efe7ff', '#c8b4ff'],
+  재미: ['#fff6cf', '#ffd68f'],
+  음식: ['#ffe3df', '#ffb4a2'],
+  수학: ['#e8ebf3', '#c2cde2'],
+  과학: ['#e6e3ff', '#b9b0f5'],
+  역사: ['#f7ead9', '#e2c49f'],
+  예술: ['#fff1d6', '#ffc98f'],
+  동물: ['#d9fbea', '#9eefcf'],
+  연예: ['#ffe2f1', '#ffb0d6'],
+  탈것: ['#d8edff', '#9ccfff'],
+  자연: ['#e3f7ec', '#a8e6c5'],
+  '게임·만화': ['#e0f2ff', '#9fd4ff'],
+};
+const catBg = (cat) => {
+  const [a, b] = CAT_COLORS[cat] || ['#ece9f7', '#cfc8ec'];
+  return `background:linear-gradient(160deg,${a},${b})`;
+};
+
+function coverHtml(quiz) {
+  if (quiz.cover.flags) {
+    return `<div class="flag-grid${quiz.cover.vs ? ' vs' : ''}" style="${catBg(quiz.category)}">${quiz.cover.flags
+      .map((c) => `<img src="${esc(FLAG(c))}" alt="" loading="lazy">`)
+      .join(quiz.cover.vs ? '<span class="vs-mark">?</span>' : '')}</div>`;
+  }
+  const src = quiz.cover.image || '';
+  if (src.startsWith('data:')) return `<img class="full" src="${esc(src)}" alt="" loading="lazy">`;
+  return `<div class="framed" style="${catBg(quiz.category)}"><img class="inset" src="${esc(src)}" alt="" loading="lazy"></div>`;
+}
+
+function cardHtml(quiz, { rank, stats, plays } = {}) {
+  const s = stats?.[quiz.id];
+  const n = quiz.generate ? quiz.perPlay : Math.min(quiz.perPlay, quiz.questions.length);
+  const pool = quiz.generate ? '매번 새 문제' : `전체 ${quiz.questions.length}문제`;
+  const played = plays?.[quiz.id];
+  return `
+    <a class="card" href="#/q/${esc(quiz.id)}">
+      <div class="cover">${coverHtml(quiz)}<span class="badge">${esc(quiz.category)}</span>${
+        quiz.isNew ? '<span class="new-tag">NEW</span>' : ''
+      }${rank ? `<span class="rank-no">${rank}</span>` : ''}</div>
+      <div class="card-body">
+        <h2 class="card-title">${esc(quiz.title)}</h2>
+        <div class="card-meta">${pool}${played ? ` · 참여 ${fmtCount(played)}` : ` · 한 판 ${n}문제`}${
+          s?.bestTime ? ` · 만점 <b>${formatTime(s.bestTime)}</b>` : s ? ` · 최고 <b>${s.best}/${s.total}</b>` : ''
+        }</div>
+      </div>
+    </a>`;
+}
+
+// 날짜마다 바뀌는 '오늘의 퀴즈' (같은 날엔 누구에게나 같은 퀴즈)
+function todaysQuiz() {
+  const day = new Date().toISOString().slice(0, 10);
+  let h = 0;
+  for (const ch of day) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const pool = QUIZZES.filter((q) => !q.noAds);
+  return pool[h % pool.length];
+}
+
+function popularQuizzes(plays, n) {
+  const order = new Map(QUIZZES.map((quiz, i) => [quiz.id, i]));
+  return [...QUIZZES].sort((a, b) => (plays[b.id] || 0) - (plays[a.id] || 0) || order.get(a.id) - order.get(b.id)).slice(0, n);
+}
+
 function renderHome() {
   document.title = '맞혀봐';
   app.innerHTML = `
     <section class="hero">
       <h1>보고, 떠올리고,<br>직접 써서 맞혀 보세요</h1>
-      <p>객관식 없이 정답을 직접 입력하는 퀴즈예요</p>
+      <p>객관식 없이 정답을 직접 입력하는 퀴즈 ${QUIZZES.length}가지</p>
     </section>
-    <input class="search" type="search" placeholder="퀴즈 찾기" value="${esc(home.query)}" aria-label="퀴즈 찾기">
-    <div class="chips" role="group" aria-label="카테고리">
-      ${CATEGORIES.map((c) => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === home.category}">${esc(c)}</button>`).join('')}
-    </div>
-    <div class="grid"></div>
+    <section class="home-sec" data-sec="today"></section>
+    <section class="home-sec">
+      <h2 class="sec-title">🔥 인기 퀴즈</h2>
+      <div class="row" data-row="popular"></div>
+    </section>
+    <section class="home-sec">
+      <h2 class="sec-title">✨ 새로 나온 퀴즈</h2>
+      <div class="row" data-row="new"></div>
+    </section>
+    <section class="home-sec" id="all">
+      <h2 class="sec-title">전체 퀴즈</h2>
+      <input class="search" type="search" placeholder="퀴즈 찾기" value="${esc(home.query)}" aria-label="퀴즈 찾기">
+      <div class="chips" role="group" aria-label="카테고리">
+        ${CATEGORIES.map((c) => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === home.category}">${esc(c)}</button>`).join('')}
+      </div>
+      <div class="grid"></div>
+    </section>
     ${adHtml('homeBottom')}
     <footer class="site-foot">
       <a href="privacy.html">개인정보 처리방침</a> · <a href="credits.html">사진 출처</a>
@@ -196,52 +273,64 @@ function renderHome() {
       renderGrid();
     })
   );
+  renderSections();
   renderGrid();
   fillAds();
   counts.refresh().then((fresh) => {
-    if (fresh && app.querySelector('.grid') && !play) renderGrid();
+    if (fresh && app.querySelector('.grid') && !play) {
+      renderSections();
+      renderGrid();
+    }
   });
+}
+
+function renderSections() {
+  const stats = store.get();
+  const plays = counts.get();
+  const t = todaysQuiz();
+  const today = app.querySelector('[data-sec="today"]');
+  if (today && t) {
+    today.innerHTML = `
+      <a class="today-card" href="#/q/${esc(t.id)}">
+        <div class="cover">${coverHtml(t)}</div>
+        <div class="today-body">
+          <span class="today-tag">오늘의 퀴즈</span>
+          <h2>${esc(t.title)}</h2>
+          <p>${esc(t.desc)}</p>
+          <span class="btn today-btn">바로 풀기</span>
+        </div>
+      </a>`;
+  }
+  const pop = app.querySelector('[data-row="popular"]');
+  if (pop) pop.innerHTML = popularQuizzes(plays, 8).map((q, i) => cardHtml(q, { rank: i + 1, stats, plays })).join('');
+  const fresh = app.querySelector('[data-row="new"]');
+  if (fresh) {
+    const list = (typeof NEW_QUIZZES !== 'undefined' ? NEW_QUIZZES : []).map((id) => QUIZZES.find((q) => q.id === id)).filter(Boolean);
+    fresh.innerHTML = list.slice(0, 8).map((q) => cardHtml(q, { stats, plays })).join('');
+  }
 }
 
 function renderGrid() {
   const stats = store.get();
   const q = normalize(home.query);
   const plays = counts.get();
-  // 참여 많은 순 (같으면 원래 순서)
+  // 전체 목록은 분류 순서대로 (같은 분류끼리 모아서)
+  const catOrder = new Map(CATEGORIES.map((c, i) => [c, i]));
   const order = new Map(QUIZZES.map((quiz, i) => [quiz.id, i]));
   const list = QUIZZES.filter(
     (quiz) =>
       (home.category === '전체' || quiz.category === home.category) &&
-      (!q || normalize(quiz.title + quiz.desc).includes(q))
-  ).sort((a, b) => (plays[b.id] || 0) - (plays[a.id] || 0) || order.get(a.id) - order.get(b.id));
+      (!q || normalize(quiz.title + quiz.desc + quiz.category).includes(q))
+  ).sort((a, b) => catOrder.get(a.category) - catOrder.get(b.category) || order.get(a.id) - order.get(b.id));
   const grid = app.querySelector('.grid');
   if (!list.length) {
-    grid.outerHTML = `<div class="grid"></div><p class="empty">찾는 퀴즈가 없어요</p>`;
+    grid.innerHTML = '';
+    if (!app.querySelector('.empty')) grid.insertAdjacentHTML('afterend', '<p class="empty">찾는 퀴즈가 없어요</p>');
     return;
   }
   app.querySelector('.empty')?.remove();
   grid.innerHTML = list
-    .map((quiz, idx) => {
-      const n = quiz.generate ? quiz.perPlay : Math.min(quiz.perPlay, quiz.questions.length);
-      const pool = quiz.generate ? '매번 새 문제' : `전체 ${quiz.questions.length}문제`;
-      const s = stats[quiz.id];
-      const cover = quiz.cover.flags
-        ? `<div class="flag-grid${quiz.cover.vs ? ' vs' : ''}">${quiz.cover.flags
-            .map((c) => `<img src="${esc(FLAG(c))}" alt="" loading="lazy">`)
-            .join(quiz.cover.vs ? '<span class="vs-mark">?</span>' : '')}</div>`
-        : `<img src="${esc(quiz.cover.image)}" alt="" loading="lazy">`;
-      const bg = '';
-      return `
-        <a class="card" href="#/q/${esc(quiz.id)}">
-          <div class="cover" ${bg}>${cover}<span class="badge">${esc(quiz.category)}</span></div>
-          <div class="card-body">
-            <h2 class="card-title">${esc(quiz.title)}</h2>
-            <div class="card-meta">${pool}${plays[quiz.id] ? ` · 참여 ${fmtCount(plays[quiz.id])}` : ` · 한 판 ${n}문제`}${
-              s?.bestTime ? ` · 만점 <b>${formatTime(s.bestTime)}</b>` : s ? ` · 최고 <b>${s.best}/${s.total}</b>` : ''
-            }</div>
-          </div>
-        </a>${idx === 5 && list.length > 6 ? `<div class="ad-row">${adHtml('homeFeed')}</div>` : ''}`;
-    })
+    .map((quiz, idx) => cardHtml(quiz, { stats, plays }) + (idx === 5 && list.length > 6 ? `<div class="ad-row">${adHtml('homeFeed')}</div>` : ''))
     .join('');
   fillAds();
 }

@@ -832,6 +832,9 @@ const QUIZZES = [
 for (const quiz of QUIZZES) {
   if (QUESTIONS[quiz.id] && QUESTIONS[quiz.id].length) quiz.questions = QUESTIONS[quiz.id];
 }
+// 새로 나온 퀴즈 (홈 '새로 나온 퀴즈' 줄과 NEW 표시)
+const NEW_QUIZZES = ['cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
+for (const quiz of QUIZZES) if (NEW_QUIZZES.includes(quiz.id)) quiz.isNew = true;
 // 표지를 첫 문제 사진으로 쓰는 퀴즈
 for (const quiz of QUIZZES) {
   if (quiz.cover.fromFirst) quiz.cover = { image: quiz.questions[0]?.image };
