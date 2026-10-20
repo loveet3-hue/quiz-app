@@ -498,46 +498,69 @@ function renderMarble(root) {
   const ta = root.querySelector('.names');
   const rule = () => root.querySelector('input[name="rule"]:checked').value;
 
-  // ── 맵 (월드 좌표: 폭 360) ── 길게, 장애물 많이
+  // ── 맵 (월드 좌표: 폭 360) ──
+  // 핀 밭은 적당히 빠르게 내려오고, 마지막 '허우적 방'에서 큰 막대에 휘둘리다 좁은 구멍으로 빠져나감
   const W = 360;
   const R = 8.5;
-  const FINISH = 3900;
+  const FINISH = 1750;
   const H = FINISH + 120;
-  const FUNNEL = FINISH - 300;
+  const FUNNEL = FINISH - 420; // 깔때기 시작
+  const ROOM_TOP = FINISH - 230; // 허우적 방 위쪽
+  const FLOOR = FINISH - 60; // 방 바닥 (가운데 구멍)
+  const ROOM = 92; // 방 반폭
   const pegs = [];
   const segs = [];
   const spinners = [];
+  const bumps = []; // 벽 턱 위치 (그 근처엔 핀을 두지 않음)
   segs.push({ x1: 0, y1: -400, x2: 0, y2: FUNNEL }, { x1: W, y1: -400, x2: W, y2: FUNNEL });
-  for (let row = 0, y = 230; y < FUNNEL - 60; row++, y += 44) {
+  // 벽 턱: 벽에 붙어 미끄러지는 구슬을 안쪽으로 튕김 (왼쪽·오른쪽 번갈아)
+  for (let y = 260, k = 0; y < FUNNEL - 120; y += 170, k++) {
+    const left = k % 2 === 0;
+    const x0 = left ? 0 : W;
+    const tip = left ? 34 : W - 34;
+    segs.push({ x1: x0, y1: y, x2: tip, y2: y + 26 }, { x1: tip, y1: y + 26, x2: x0, y2: y + 52 });
+    bumps.push({ y: y + 26, left });
+  }
+  for (let row = 0, y = 230; y < FUNNEL - 50; row++, y += 44) {
     const off = row % 2 ? 22 : 0;
     for (let x = 40 + off; x <= W - 40; x += 44) {
       if (spinners.some((s) => Math.abs(s.cy - y) < 50 && Math.abs(s.cx - x) < s.len / 2 + 14)) continue;
-      pegs.push({ x, y, r: 4.5, bounce: 0.55 });
+      if (bumps.some((b) => Math.abs(b.y - y) < 60 && (b.left ? x < 84 : x > W - 84))) continue;
+      pegs.push({ x, y, r: 4.5, bounce: 0.6 });
     }
-    if (row % 12 === 9) {
-      // 가운데 큰 회전 막대
-      spinners.push({ cx: W / 2, cy: y + 22, len: 150, a: Math.random() * 3, w: row % 24 === 9 ? 1.6 : -1.6 });
-    } else if (row % 6 === 3) {
-      // 양쪽 회전 막대
-      spinners.push({ cx: 95, cy: y + 22, len: 84, a: Math.random() * 3, w: 2.4 }, { cx: 265, cy: y + 22, len: 84, a: Math.random() * 3, w: -2.4 });
+    if (row % 8 === 4) {
+      spinners.push({ cx: 100, cy: y + 22, len: 84, a: Math.random() * 3, w: 2.6 }, { cx: 260, cy: y + 22, len: 84, a: Math.random() * 3, w: -2.6 });
     }
-    if (row % 8 === 6) {
-      pegs.push({ x: W / 2 - 70, y: y + 22, r: 15, bounce: 1.1, bumper: true }, { x: W / 2 + 70, y: y + 22, r: 15, bounce: 1.1, bumper: true });
+    if (row % 8 === 0 && row > 0) {
+      pegs.push({ x: W / 2, y: y + 22, r: 15, bounce: 1.1, bumper: true });
     }
   }
   for (let i = pegs.length - 1; i >= 0; i--) {
     const p = pegs[i];
     if (!p.bumper && pegs.some((b) => b.bumper && Math.hypot(b.x - p.x, b.y - p.y) < 44)) pegs.splice(i, 1);
   }
-  // 깔때기 → 좁은 통로 → 골인. 통로 가운데서 막대가 빙빙 돌며 막았다 열었다 함
-  const GATE = 34;
+  // 깔때기 → 허우적 방
   segs.push(
-    { x1: 0, y1: FUNNEL, x2: W / 2 - GATE, y2: FINISH - 150 },
-    { x1: W, y1: FUNNEL, x2: W / 2 + GATE, y2: FINISH - 150 },
-    { x1: W / 2 - GATE, y1: FINISH - 150, x2: W / 2 - GATE, y2: FINISH + 20 },
-    { x1: W / 2 + GATE, y1: FINISH - 150, x2: W / 2 + GATE, y2: FINISH + 20 }
+    { x1: 0, y1: FUNNEL, x2: W / 2 - ROOM, y2: ROOM_TOP },
+    { x1: W, y1: FUNNEL, x2: W / 2 + ROOM, y2: ROOM_TOP },
+    { x1: W / 2 - ROOM, y1: ROOM_TOP, x2: W / 2 - ROOM, y2: FLOOR - 34 },
+    { x1: W / 2 + ROOM, y1: ROOM_TOP, x2: W / 2 + ROOM, y2: FLOOR - 34 }
   );
-  spinners.push({ cx: W / 2, cy: FINISH - 70, len: GATE * 2 - 6, a: 0, w: 2.6, gate: true });
+  // 방 바닥: 가운데로 살짝 기울고 구멍이 뚫림. 구멍 폭은 hole(반폭)로 조절 — 첫 구슬이 나간 뒤 점점 넓어짐
+  const HOLE_MIN = 13;
+  let hole = HOLE_MIN;
+  const floorL = { x1: W / 2 - ROOM, y1: FLOOR - 34, x2: W / 2 - hole, y2: FLOOR };
+  const floorR = { x1: W / 2 + ROOM, y1: FLOOR - 34, x2: W / 2 + hole, y2: FLOOR };
+  segs.push(floorL, floorR);
+  const setHole = (h) => {
+    hole = h;
+    floorL.x2 = W / 2 - h;
+    floorR.x2 = W / 2 + h;
+  };
+  // 방을 휘젓는 큰 막대 (구멍 바로 위)
+  spinners.push({ cx: W / 2, cy: FLOOR - 62, len: ROOM * 2 - 22, a: 0, w: 1.9, gate: true });
+  // 구멍 아래 짧은 통로
+  segs.push({ x1: W / 2 - 22, y1: FLOOR + 6, x2: W / 2 - 22, y2: FINISH + 20 }, { x1: W / 2 + 22, y1: FLOOR + 6, x2: W / 2 + 22, y2: FINISH + 20 });
 
   let marbles = [];
   let finished = [];
@@ -582,6 +605,8 @@ function renderMarble(root) {
       return { name, x: cx, y: cy, vx: 0, vy: 0, color: gameColor(i, names.length), done: false, still: 0 };
     });
     finished = [];
+    sinceFirst = -1;
+    setHole(HOLE_MIN);
     rankEl.innerHTML = '';
     camY = 0;
     leaderName = '';
@@ -591,8 +616,8 @@ function renderMarble(root) {
   }
 
   // ── 물리 ──
-  const G = 520;
-  const MAXV = 330; // 최고 속도를 눌러서 천천히 굴러 내려가게 (1등 도착 약 20초)
+  const G = 950;
+  const MAXV = 700;
   function collideCircle(m, cx, cy, cr, bounce, vx = 0, vy = 0) {
     const dx = m.x - cx;
     const dy = m.y - cy;
@@ -622,8 +647,15 @@ function renderMarble(root) {
     collideCircle(m, s.x1 + ex * t, s.y1 + ey * t, 2, bounce, svx, svy);
   }
 
+  let sinceFirst = -1; // 첫 구슬이 나간 뒤 흐른 시간
   function step(dt) {
     spinners.forEach((s) => (s.a += s.w * dt));
+    if (finished.length && sinceFirst < 0) sinceFirst = 0;
+    if (sinceFirst >= 0) {
+      sinceFirst += dt;
+      // 첫 구슬이 나가고 3초 뒤부터 4초마다 조금씩 넓어짐 (꼴찌 정할 때 너무 오래 걸리지 않게)
+      setHole(Math.min(40, HOLE_MIN + Math.max(0, Math.floor((sinceFirst - 3) / 4) + 1) * 5 * (sinceFirst > 3 ? 1 : 0)));
+    }
     for (const m of marbles) {
       if (m.done) continue;
       m.vy += G * dt;
@@ -778,18 +810,19 @@ function renderMarble(root) {
     timeScale = 1;
     if (r === 'first' && finished.length === 0 && live.length > 1) {
       const [a, b] = live;
-      if (a.y > FINISH - 280 && a.y - b.y < 140) timeScale = 0.35;
+      if (a.y > FLOOR - 40 && b.y > ROOM_TOP) timeScale = 0.45; // 방에서 구멍 직전, 둘 이상 남았을 때
       if (a.name !== leaderName && now - lastCall > 900) {
         resultEl.innerHTML = leaderName ? `🔥 역전! <b>${esc(a.name)}</b> 선두!` : `<b>${esc(a.name)}</b> 앞서 나가요!`;
         leaderName = a.name;
         lastCall = now;
-      } else if (a.y > FINISH - 500 && now - lastCall > 1500) {
-        resultEl.innerHTML = `골인 직전! <b>${esc(a.name)}</b>${live[1] ? ` vs <b>${esc(live[1].name)}</b>` : ''}`;
+      } else if (a.y > ROOM_TOP && now - lastCall > 1600) {
+        const inRoom = live.filter((m) => m.y > ROOM_TOP).length;
+        resultEl.innerHTML = `마지막 방! ${inRoom}개가 허우적… <b>${esc(a.name)}</b>${live[1] ? ` vs <b>${esc(live[1].name)}</b>` : ''}`;
         lastCall = now;
       }
     } else if (r === 'last' && live.length > 0) {
       const lastOne = live[live.length - 1];
-      if (live.length <= 2 && live[0].y > FINISH - 320) timeScale = 0.35;
+      if (live.length <= 2 && live[0].y > FLOOR - 40) timeScale = 0.45;
       if (now - lastCall > 1200) {
         resultEl.innerHTML =
           live.length <= 3 ? `남은 구슬 ${live.length}개… 꼴찌는 누구? (지금 꼴찌 <b>${esc(lastOne.name)}</b>)` : `지금 꼴찌는 <b>${esc(lastOne.name)}</b>`;
@@ -993,7 +1026,7 @@ function renderHorse(root) {
     horses.forEach((h) => {
       h.p = 0;
       h.v = 0;
-      h.target = 0.045 + Math.random() * 0.01;
+      h.target = 0.085 + Math.random() * 0.01;
       h.next = 0;
       h.burst = 0;
       h.place = 0;
@@ -1033,14 +1066,14 @@ function renderHorse(root) {
         if (h.place) continue;
         // 목표 속도를 자주 바꾸고 가끔 질주. 앞선 말은 조금 느려지고 뒤처진 말은 따라붙어서 끝까지 엎치락뒤치락
         if (t >= h.next) {
-          h.target = 0.03 + Math.random() * 0.035;
+          h.target = 0.06 + Math.random() * 0.06; // 약 10~12초 경주
           if (Math.random() < 0.2) h.burst = 0.7 + Math.random() * 0.7;
-          h.next = t + 0.4 + Math.random() * 0.8;
+          h.next = t + 0.3 + Math.random() * 0.6;
         }
         const catchUp = h.p < lead - 0.08 ? 1.15 : h.p >= lead ? 0.95 : 1;
         const want = h.target * catchUp * (h.burst > 0 ? 1.55 : 1);
         h.burst -= dt;
-        h.v += (want - h.v) * Math.min(1, dt * 2.5);
+        h.v += (want - h.v) * Math.min(1, dt * 3.5);
         h.p += h.v * dt;
         if (h.p >= 1) {
           h.p = 1;
