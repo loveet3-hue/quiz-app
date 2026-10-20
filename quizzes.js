@@ -797,6 +797,16 @@ const QUIZZES = [
     questions: [],
   },
   {
+    id: 'mbti',
+    title: '성격 보고 MBTI 맞히기',
+    desc: '이 사람, 무슨 유형일까요?',
+    category: '재미',
+    perPlay: 10,
+    guide: '알파벳 4글자로 써 보세요 (예: ENFP) · 대소문자 상관없어요',
+    cover: { image: COVERS.mbti },
+    questions: [],
+  },
+  {
     id: 'clock',
     guide: "'3시 15분'처럼 써 보세요 · '3:15'도 정답",
     title: '시계 보고 시간 맞히기',
@@ -833,7 +843,7 @@ for (const quiz of QUIZZES) {
   if (QUESTIONS[quiz.id] && QUESTIONS[quiz.id].length) quiz.questions = QUESTIONS[quiz.id];
 }
 // 새로 나온 퀴즈 (홈 '새로 나온 퀴즈' 줄과 NEW 표시)
-const NEW_QUIZZES = ['cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
+const NEW_QUIZZES = ['mbti', 'cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
 for (const quiz of QUIZZES) if (NEW_QUIZZES.includes(quiz.id)) quiz.isNew = true;
 // 표지를 첫 문제 사진으로 쓰는 퀴즈
 for (const quiz of QUIZZES) {

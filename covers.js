@@ -300,6 +300,18 @@ const COVERS = (() => {
       ${[0, 1, 2, 3].map((r) => [0, 1].map((c) => `<rect x="${300 + c * 12}" y="${70 + r * 42 + (c % 2 ? 21 : 0)}" width="12" height="21" fill="#2d3142"/>`).join('')).join('')}
       ${[[230, '#ff6b6b', 1], [270, '#4f8cff', 2], [180, '#ffcc33', 3], [205, '#7c5cff', 4]].map(([x, col, n], i) => `<circle cx="${x}" cy="${91 + i * 42}" r="15" fill="${col}" stroke="#fff" stroke-width="3"/><text x="${x}" y="${97 + i * 42}" font-family="${NUM}" font-size="16" font-weight="700" fill="#fff" text-anchor="middle">${n}</text>`).join('')}`),
 
+    // MBTI: 알파벳 네 칸 + 물음표
+    mbti: make('#ffe9f3', '#c9b6ff', `
+      ${shadow(200, 248, 130)}
+      ${[['E', '#ff8a7a'], ['N', '#ffd166'], ['F', '#7ad98f'], ['P', '#6fc8ff']].map(([l, c], i) => `
+        <g transform="rotate(${[-8, 4, -3, 7][i]} ${92 + i * 72} 150)">
+          <rect x="${62 + i * 72}" y="${110 + (i % 2) * 12}" width="60" height="70" rx="14" fill="${c}"/>
+          <rect x="${62 + i * 72}" y="${110 + (i % 2) * 12}" width="60" height="70" rx="14" fill="none" stroke="#fff" stroke-width="4"/>
+          <text x="${92 + i * 72}" y="${160 + (i % 2) * 12}" font-family="${NUM}" font-size="40" font-weight="700" fill="#fff" text-anchor="middle">${l}</text>
+        </g>`).join('')}
+      <circle cx="320" cy="84" r="22" fill="#2d3142"/>
+      <text x="320" y="96" font-family="${NUM}" font-size="30" font-weight="700" fill="#fff" text-anchor="middle">?</text>`),
+
     // 시계
     clock: make('#ebe6ff', '#cbbcff', `
       ${shadow(200, 264, 84)}

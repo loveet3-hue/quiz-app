@@ -33,10 +33,11 @@ for (const id of ids) {
   }
   const problems = [];
   const seen = new Map();
+  const allowDup = fs.readFileSync(path.join(dir, id + '.js'), 'utf8').includes('allow-duplicate-answers');
   qs.forEach((q, i) => {
     if (!q.answer) problems.push(`#${i + 1} 정답 없음`);
     const key = normalize(q.answer);
-    if (seen.has(key)) problems.push(`#${i + 1} 정답 중복: ${q.answer} (#${seen.get(key) + 1})`);
+    if (!allowDup && seen.has(key)) problems.push(`#${i + 1} 정답 중복: ${q.answer} (#${seen.get(key) + 1})`);
     seen.set(key, i);
     if (q.chosung && !/^[가-힣\s]+$/.test(q.answer)) problems.push(`#${i + 1} 초성 문제인데 정답에 한글 외 글자: ${q.answer}`);
     if (!q.image && !q.big && !q.text && !q.chosung) problems.push(`#${i + 1} 보여줄 내용 없음: ${q.answer}`);
