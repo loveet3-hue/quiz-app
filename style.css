@@ -1468,14 +1468,45 @@ a.icon-btn { display: inline-grid; place-items: center; }
 .fmt-covers .flag-grid img { border-radius: 4px; }
 
 /* 카드 짝 맞추기 */
-.mem-grid { display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); gap: 8px; }
-.mem-card { aspect-ratio: 3 / 4; padding: 0; border: 0; background: none; perspective: 600px; cursor: pointer; }
-.mem-in { position: relative; display: block; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .35s ease; }
+.mem-grid { display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); gap: 8px; width: min(100%, 460px); margin: 0 auto; }
+.mem-card { aspect-ratio: 3 / 4; padding: 0; border: 0; background: none; perspective: 700px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.mem-in {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform .38s cubic-bezier(.4, .2, .2, 1);
+  will-change: transform;
+}
 .mem-card.open .mem-in, .mem-card.done .mem-in { transform: rotateY(180deg); }
-.mem-back, .mem-front { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 12px; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-.mem-back { background: linear-gradient(160deg, #7c5cff, #b48cff); color: rgba(255, 255, 255, .8); font-size: 24px; font-weight: 900; box-shadow: 0 3px 0 #5a3fd6; }
-.mem-front { transform: rotateY(180deg); background: var(--surface); border: 2px solid var(--line); font-size: clamp(24px, 7vw, 40px); }
-.mem-card.done .mem-front { border-color: #2bb24c; background: rgba(43, 178, 76, .12); animation: pop .35s ease; }
+.mem-back, .mem-front {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+}
+.mem-back {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .22) 0 30%, transparent 31%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, .12) 0 6px, transparent 6px 12px),
+    linear-gradient(160deg, #7c5cff, #c86bff);
+  box-shadow: 0 3px 0 #5a3fd6, inset 0 0 0 3px rgba(255, 255, 255, .35);
+}
+.mem-back b { color: #fff; font-size: clamp(18px, 5vw, 26px); font-weight: 900; text-shadow: 0 2px 0 rgba(0, 0, 0, .15); }
+.mem-front {
+  transform: rotateY(180deg) translateZ(0);
+  background: radial-gradient(circle at 50% 40%, #fff 0 34%, transparent 35%), var(--bg, #fff);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, .12), inset 0 0 0 3px rgba(255, 255, 255, .7);
+}
+.mem-front i { font-style: normal; font-size: clamp(26px, 8vw, 40px); line-height: 1; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .15)); }
+.mem-card.done .mem-front { box-shadow: 0 0 0 3px #2bb24c, 0 3px 0 rgba(0, 0, 0, .12); }
+.mem-card.done .mem-front i { animation: mem-pop .4s ease; }
+@keyframes mem-pop { 50% { transform: scale(1.25) rotate(-8deg); } }
 
 /* 사과 게임 */
 .apple-bar { display: flex; align-items: center; gap: 10px; font-weight: 900; }

@@ -2372,7 +2372,9 @@ function renderMini(root) {
 
 /* ═════════════════════ 카드 짝 맞추기 ═════════════════════ */
 
-const MEMORY_FACES = ['🍎', '🍌', '🍇', '🍓', '🍒', '🍑', '🥝', '🍍', '🐶', '🐱', '🐰', '🐼', '🦊', '🐸', '🐧', '🦄', '⚽', '🎲', '🎈', '🚗'];
+const MEMORY_FACES = ['🍎', '🍌', '🍇', '🍓', '🍒', '🍑', '🥝', '🍍', '🐶', '🐱', '🐰', '🐼', '🦊', '🐸', '🐧', '🦄', '⚽', '🎲', '🎈', '🚗', '🌈', '⭐', '🍩', '🎁'];
+// 그림마다 다른 파스텔 바탕 (짝끼리 같은 색이라 찾기 재밌게)
+const MEMORY_COLORS = ['#ffd6d6', '#fff1b8', '#e3d7ff', '#ffd6ec', '#ffe0c2', '#d6f5e3', '#d6ecff', '#fff6cf', '#e8f7d0', '#ffe3f1', '#dff4ff', '#f1e6ff'];
 
 function renderMemory(root) {
   const saved = gameStore.get('memory') || { pairs: 8, two: false };
@@ -2386,19 +2388,20 @@ function renderMemory(root) {
     <p class="game-result" role="status"></p>
     <div class="mem-grid"></div>
     <div class="game-actions">
-      <button class="btn block" data-act="reset">새 게임 (다시 시작)</button>
-      <button class="btn ghost block" data-act="peek">처음에 3초 보여주기</button>
+      <button class="btn block" data-act="reset">새 게임</button>
+      <button class="btn ghost block" data-act="hint">힌트 (1초 다시 보기)</button>
     </div>`;
   const grid = root.querySelector('.mem-grid');
   const resultEl = root.querySelector('.game-result');
   let cards = [];
   let open = [];
-  let lock = false;
+  let lock = true;
   let moves = 0;
   let found = 0;
   let t0 = 0;
   let turn = 0;
   let score = [0, 0];
+  let hints = 0;
   let timers = [];
   const clear = () => { timers.forEach(clearTimeout); timers = []; };
   const best = () => gameStore.get('memory-best-' + pairs);
@@ -2411,21 +2414,48 @@ function renderMemory(root) {
     }
   }
 
+  // 모든 카드를 잠깐 보여 줬다가 덮음 (시작할 때 외우기, 힌트)
+  function peek(ms, msg, after) {
+    lock = true;
+    grid.querySelectorAll('.mem-card:not(.done)').forEach((c) => c.classList.add('open'));
+    status(msg);
+    timers.push(
+      setTimeout(() => {
+        grid.querySelectorAll('.mem-card:not(.done)').forEach((c) => c.classList.remove('open'));
+        timers.push(setTimeout(() => { lock = false; after && after(); }, 420));
+      }, ms)
+    );
+  }
+
   function setup() {
     clear();
     gameStore.save('memory', { pairs, two });
-    const faces = shuffle(MEMORY_FACES).slice(0, pairs);
-    cards = shuffle([...faces, ...faces]);
+    const pick = shuffle(MEMORY_FACES.map((f, i) => i)).slice(0, pairs);
+    cards = shuffle([...pick, ...pick]);
     open = [];
-    lock = false;
     moves = 0;
     found = 0;
     t0 = 0;
     turn = 0;
+    hints = 0;
     score = [0, 0];
-    grid.style.setProperty('--cols', pairs <= 6 ? 4 : pairs <= 8 ? 4 : pairs <= 10 ? 5 : 6);
-    grid.innerHTML = cards.map((f, i) => `<button class="mem-card" data-i="${i}" aria-label="카드"><span class="mem-in"><span class="mem-back">?</span><span class="mem-front">${f}</span></span></button>`).join('');
-    status(two ? '1번부터 카드 두 장을 뒤집어 보세요' : '같은 그림 두 장을 찾아보세요');
+    grid.style.setProperty('--cols', pairs <= 8 ? 4 : pairs <= 10 ? 5 : 6);
+    grid.innerHTML = cards
+      .map((f, i) => `<button class="mem-card" data-i="${i}" aria-label="카드"><span class="mem-in"><span class="mem-back"><b>?</b></span><span class="mem-front" style="--bg:${MEMORY_COLORS[f % MEMORY_COLORS.length]}"><i>${MEMORY_FACES[f]}</i></span></span></button>`)
+      .join('');
+    // 시작할 때 전체를 한 번 보여 줌 (카드가 많을수록 조금 더 길게)
+    let n = 3;
+    const sec = pairs <= 6 ? 3 : pairs <= 8 ? 4 : 5;
+    n = sec;
+    peek(sec * 1000, `👀 외우세요! ${n}`, () => status(two ? '1번부터 카드 두 장을 뒤집어 보세요' : '같은 그림 두 장을 찾아보세요'));
+    const cd = () => {
+      n--;
+      if (n > 0) {
+        status(`👀 외우세요! ${n}`);
+        timers.push(setTimeout(cd, 1000));
+      }
+    };
+    timers.push(setTimeout(cd, 1000));
   }
 
   grid.addEventListener('click', (e) => {
@@ -2438,22 +2468,21 @@ function renderMemory(root) {
     moves++;
     const [a, b] = open;
     if (cards[a.dataset.i] === cards[b.dataset.i]) {
-      a.classList.add('done');
-      b.classList.add('done');
       open = [];
       found++;
       buzz(30);
       if (two) score[turn]++;
+      // 다 뒤집힌 뒤에 '찾음' 표시 (뒤집는 중 끊겨 보이지 않게)
+      timers.push(setTimeout(() => { a.classList.add('done'); b.classList.add('done'); }, 380));
       if (found === pairs) {
         const sec = Math.round((performance.now() - t0) / 1000);
         if (two) {
-          const w = score[0] === score[1] ? '무승부!' : `🏆 ${score[0] > score[1] ? 1 : 2}번 승리!`;
-          status(`${w}`);
+          status(score[0] === score[1] ? '무승부!' : `🏆 ${score[0] > score[1] ? 1 : 2}번 승리!`);
         } else {
           const b0 = best();
-          const isBest = !b0 || moves < b0.moves || (moves === b0.moves && sec < b0.sec);
+          const isBest = !hints && (!b0 || moves < b0.moves || (moves === b0.moves && sec < b0.sec));
           if (isBest) gameStore.save('memory-best-' + pairs, { moves, sec });
-          status(`🎉 다 찾았어요! ${moves}번 만에 ${sec}초${isBest ? ' · 최고 기록!' : ''}`);
+          status(`🎉 다 찾았어요! ${moves}번 만에 ${sec}초${isBest ? ' · 최고 기록!' : hints ? ' (힌트 사용)' : ''}`);
         }
       } else status(two ? `짝 찾기! ${turn + 1}번 한 번 더` : '짝을 찾았어요! 👏');
     } else {
@@ -2463,10 +2492,10 @@ function renderMemory(root) {
           a.classList.remove('open');
           b.classList.remove('open');
           open = [];
-          lock = false;
+          timers.push(setTimeout(() => { lock = false; }, 300));
           if (two) turn = 1 - turn;
           status(two ? `${turn + 1}번 차례` : '');
-        }, 800)
+        }, 750)
       );
     }
   });
@@ -2483,16 +2512,12 @@ function renderMemory(root) {
     setup();
   });
   root.querySelector('[data-act="reset"]').addEventListener('click', setup);
-  root.querySelector('[data-act="peek"]').addEventListener('click', () => {
-    setup();
-    lock = true;
-    grid.querySelectorAll('.mem-card').forEach((c) => c.classList.add('open'));
-    timers.push(
-      setTimeout(() => {
-        grid.querySelectorAll('.mem-card').forEach((c) => c.classList.remove('open'));
-        lock = false;
-      }, 3000)
-    );
+  root.querySelector('[data-act="hint"]').addEventListener('click', () => {
+    if (lock || found === pairs) return;
+    open.forEach((c) => c.classList.remove('open'));
+    open = [];
+    hints++;
+    peek(1000, '👀 힌트!', () => status(''));
   });
   setup();
   gameCleanup = clear;
@@ -2500,13 +2525,16 @@ function renderMemory(root) {
 
 /* ═════════════════════ 사과 게임 (합이 10) ═════════════════════ */
 
-// 숫자 사과판에서 네모로 드래그해 묶은 숫자의 합이 10이면 사과가 사라짐. 2분 동안 최대한 많이!
+// 숫자 사과판에서 네모로 드래그해 묶은 숫자의 합이 10이면 사과가 사라짐. 60초·120초 중 골라서 최대한 많이!
 function renderApple(root) {
   const wide = window.innerWidth >= 720;
   const COLS = wide ? 17 : 10;
   const ROWS = wide ? 10 : 15;
-  const LIMIT = 120;
+  let LIMIT = (gameStore.get('apple') || {}).limit || 120;
   root.innerHTML = `
+    <div class="opt-row" role="group" aria-label="제한 시간">
+      ${[60, 120].map((t) => `<button class="chip" data-limit="${t}" aria-pressed="${t === LIMIT}">${t}초</button>`).join('')}
+    </div>
     <div class="apple-bar"><span class="apple-score">0개</span><span class="apple-time"><i></i></span><span class="apple-best"></span></div>
     <div class="apple-board" style="--cols:${COLS}"></div>
     <p class="game-result" role="status">손가락(마우스)으로 네모를 그려서 숫자 합이 <b>10</b>이 되게 묶으세요!</p>
@@ -2527,8 +2555,8 @@ function renderApple(root) {
   let raf = 0;
   let sel = null;
   const showBest = () => {
-    const b = gameStore.get('apple-best');
-    bestEl.textContent = b ? `최고 ${b}개` : '';
+    const b = gameStore.get('apple-best-' + LIMIT);
+    bestEl.textContent = b ? `${LIMIT}초 최고 ${b}개` : '';
   };
 
   function make() {
@@ -2611,7 +2639,7 @@ function renderApple(root) {
     playing = true;
     t0 = performance.now();
     startBtn.disabled = true;
-    resultEl.innerHTML = '합이 <b>10</b>이 되게 네모로 묶으세요! 2분!';
+    resultEl.innerHTML = `합이 <b>10</b>이 되게 네모로 묶으세요! ${LIMIT}초!`;
     raf = requestAnimationFrame(tick);
   }
   function end() {
@@ -2620,13 +2648,22 @@ function renderApple(root) {
     paintSel();
     startBtn.disabled = false;
     startBtn.textContent = '한 판 더';
-    const b = gameStore.get('apple-best') || 0;
-    if (score > b) gameStore.save('apple-best', score);
+    const b = gameStore.get('apple-best-' + LIMIT) || 0;
+    if (score > b) gameStore.save('apple-best-' + LIMIT, score);
     resultEl.innerHTML = `⏰ 끝! 사과 <b>${score}개</b>${score > b ? ' · 최고 기록! 🎉' : ''}`;
     showBest();
     buzz([100, 50, 100]);
   }
   startBtn.addEventListener('click', start);
+  root.querySelectorAll('[data-limit]').forEach((b) =>
+    b.addEventListener('click', () => {
+      if (playing) return;
+      LIMIT = +b.dataset.limit;
+      gameStore.save('apple', { limit: LIMIT });
+      root.querySelectorAll('[data-limit]').forEach((x) => x.setAttribute('aria-pressed', x === b));
+      showBest();
+    })
+  );
   root.querySelector('[data-act="reset"]').addEventListener('click', () => {
     cancelAnimationFrame(raf);
     playing = false;
