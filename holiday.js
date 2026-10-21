@@ -1,4 +1,4 @@
-// 기념일·공휴일 로고: 그날이 되면 상단 로고에 소품(경찰 모자, 산타 모자 …)을 씌우고 옆에 기념일 이름을 보여준다.
+// 기념일·공휴일 로고: 그날이 되면 상단 로고에 소품(경찰 모자, 산타 모자 …)을 씌운다. (기념일 이름은 로고에 마우스를 올렸을 때만)
 // 소품은 로고와 같은 100×100 판 위에 그림 (위로 삐져나가도 됨). 시험: 주소 뒤에 ?logo=10-21 처럼 붙이면 그날 로고로 보임.
 'use strict';
 
@@ -86,7 +86,6 @@
       img.replaceWith(wrap);
       wrap.appendChild(img);
       wrap.insertAdjacentHTML('beforeend', `<svg class="logo-deco" viewBox="0 0 100 100" aria-hidden="true">${PARTS[part]}</svg>`);
-      logo.insertAdjacentHTML('beforeend', `<em class="logo-day"><b>${emoji}</b><span>${name}</span></em>`);
     });
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
