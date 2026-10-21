@@ -7,10 +7,13 @@ const GAMES = [
   { id: 'marble', title: '구슬 추첨', desc: '구슬이 굴러 내려가는 순서로 뽑기', cover: () => COVERS['game-marble'] },
   { id: 'horse', title: '경주마', desc: '1등할 말을 골라 맞혀 보세요', cover: () => COVERS['game-horse'] },
   { id: 'ladder', title: '사다리 타기', desc: '누가 당첨일까? 길을 따라가 보세요', cover: () => COVERS['game-ladder'] },
-  { id: 'wheel', title: '돌림판', desc: '항목을 넣고 돌려서 하나 뽑기', cover: () => COVERS['game-wheel'] },
+  { id: 'wheel', title: '돌림판 · 복불복 룰렛', desc: '이름·메뉴·벌칙을 넣고 돌려서 뽑기', cover: () => COVERS['game-wheel'] },
   { id: 'lots', title: '제비뽑기', desc: '종이를 하나씩 펼쳐서 당첨 찾기', cover: () => COVERS['game-lots'] },
   { id: 'bomb', title: '폭탄 돌리기', desc: '폰을 돌리다 터지면 벌칙!', cover: () => COVERS['game-bomb'] },
   { id: 'teams', title: '팀 나누기', desc: '이름만 넣으면 공평하게 팀 배정', cover: () => COVERS['game-teams'] },
+  { id: 'liar', title: '라이어 게임', desc: '한 명만 제시어를 몰라요. 라이어를 찾아라!', cover: () => COVERS['game-liar'] },
+  { id: 'mini', title: '10초 미니게임 대결', desc: '연타·반응속도·10초 맞히기, 꼴찌는 벌칙', cover: () => COVERS['game-mini'] },
+  { id: 'croc', title: '악어 룰렛', desc: '이빨을 번갈아 누르다 물리면 당첨!', cover: () => COVERS['game-croc'] },
   { id: 'lol', title: '롤 내전 팀 짜기', desc: '블루·레드 팀을 라인별로 섞기', cover: () => COVERS['game-lol'] },
   { id: 'dice', title: '주사위·동전', desc: '주사위 굴리기와 동전 던지기', cover: () => COVERS['game-dice'] },
 ];
@@ -66,7 +69,7 @@ function countdown(overlay, done) {
 }
 
 // 새로 나온 게임 (홈 '새로 나온 게임' 줄과 NEW 표시)
-const NEW_GAMES = ['lol', 'lots', 'bomb', 'teams', 'dice'];
+const NEW_GAMES = ['liar', 'mini', 'croc', 'lol', 'bomb'];
 
 // 게임 참여 수는 퀴즈와 같은 집계 서버에 'game-<id>'로 셈 (하루 한 번, 익명)
 const gamePlays = (plays, g) => plays['game-' + g.id] || 0;
@@ -125,11 +128,18 @@ function renderGame(id) {
     <div class="game-body"></div>`;
   app.querySelector('[data-act="home"]').addEventListener('click', () => nav('/games/'));
   const body = app.querySelector('.game-body');
-  ({ wheel: renderWheel, ladder: renderLadder, marble: renderMarble, horse: renderHorse, lots: renderLots, bomb: renderBomb, teams: renderTeams, lol: renderLol, dice: renderDice })[id](body);
+  ({ wheel: renderWheel, ladder: renderLadder, marble: renderMarble, horse: renderHorse, lots: renderLots, bomb: renderBomb, teams: renderTeams, lol: renderLol, dice: renderDice, liar: renderLiar, croc: renderCroc, mini: renderMini })[id](body);
 }
 
 /* ═════════════════════ 돌림판 ═════════════════════ */
 
+// 돌림판 항목 모음 (누르면 항목 칸이 바뀜)
+const WHEEL_PRESETS = {
+  '🍱 점심 메뉴': ['치킨', '피자', '짜장면', '떡볶이', '햄버거', '초밥', '김치찌개', '돈가스', '국밥', '마라탕'],
+  '😈 복불복 벌칙': ['노래 한 소절', '애교 3종 세트', '성대모사', '커피 쏘기', '아이스크림 쏘기', '칭찬 3개 하기', '엉덩이로 이름 쓰기', '통과!', '꽝 (벌칙 없음)', '옆 사람이 정해 주기'],
+  '💸 계산 몰아주기': ['내가 쏜다', '반반', '1/N', '가위바위보 진 사람', '막내가 쏜다', '제일 늦게 온 사람'],
+  '🧹 당번 정하기': ['설거지', '청소기', '분리수거', '빨래', '장보기', '쉬는 날'],
+};
 function renderWheel(root) {
   const saved = gameStore.get('wheel') || { items: '치킨\n피자\n짜장면\n떡볶이\n햄버거\n초밥' };
   root.innerHTML = `
@@ -144,6 +154,9 @@ function renderWheel(root) {
       <button class="btn ghost block" data-act="reset">다시 시작</button>
     </div>
     <button class="btn ghost block" data-act="remove" hidden>당첨 항목 빼고 다시 돌리기</button>
+    <div class="opt-row" role="group" aria-label="항목 모음">
+      ${Object.keys(WHEEL_PRESETS).map((k) => `<button class="chip" data-preset="${k}">${k}</button>`).join('')}
+    </div>
     <label class="field">
       <span>항목 (한 줄에 하나, 또는 쉼표로 구분 · 최대 30개)</span>
       <textarea class="names" rows="6">${esc(saved.items)}</textarea>
@@ -290,6 +303,14 @@ function renderWheel(root) {
   ta.addEventListener('input', () => {
     if (!spinning) reset();
   });
+  root.querySelectorAll('[data-preset]').forEach((b) =>
+    b.addEventListener('click', () => {
+      if (spinning) return;
+      ta.value = WHEEL_PRESETS[b.dataset.preset].join('\n');
+      gameStore.save('wheel', { items: ta.value });
+      reset();
+    })
+  );
   draw();
   gameCleanup = () => cancelAnimationFrame(raf);
 }
@@ -1349,6 +1370,13 @@ const BOMB_SVG = `<svg class="bomb-svg" viewBox="0 0 200 200" aria-hidden="true"
   <ellipse cx="66" cy="96" rx="17" ry="10" fill="#fff" opacity=".25" transform="rotate(-35 66 96)"/>
 </svg>`;
 const BOMB_RANGES = { short: [5, 15], mid: [10, 30], long: [20, 60] };
+// 폭탄 제시어: 주제 또는 초성 → 조건에 맞는 말을 하고 폰을 넘김
+const BOMB_TOPICS = ['과자 이름', '라면 이름', '아이돌 그룹', '나라 이름', '동물', '과일', '채소', '음식', '지하철역', '직업', '색깔', '운동 종목', '영화 제목', '드라마 제목', '가수 이름', '브랜드', '수도 이름', '바다 동물', '꽃 이름', '곤충', '악기', '탈것', '게임 이름', '만화 캐릭터', '치킨 브랜드', '편의점 음식', '학교 과목', '스마트폰 앱', '세 글자 단어', '받침 없는 단어'];
+const BOMB_CHOSUNG = ['ㄱㅅ', 'ㅅㄱ', 'ㄱㄴ', 'ㅂㄹ', 'ㅅㅈ', 'ㄷㄹ', 'ㅈㄱ', 'ㅁㄹ', 'ㄱㅂ', 'ㅅㅁ', 'ㅂㅅ', 'ㅇㅅ', 'ㄱㄹ', 'ㅈㅅ', 'ㅎㄱ', 'ㄴㄹ', 'ㅅㄹ', 'ㄱㅈ', 'ㅂㄱ', 'ㅁㅅ', 'ㅇㄱ', 'ㅊㄱ', 'ㅍㄷ', 'ㅌㄹ', 'ㄷㄱ'];
+const bombWord = (mode) => {
+  const list = mode === 'chosung' ? BOMB_CHOSUNG : BOMB_TOPICS;
+  return list[Math.floor(Math.random() * list.length)];
+};
 
 function renderBomb(root) {
   const saved = gameStore.get('bomb') || {
@@ -1357,6 +1385,7 @@ function renderBomb(root) {
     penalties: '노래 한 소절 부르기\n애교 3종 세트\n성대모사 하나\n옆 사람 칭찬 3개\n엉덩이로 이름 쓰기\n다음 판 술래',
   };
   let len = saved.len;
+  let mode = saved.mode || 'topic';
   root.innerHTML = `
     <div class="bomb-stage">
       <div class="bomb">${BOMB_SVG}</div>
@@ -1372,6 +1401,12 @@ function renderBomb(root) {
         .map(([k, t]) => `<button class="chip" data-len="${k}" aria-pressed="${k === len}">${t}</button>`)
         .join('')}
     </div>
+    <div class="opt-row" role="group" aria-label="제시어">
+      ${Object.entries({ none: '제시어 없음', topic: '주제 (예: 과자 이름)', chosung: '초성 (예: ㄱㅅ)' })
+        .map(([k, t]) => `<button class="chip" data-mode="${k}" aria-pressed="${k === mode}">${t}</button>`)
+        .join('')}
+    </div>
+    <p class="lol-hint">주제·초성을 고르면 시작할 때 제시어가 나와요. 조건에 맞는 말을 하고 옆 사람에게 넘기세요!</p>
     <label class="check"><input type="checkbox" data-k="sound" ${saved.sound ? 'checked' : ''}> 째깍 소리 켜기</label>
     <label class="field">
       <span>벌칙 (터지면 하나 뽑아 줘요 · 비워도 돼요)</span>
@@ -1384,7 +1419,7 @@ function renderBomb(root) {
   const ta = root.querySelector('.names');
   let timer = 0;
 
-  const save = () => gameStore.save('bomb', { len, sound: soundEl.checked, penalties: ta.value });
+  const save = () => gameStore.save('bomb', { len, mode, sound: soundEl.checked, penalties: ta.value });
   const idle = (msg = '시작을 누르고 폰을 옆 사람에게 넘기세요!') => {
     stage.className = 'bomb-stage';
     stage.innerHTML = `<div class="bomb">${BOMB_SVG}</div><p class="bomb-msg">${msg}</p>`;
@@ -1397,7 +1432,14 @@ function renderBomb(root) {
     const [a, b] = BOMB_RANGES[len];
     const total = (a + Math.random() * (b - a)) * 1000;
     const t0 = performance.now();
-    idle('째깍째깍… 빨리 옆 사람에게 넘겨요!');
+    if (mode === 'none') idle('째깍째깍… 빨리 옆 사람에게 넘겨요!');
+    else {
+      idle('');
+      stage.querySelector('.bomb-msg').outerHTML = `<p class="bomb-word" title="눌러서 제시어 바꾸기">${esc(bombWord(mode))}</p><p class="bomb-msg">${mode === 'chosung' ? '이 초성으로 된 말' : '이 주제에 맞는 말'}을 하고 넘기세요! <small>(제시어를 누르면 바뀌어요)</small></p>`;
+      stage.querySelector('.bomb-word').addEventListener('click', (e) => {
+        e.currentTarget.textContent = bombWord(mode);
+      });
+    }
     const bomb = stage.querySelector('.bomb');
     bomb.classList.add('lit');
     startBtn.disabled = true;
@@ -1448,6 +1490,13 @@ function renderBomb(root) {
     b.addEventListener('click', () => {
       len = b.dataset.len;
       root.querySelectorAll('[data-len]').forEach((x) => x.setAttribute('aria-pressed', x === b));
+      save();
+    })
+  );
+  root.querySelectorAll('[data-mode]').forEach((b) =>
+    b.addEventListener('click', () => {
+      mode = b.dataset.mode;
+      root.querySelectorAll('[data-mode]').forEach((x) => x.setAttribute('aria-pressed', x === b));
       save();
     })
   );
@@ -1927,4 +1976,393 @@ function renderLol(root) {
   });
   drawLocks();
   gameCleanup = clear;
+}
+
+/* ═════════════════════ 라이어 게임 ═════════════════════ */
+
+// 폰 하나를 돌려 보며 하는 심리전: 라이어만 제시어를 모름 (바보 모드: 라이어는 비슷한 다른 단어를 받음)
+const LIAR_WORDS = {
+  음식: ['김치찌개', '떡볶이', '짜장면', '삼겹살', '치킨', '피자', '햄버거', '초밥', '라면', '비빔밥', '냉면', '김밥', '돈가스', '마라탕', '파스타', '순대', '만두', '불고기', '팥빙수', '붕어빵'],
+  동물: ['강아지', '고양이', '호랑이', '사자', '코끼리', '기린', '펭귄', '판다', '토끼', '거북이', '원숭이', '돌고래', '상어', '독수리', '하마', '캥거루', '다람쥐', '여우', '부엉이', '고래'],
+  장소: ['학교', '병원', '공항', '도서관', '영화관', '놀이공원', '편의점', '찜질방', '수영장', '해수욕장', '지하철', '캠핑장', '노래방', 'PC방', '백화점', '경찰서', '동물원', '카페', '헬스장', '미용실'],
+  직업: ['의사', '소방관', '경찰관', '선생님', '요리사', '가수', '배우', '유튜버', '프로게이머', '변호사', '간호사', '파일럿', '택배 기사', '미용사', '농부', '과학자', '운동선수', '개발자', '아나운서', '군인'],
+  물건: ['우산', '냉장고', '스마트폰', '안경', '칫솔', '시계', '가위', '거울', '베개', '이어폰', '선풍기', '지갑', '열쇠', '노트북', '전자레인지', '자전거', '텀블러', '마스크', '리모컨', '헤어드라이어'],
+  스포츠: ['축구', '야구', '농구', '배구', '테니스', '탁구', '골프', '수영', '스키', '태권도', '복싱', '볼링', '마라톤', '양궁', '배드민턴', '스케이트', '씨름', '유도', '펜싱', '당구'],
+  나라: ['미국', '일본', '중국', '프랑스', '영국', '이탈리아', '브라질', '호주', '캐나다', '독일', '스페인', '태국', '베트남', '이집트', '인도', '멕시코', '러시아', '스위스', '그리스', '튀르키예'],
+};
+
+function renderLiar(root) {
+  const saved = gameStore.get('liar') || { n: 4, cat: '음식', fool: false };
+  let n = saved.n;
+  let cat = saved.cat;
+  root.innerHTML = `
+    <div class="liar-stage"></div>
+    <div class="liar-setup">
+      <div class="field"><span>인원</span>
+        <div class="opt-row">${[3, 4, 5, 6, 7, 8, 9, 10].map((k) => `<button class="chip" data-n="${k}" aria-pressed="${k === n}">${k}명</button>`).join('')}</div>
+      </div>
+      <div class="field"><span>주제</span>
+        <div class="opt-row">${['랜덤', ...Object.keys(LIAR_WORDS)].map((k) => `<button class="chip" data-cat="${k}" aria-pressed="${k === cat}">${k}</button>`).join('')}</div>
+      </div>
+      <label class="check"><input type="checkbox" data-k="fool" ${saved.fool ? 'checked' : ''}> 바보 모드 (라이어도 자기가 라이어인 줄 모르고 비슷한 단어를 받아요)</label>
+      <button class="btn block" data-act="start">게임 시작</button>
+    </div>`;
+  const stage = root.querySelector('.liar-stage');
+  const setup = root.querySelector('.liar-setup');
+  const foolEl = root.querySelector('[data-k="fool"]');
+  let game = null;
+  let timer = 0;
+  const save = () => gameStore.save('liar', { n, cat, fool: foolEl.checked });
+
+  function start() {
+    save();
+    const topic = cat === '랜덤' ? Object.keys(LIAR_WORDS)[Math.floor(Math.random() * Object.keys(LIAR_WORDS).length)] : cat;
+    const [word, other] = shuffle(LIAR_WORDS[topic]);
+    game = { topic, word, other, liar: Math.floor(Math.random() * n), fool: foolEl.checked, turn: 0 };
+    setup.hidden = true;
+    showTurn();
+  }
+
+  // 한 사람씩: 폰 받기 → 눌러서 확인 → 가리고 넘기기
+  function showTurn() {
+    const i = game.turn;
+    stage.innerHTML = `
+      <div class="liar-card cover">
+        <p class="liar-who">${i + 1}번 플레이어</p>
+        <p>폰을 받았으면 아래 카드를 눌러<br>제시어를 혼자 확인하세요</p>
+        <button class="btn block" data-act="peek">🔍 내 제시어 보기</button>
+      </div>
+      <p class="game-result">주제: <b>${esc(game.topic)}</b> · ${i + 1} / ${n}</p>`;
+    stage.querySelector('[data-act="peek"]').addEventListener('click', () => {
+      const isLiar = i === game.liar;
+      const text = isLiar && !game.fool ? '당신은 <b class="liar-red">라이어</b>예요' : `제시어: <b>${esc(isLiar ? game.other : game.word)}</b>`;
+      stage.innerHTML = `
+        <div class="liar-card">
+          <p class="liar-who">${i + 1}번 플레이어</p>
+          <p class="liar-word">${text}</p>
+          ${isLiar && !game.fool ? '<p class="sub">들키지 않게 다른 사람 설명을 듣고 눈치껏 말하세요!</p>' : ''}
+          <button class="btn block" data-act="next">${i + 1 < n ? '확인했어요 · 가리고 다음 사람에게' : '확인했어요 · 모두 확인 끝'}</button>
+        </div>`;
+      stage.querySelector('[data-act="next"]').addEventListener('click', () => {
+        game.turn++;
+        if (game.turn < n) showTurn();
+        else talk();
+      });
+    });
+  }
+
+  // 설명 시간 (타이머) → 투표
+  function talk() {
+    let left = 180;
+    const first = Math.floor(Math.random() * n) + 1;
+    stage.innerHTML = `
+      <div class="liar-card">
+        <p class="liar-who">모두 확인 완료!</p>
+        <p><b>${first}번</b>부터 돌아가며 제시어를 한마디씩 설명하세요.<br>너무 쉽게 말하면 라이어가 눈치채요 😏</p>
+        <p class="liar-timer">3:00</p>
+        <button class="btn block" data-act="vote">투표하러 가기</button>
+      </div>`;
+    const t = stage.querySelector('.liar-timer');
+    timer = setInterval(() => {
+      left--;
+      t.textContent = `${Math.floor(Math.max(left, 0) / 60)}:${String(Math.max(left, 0) % 60).padStart(2, '0')}`;
+      if (left <= 0) {
+        clearInterval(timer);
+        t.textContent = '시간 끝!';
+        buzz(200);
+      }
+    }, 1000);
+    stage.querySelector('[data-act="vote"]').addEventListener('click', () => {
+      clearInterval(timer);
+      vote();
+    });
+  }
+
+  function vote() {
+    stage.innerHTML = `
+      <div class="liar-card">
+        <p class="liar-who">하나, 둘, 셋 하면 동시에 라이어를 가리키세요!</p>
+        <p>가장 많이 지목된 사람을 고르세요</p>
+        <div class="liar-votes">${Array.from({ length: n }, (_, k) => `<button class="chip" data-pick="${k}">${k + 1}번</button>`).join('')}</div>
+      </div>`;
+    stage.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => reveal(+b.dataset.pick)));
+  }
+
+  function reveal(pick) {
+    const caught = pick === game.liar;
+    stage.innerHTML = `
+      <div class="liar-card ${caught ? 'ok' : 'bad'}">
+        <p class="liar-who">${caught ? '🎯 라이어를 잡았어요!' : '😈 라이어가 숨어 있었어요!'}</p>
+        <p class="liar-word">라이어는 <b>${game.liar + 1}번</b> · 제시어는 <b>${esc(game.word)}</b>${game.fool ? ` <small>(라이어 단어: ${esc(game.other)})</small>` : ''}</p>
+        ${caught && !game.fool ? '<p>라이어에게 마지막 기회! 제시어를 맞히면 라이어 승리예요.</p><div class="game-actions"><button class="btn ghost block" data-end="liar">라이어가 맞혔어요</button><button class="btn ghost block" data-end="citizen">못 맞혔어요</button></div>' : ''}
+        <p class="game-result" data-role="final">${caught ? (game.fool ? '시민 승리! 🎉' : '') : '라이어 승리! 시민 모두 벌칙 😆'}</p>
+        <button class="btn block" data-act="again">한 판 더</button>
+      </div>`;
+    stage.querySelectorAll('[data-end]').forEach((b) =>
+      b.addEventListener('click', () => {
+        stage.querySelector('[data-role="final"]').textContent = b.dataset.end === 'liar' ? '라이어 역전승! 😈' : '시민 승리! 🎉';
+        stage.querySelectorAll('[data-end]').forEach((x) => (x.disabled = true));
+      })
+    );
+    stage.querySelector('[data-act="again"]').addEventListener('click', start);
+  }
+
+  root.querySelectorAll('[data-n]').forEach((b) =>
+    b.addEventListener('click', () => {
+      n = +b.dataset.n;
+      root.querySelectorAll('[data-n]').forEach((x) => x.setAttribute('aria-pressed', x === b));
+    })
+  );
+  root.querySelectorAll('[data-cat]').forEach((b) =>
+    b.addEventListener('click', () => {
+      cat = b.dataset.cat;
+      root.querySelectorAll('[data-cat]').forEach((x) => x.setAttribute('aria-pressed', x === b));
+    })
+  );
+  root.querySelector('[data-act="start"]').addEventListener('click', start);
+  stage.innerHTML = `<div class="liar-card"><p class="liar-who">🕵️ 라이어 게임</p><p>한 명만 제시어를 몰라요. 돌아가며 제시어를 설명하고,<br>거짓말하는 라이어를 투표로 찾아내세요!</p></div>`;
+  gameCleanup = () => clearInterval(timer);
+}
+
+/* ═════════════════════ 악어 룰렛 ═════════════════════ */
+
+function renderCroc(root) {
+  let teeth = 10;
+  let bite = -1;
+  let over = false;
+  root.innerHTML = `
+    <div class="croc">
+      <div class="croc-top">
+        <svg viewBox="0 0 320 110" aria-hidden="true"><path d="M10 100 Q20 20 120 18 L250 26 Q312 32 312 70 L312 100 Z" fill="#4fbf6a"/><circle cx="110" cy="40" r="15" fill="#fff"/><circle cx="114" cy="40" r="7" fill="#1d1b26"/><circle cx="200" cy="40" r="15" fill="#fff"/><circle cx="204" cy="40" r="7" fill="#1d1b26"/><circle cx="285" cy="52" r="4" fill="#2e8a44"/><circle cx="297" cy="60" r="4" fill="#2e8a44"/><path d="M10 100 L312 100" stroke="#2e8a44" stroke-width="6"/></svg>
+      </div>
+      <div class="croc-teeth"></div>
+      <div class="croc-jaw"></div>
+    </div>
+    <p class="game-result" role="status">이빨을 하나씩 번갈아 눌러 보세요. 하나는 물어요! 🐊</p>
+    <div class="game-actions">
+      <button class="btn block" data-act="reset">새 판 (다시 시작)</button>
+      <button class="btn ghost block" data-act="more">이빨 수 바꾸기</button>
+    </div>`;
+  const croc = root.querySelector('.croc');
+  const box = root.querySelector('.croc-teeth');
+  const resultEl = root.querySelector('.game-result');
+
+  function setup() {
+    over = false;
+    bite = Math.floor(Math.random() * teeth);
+    croc.classList.remove('snap');
+    box.style.setProperty('--n', teeth);
+    box.innerHTML = Array.from({ length: teeth }, (_, i) => `<button class="tooth" data-i="${i}" aria-label="${i + 1}번 이빨"></button>`).join('');
+    resultEl.textContent = `이빨 ${teeth}개 중 하나가 물어요! 번갈아 눌러 보세요 🐊`;
+  }
+  box.addEventListener('click', (e) => {
+    const t = e.target.closest('.tooth');
+    if (!t || over || t.classList.contains('down')) return;
+    if (+t.dataset.i === bite) {
+      over = true;
+      croc.classList.add('snap');
+      t.classList.add('hit');
+      buzz([250, 60, 250]);
+      gameAudio.unlock();
+      gameAudio.boom();
+      resultEl.innerHTML = '꽉! 🐊 <b>당첨!</b> 벌칙 받으세요';
+    } else {
+      t.classList.add('down');
+      buzz(15);
+      const left = box.querySelectorAll('.tooth:not(.down)').length;
+      resultEl.textContent = `휴~ 살았다! 남은 이빨 ${left}개`;
+    }
+  });
+  root.querySelector('[data-act="reset"]').addEventListener('click', setup);
+  root.querySelector('[data-act="more"]').addEventListener('click', () => {
+    teeth = teeth >= 14 ? 6 : teeth + 2;
+    setup();
+  });
+  setup();
+}
+
+/* ═════════════════════ 10초 미니게임 대결 ═════════════════════ */
+
+// 폰 하나를 돌려 가며 한 명씩 도전 → 라운드마다 꼴찌가 벌칙. (여러 폰 동시 접속은 서버가 필요해서 한 폰으로 진행)
+const MINI_GAMES = [
+  { id: 'tap', title: '5초 연타', desc: '5초 동안 화면을 최대한 많이 누르세요!', better: 'high', unit: '번' },
+  { id: 'ten', title: '10초 맞히기', desc: '정확히 10.00초에 멈추세요! (3초 뒤 시계가 사라져요)', better: 'low', unit: '초 차이' },
+  { id: 'react', title: '반응 속도', desc: '화면이 초록색으로 바뀌는 순간 누르세요! (먼저 누르면 실격)', better: 'low', unit: 'ms' },
+  { id: 'order', title: '1→16 순서대로', desc: '숫자를 1부터 16까지 순서대로 빠르게 누르세요!', better: 'low', unit: '초' },
+];
+
+function renderMini(root) {
+  const saved = gameStore.get('mini') || { names: '철수\n영희\n민수\n지은' };
+  root.innerHTML = `
+    <div class="mini-stage"></div>
+    <div class="mini-setup">
+      <label class="field"><span>참가자 (2~8명)</span><textarea class="names" rows="4">${esc(saved.names)}</textarea></label>
+      <button class="btn block" data-act="start">대결 시작</button>
+      <p class="lol-hint">한 라운드마다 미니게임이 하나씩 나와요. 폰을 돌려 가며 한 명씩 도전하고, 꼴찌는 벌칙!</p>
+    </div>`;
+  const stage = root.querySelector('.mini-stage');
+  const setupEl = root.querySelector('.mini-setup');
+  const ta = root.querySelector('.names');
+  let names = [];
+  let round = 0;
+  let order = shuffle(MINI_GAMES);
+  let scores = [];
+  let turn = 0;
+  let cleanup = () => {};
+  const stop = () => { cleanup(); cleanup = () => {}; };
+
+  function start() {
+    names = parseNames(ta.value, 8);
+    if (names.length < 2) {
+      stage.innerHTML = '<p class="game-result">참가자를 2명 이상 넣어 주세요.</p>';
+      return;
+    }
+    gameStore.save('mini', { names: ta.value });
+    setupEl.hidden = true;
+    round = 0;
+    order = shuffle(MINI_GAMES);
+    nextRound();
+  }
+  const mg = () => order[round % order.length];
+
+  function nextRound() {
+    scores = [];
+    turn = 0;
+    ready();
+  }
+
+  function ready() {
+    stop();
+    const g = mg();
+    stage.innerHTML = `
+      <div class="liar-card">
+        <p class="sub">라운드 ${round + 1} · ${turn + 1} / ${names.length}</p>
+        <p class="liar-who">🎮 ${esc(g.title)}</p>
+        <p>${esc(g.desc)}</p>
+        <p class="liar-word"><b>${esc(names[turn])}</b> 차례!</p>
+        <button class="btn block" data-act="go">준비됐으면 시작</button>
+      </div>`;
+    stage.querySelector('[data-act="go"]').addEventListener('click', () => play(g));
+  }
+
+  function done(score, label) {
+    stop();
+    scores[turn] = score;
+    stage.innerHTML = `<div class="liar-card"><p class="liar-who">${esc(names[turn])}</p><p class="liar-word">${label}</p><button class="btn block" data-act="next">${turn + 1 < names.length ? '다음 사람에게 넘기기' : '결과 보기'}</button></div>`;
+    stage.querySelector('[data-act="next"]').addEventListener('click', () => {
+      turn++;
+      if (turn < names.length) ready();
+      else result();
+    });
+  }
+
+  function play(g) {
+    if (g.id === 'tap') {
+      let n = 0;
+      let left = 5;
+      stage.innerHTML = `<button class="mini-pad">누르세요!<br><b>0</b><small>5.0초</small></button>`;
+      const pad = stage.querySelector('.mini-pad');
+      const t0 = performance.now();
+      pad.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (left <= 0) return;
+        n++;
+        pad.querySelector('b').textContent = n;
+      });
+      const iv = setInterval(() => {
+        left = 5 - (performance.now() - t0) / 1000;
+        pad.querySelector('small').textContent = `${Math.max(left, 0).toFixed(1)}초`;
+        if (left <= 0) {
+          clearInterval(iv);
+          buzz(80);
+          setTimeout(() => done(n, `<b>${n}번</b> 눌렀어요!`), 400);
+        }
+      }, 50);
+      cleanup = () => clearInterval(iv);
+    } else if (g.id === 'ten') {
+      stage.innerHTML = `<div class="mini-ten"><p class="mini-clock">0.00</p><button class="btn block mini-big" data-act="stop">멈춰!</button></div>`;
+      const clock = stage.querySelector('.mini-clock');
+      const t0 = performance.now();
+      const iv = setInterval(() => {
+        const t = (performance.now() - t0) / 1000;
+        clock.textContent = t < 3 ? t.toFixed(2) : '? ? ?';
+      }, 30);
+      stage.querySelector('[data-act="stop"]').addEventListener('click', () => {
+        clearInterval(iv);
+        const t = (performance.now() - t0) / 1000;
+        const diff = Math.abs(t - 10);
+        done(diff, `<b>${t.toFixed(2)}초</b>에 멈췄어요 (차이 ${diff.toFixed(2)}초)`);
+      });
+      cleanup = () => clearInterval(iv);
+    } else if (g.id === 'react') {
+      stage.innerHTML = `<button class="mini-pad wait">기다리세요…<br><small>초록색이 되면 누르기</small></button>`;
+      const pad = stage.querySelector('.mini-pad');
+      let goAt = 0;
+      const to = setTimeout(() => {
+        goAt = performance.now();
+        pad.className = 'mini-pad go';
+        pad.innerHTML = '지금!';
+      }, 1500 + Math.random() * 3000);
+      pad.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (!goAt) {
+          clearTimeout(to);
+          done(99999, '<b>너무 빨랐어요!</b> 실격 😅');
+        } else {
+          const ms = Math.round(performance.now() - goAt);
+          done(ms, `<b>${ms}ms</b> 만에 눌렀어요!`);
+        }
+      });
+      cleanup = () => clearTimeout(to);
+    } else if (g.id === 'order') {
+      const nums = shuffle(Array.from({ length: 16 }, (_, i) => i + 1));
+      stage.innerHTML = `<p class="game-result">다음: <b data-role="want">1</b></p><div class="mini-grid">${nums.map((v) => `<button data-v="${v}">${v}</button>`).join('')}</div>`;
+      let want = 1;
+      const t0 = performance.now();
+      stage.querySelector('.mini-grid').addEventListener('pointerdown', (e) => {
+        const b = e.target.closest('[data-v]');
+        if (!b) return;
+        e.preventDefault();
+        if (+b.dataset.v !== want) {
+          b.classList.remove('miss');
+          void b.offsetWidth;
+          b.classList.add('miss');
+          buzz(30);
+          return;
+        }
+        b.classList.add('hit');
+        want++;
+        if (want > 16) {
+          const sec = (performance.now() - t0) / 1000;
+          done(sec, `<b>${sec.toFixed(2)}초</b> 걸렸어요!`);
+        } else stage.querySelector('[data-role="want"]').textContent = want;
+      });
+    }
+  }
+
+  function result() {
+    const g = mg();
+    const rank = names.map((nm, i) => ({ nm, s: scores[i] })).sort((a, b) => (g.better === 'high' ? b.s - a.s : a.s - b.s));
+    const fmt = (s) => (s >= 99999 ? '실격' : g.id === 'tap' ? `${s}번` : g.id === 'react' ? `${s}ms` : `${s.toFixed(2)}초${g.id === 'ten' ? ' 차이' : ''}`);
+    const last = rank[rank.length - 1];
+    stage.innerHTML = `
+      <div class="liar-card">
+        <p class="liar-who">라운드 ${round + 1} 결과 · ${esc(g.title)}</p>
+        <ol class="mini-rank">${rank.map((r, i) => `<li class="${i === rank.length - 1 ? 'last' : ''}"><span>${i + 1}</span><b>${esc(r.nm)}</b><em>${fmt(r.s)}</em></li>`).join('')}</ol>
+        <p class="game-result">😈 꼴찌 <b>${esc(last.nm)}</b> 벌칙 당첨!</p>
+        <div class="game-actions"><button class="btn block" data-act="next">다음 라운드</button><button class="btn ghost block" data-act="end">그만하기</button></div>
+      </div>`;
+    buzz([120, 60, 120]);
+    stage.querySelector('[data-act="next"]').addEventListener('click', () => {
+      round++;
+      nextRound();
+    });
+    stage.querySelector('[data-act="end"]').addEventListener('click', () => {
+      stage.innerHTML = '';
+      setupEl.hidden = false;
+    });
+  }
+
+  root.querySelector('[data-act="start"]').addEventListener('click', start);
+  gameCleanup = stop;
 }

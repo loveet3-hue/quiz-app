@@ -49,3 +49,17 @@ const RANK = (title, rows) => {
     <text x="200" y="40" font-family="${KO}" font-size="${tfs}" font-weight="900" fill="#1d1b26" text-anchor="middle">🏆 ${x(title)}</text>${body}</svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 };
+// 캐치마인드식 그림: SKETCH(['M10 10 L50 50', ['M…', '#e74c3c'], …]) → 선이 한 획씩 그려지는 그림 (400×300 판)
+//   획마다 [경로, 색(선택), 굵기(선택)] · 순서대로 그려짐 · 전체 약 7초
+const SKETCH = (strokes, total = 7) => {
+  const list = strokes.map((s) => (Array.isArray(s) ? s : [s]));
+  const n = list.length;
+  const per = total / n;
+  const paths = list
+    .map(([d, color = '#2d3142', w = 6], i) =>
+      `<path d="${d}" pathLength="1" stroke="${color}" stroke-width="${w}" style="animation-delay:${(i * per).toFixed(2)}s;animation-duration:${Math.max(per, 0.35).toFixed(2)}s"/>`
+    )
+    .join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><style>path{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation-name:d;animation-timing-function:ease-in-out;animation-fill-mode:forwards}@keyframes d{to{stroke-dashoffset:0}}</style><rect width="400" height="300" fill="#fffef8"/>${paths}</svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+};

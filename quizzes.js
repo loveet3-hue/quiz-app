@@ -826,6 +826,16 @@ const QUIZZES = [
     questions: [],
   },
   {
+    id: 'catchmind',
+    title: '그림 보고 맞히기',
+    desc: '캐치마인드처럼 한 획씩 그려지는 그림, 먼저 맞혀 보세요!',
+    category: '재미',
+    perPlay: 10,
+    guide: '그림이 다 그려지기 전에 맞혀도 돼요',
+    cover: { image: COVERS.catchmind },
+    questions: [],
+  },
+  {
     id: 'lol-champs',
     title: '칭호 보고 롤 챔피언 맞히기',
     desc: '"구미호"는 누구? 리그 오브 레전드 챔피언 이름을 써 보세요',
@@ -946,7 +956,7 @@ for (const quiz of QUIZZES) {
   if (QUESTIONS[quiz.id] && QUESTIONS[quiz.id].length) quiz.questions = QUESTIONS[quiz.id];
 }
 // 새로 나온 퀴즈 (홈 '새로 나온 퀴즈' 줄과 NEW 표시)
-const NEW_QUIZZES = ['trivia-easy', 'trivia', 'life-trivia', 'lol-champs', 'melody', 'songs', 'char-colors', 'plots', 'movie-ratings', 'dialect', 'memes', 'mbti', 'cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
+const NEW_QUIZZES = ['catchmind', 'trivia-easy', 'trivia', 'life-trivia', 'lol-champs', 'melody', 'songs', 'char-colors', 'plots', 'movie-ratings', 'dialect', 'memes', 'mbti', 'cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
 for (const quiz of QUIZZES) if (NEW_QUIZZES.includes(quiz.id)) quiz.isNew = true;
 // 표지를 첫 문제 사진으로 쓰는 퀴즈
 for (const quiz of QUIZZES) {

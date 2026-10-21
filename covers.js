@@ -343,6 +343,35 @@ const COVERS = (() => {
       <circle cx="200" cy="150" r="24" fill="#2d3142"/>
       <text x="200" y="158" font-family="${NUM}" font-size="20" font-weight="700" fill="#fff" text-anchor="middle">VS</text>`),
 
+    // 라이어 게임: 가면 쓴 사람들 + 물음표
+    'game-liar': make('#efe7ff', '#ffd6e0', `
+      ${shadow(200, 254, 120)}
+      ${[[120, '#6fc8ff'], [200, '#ff8a7a'], [280, '#7ad98f']].map(([x, c], i) => `<circle cx="${x}" cy="${i === 1 ? 118 : 132}" r="${i === 1 ? 36 : 30}" fill="${c}"/><path d="M${x - (i === 1 ? 52 : 44)} ${i === 1 ? 236 : 236}c0-${i === 1 ? 60 : 48} ${i === 1 ? 24 : 20}-${i === 1 ? 76 : 64} ${i === 1 ? 52 : 44}-${i === 1 ? 76 : 64}s${i === 1 ? 52 : 44} ${i === 1 ? 16 : 16} ${i === 1 ? 52 : 44} ${i === 1 ? 76 : 64}z" fill="${c}"/>`).join('')}
+      <rect x="168" y="104" width="64" height="20" rx="10" fill="#2d3142"/><circle cx="186" cy="114" r="5" fill="#fff"/><circle cx="214" cy="114" r="5" fill="#fff"/>
+      <circle cx="292" cy="70" r="24" fill="#2d3142"/><text x="292" y="81" font-family="${NUM}" font-size="30" font-weight="700" fill="#ffd93d" text-anchor="middle">?</text>`),
+
+    // 10초 미니게임: 스톱워치 + 번개
+    'game-mini': make('#e0f2ff', '#c8b4ff', `
+      ${shadow(200, 256, 100)}
+      <circle cx="200" cy="160" r="82" fill="#fff" stroke="#2d3142" stroke-width="10"/>
+      <rect x="186" y="56" width="28" height="20" rx="5" fill="#2d3142"/><rect x="176" y="46" width="48" height="12" rx="6" fill="#ff5a5a"/>
+      <line x1="200" y1="160" x2="200" y2="104" stroke="#7c5cff" stroke-width="9" stroke-linecap="round"/>
+      <line x1="200" y1="160" x2="240" y2="180" stroke="#2d3142" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="200" cy="160" r="9" fill="#2d3142"/>
+      <text x="200" y="222" font-family="${NUM}" font-size="26" font-weight="700" fill="#7c5cff" text-anchor="middle">10.00</text>
+      <path d="M306 70l-20 34h14l-10 28 28-38h-14l12-24z" fill="#ffd93d" stroke="#e8a900" stroke-width="3"/>`),
+
+    // 악어 룰렛: 입 벌린 악어 + 이빨
+    'game-croc': make('#e3f7ec', '#fff1c4', `
+      ${shadow(200, 258, 130)}
+      <path d="M70 150 Q80 70 180 66 L300 74 Q340 80 340 120 L340 150 Z" fill="#4fbf6a"/>
+      <circle cx="170" cy="92" r="14" fill="#fff"/><circle cx="174" cy="92" r="7" fill="#1d1b26"/>
+      <circle cx="230" cy="92" r="14" fill="#fff"/><circle cx="234" cy="92" r="7" fill="#1d1b26"/>
+      <path d="M70 150 L340 150" stroke="#2e8a44" stroke-width="5"/>
+      ${Array.from({ length: 8 }, (_, i) => `<path d="M${90 + i * 31} 152 l14 24 l14 -24 z" fill="${i === 5 ? '#ff5a5a' : '#fff'}" stroke="#cfd5e2" stroke-width="2"/>`).join('')}
+      <path d="M70 178 L340 178 L340 196 Q330 236 200 238 Q80 236 70 196 Z" fill="#4fbf6a"/>
+      <path d="M78 182 L332 182 L332 192 Q200 206 78 192 Z" fill="#e86f7f"/>`),
+
     // 뽑기 게임: 주사위·동전
     'game-dice': make('#d9fbea', '#9eefcf', `
       ${shadow(200, 256, 110)}
@@ -503,6 +532,16 @@ const COVERS = (() => {
       <path d="M246 170h64l14 32a8 8 0 0 1-7 12h-78a8 8 0 0 1-7-12z" fill="#4fd18b"/>
       <rect x="254" y="84" width="48" height="10" rx="5" fill="#6b7fa8"/>
       <circle cx="270" cy="190" r="5" fill="#fff" opacity=".8"/><circle cx="288" cy="200" r="4" fill="#fff" opacity=".8"/>`),
+
+    // 캐치마인드: 스케치북 + 연필 + 그려지는 집
+    catchmind: make('#fff6cf', '#c8f0d8', `
+      ${shadow(200, 256, 120)}
+      <rect x="92" y="64" width="216" height="176" rx="12" fill="#fffef8" stroke="#2d3142" stroke-width="5"/>
+      ${[0, 1, 2, 3, 4, 5].map((i) => `<circle cx="${112 + i * 35}" cy="64" r="6" fill="#fff" stroke="#2d3142" stroke-width="4"/>`).join('')}
+      <path d="M140 200 V150 L190 112 L240 150 V200 Z" fill="none" stroke="#2d3142" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M180 200 V172 H200 V200" fill="none" stroke="#2d3142" stroke-width="5"/>
+      <path d="M150 104 q12 -14 24 0 t24 0" fill="none" stroke="#4f8cff" stroke-width="4" stroke-linecap="round"/>
+      <g transform="rotate(35 280 150)"><rect x="268" y="96" width="24" height="98" rx="4" fill="#ffd166" stroke="#2d3142" stroke-width="4"/><path d="M268 194 l12 24 l12 -24 z" fill="#f5d2a8" stroke="#2d3142" stroke-width="4" stroke-linejoin="round"/><rect x="268" y="96" width="24" height="16" fill="#ff8a7a" stroke="#2d3142" stroke-width="4"/></g>`),
 
     // MBTI: 알파벳 네 칸 + 물음표
     mbti: make('#ffe9f3', '#c9b6ff', `
