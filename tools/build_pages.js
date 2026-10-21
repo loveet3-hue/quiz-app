@@ -24,7 +24,7 @@ const rankLink = ctx.RL;
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-function meta({ title, desc, url, image }) {
+function meta({ title, desc, url, image, ld }) {
   return `<!--META-->
   <title>${esc(title)}</title>
   <meta name="description" content="${esc(desc)}">
@@ -37,15 +37,15 @@ function meta({ title, desc, url, image }) {
   <meta property="og:image" content="${image}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:card" content="summary_large_image">${ld ? `\n  <script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>` : ''}
   <!--/META-->`;
 }
 
-function page({ title, desc, url, image, body, noAds }) {
+function page({ title, desc, url, image, body, noAds, ld }) {
   // 광고 없는 퀴즈(실존 인물 사진)는 애드센스 스크립트를 빼고 계정 확인용 meta만 남김
   const t = noAds ? tpl.replace(/<script async id="adsense-js"[^>]*><\/script>\n\s*/, '') : tpl;
   return t
-    .replace(/<!--META-->[\s\S]*?<!--\/META-->/, meta({ title, desc, url, image }))
+    .replace(/<!--META-->[\s\S]*?<!--\/META-->/, meta({ title, desc, url, image, ld }))
     .replace(/<!--STATIC-->[\s\S]*?<!--\/STATIC-->/, `<!--STATIC--><div class="seo-static">${body}</div><!--/STATIC-->`);
 }
 
@@ -61,11 +61,21 @@ const urls = [];
 // 홈 (검색엔진용으로 퀴즈 목록을 글로도 넣어 둠 — 화면은 앱이 다시 그림)
 const homeBody = `<h1>맞혀봐 - 직접 써서 맞히는 퀴즈</h1><ul>${QUIZZES.map((q) => `<li><a href="/q/${q.id}/">${esc(q.title)}</a> - ${esc(q.desc)}</li>`).join('')}</ul><p><a href="/games/">뽑기 게임</a> · <a href="/about.html">소개</a> · <a href="/privacy.html">개인정보 처리방침</a></p>`;
 const homeHtml = page({
-  title: '맞혀봐 - 직접 써서 맞히는 퀴즈',
-  desc: `사진 보고, 초성 보고, 정답을 직접 입력하는 주관식 퀴즈와 뽑기 게임, 1위 맞히기 랭킹. 국기·명화·자동차·연예인·MBTI 등`,
+  title: '맞혀봐 - 상식 퀴즈 · 그림 퀴즈 · 뽑기 게임 · 랭킹',
+  desc: `맞혀봐(맞춰봐)는 사진·초성·그림을 보고 정답을 직접 써서 맞히는 무료 주관식 퀴즈 사이트예요. 상식 퀴즈, 국기 퀴즈, 초성 퀴즈, 노래·영화 퀴즈와 라이어 게임·돌림판·사다리 같은 뽑기 게임, 1위 맞히기 랭킹까지`,
   url: `${SITE}/`,
   image: ogFile('home'),
   body: homeBody,
+  ld: {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: '맞혀봐',
+    alternateName: ['맞춰봐', '맞혀봐 퀴즈', 'quizbwa'],
+    url: `${SITE}/`,
+    inLanguage: 'ko',
+    description: '사진·초성·그림을 보고 정답을 직접 써서 맞히는 무료 주관식 퀴즈와 뽑기 게임',
+    publisher: { '@type': 'Organization', name: '맞혀봐', logo: { '@type': 'ImageObject', url: `${SITE}/icons/icon-512.png` } },
+  },
 });
 write('index.html', homeHtml);
 write('404.html', homeHtml); // 모르는 주소는 앱이 홈을 보여줌
@@ -77,11 +87,12 @@ for (const q of QUIZZES) {
   write(
     `q/${q.id}/index.html`,
     page({
-      title: `${q.title} - 맞혀봐`,
+      title: `${/퀴즈/.test(q.title) ? q.title : `${q.title} 퀴즈`} - 맞혀봐`,
       desc: `${q.desc} · ${n}, 정답을 직접 입력하는 주관식 퀴즈`,
       url: `${SITE}/q/${q.id}/`,
       image: ogFile(q.id),
       body: `<h1>${esc(q.title)}</h1><p>${esc(q.desc)} · ${n}</p><p><a href="/">다른 퀴즈 보기</a></p>`,
+      ld: { '@context': 'https://schema.org', '@type': 'Quiz', name: q.title, description: q.desc, about: q.category, inLanguage: 'ko', url: `${SITE}/q/${q.id}/`, isAccessibleForFree: true },
       noAds: q.noAds,
     })
   );
@@ -161,6 +172,19 @@ write(
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
     .map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${today}</lastmod></url>`)
     .join('\n')}\n</urlset>\n`
+);
+// RSS (네이버 서치어드바이저에 제출) — 퀴즈·게임·랭킹 페이지 목록
+const rssItems = [
+  ...QUIZZES.map((q) => ({ t: `${q.title}`, d: q.desc, u: `${SITE}/q/${q.id}/` })),
+  ...GAMES.map((g) => ({ t: `${g.title} - 뽑기 게임`, d: g.desc, u: `${SITE}/game/${g.id}/` })),
+  ...RANKINGS.map((b) => ({ t: `${b.title} 1위는?`, d: b.q, u: `${SITE}/ranking/${b.id}/` })),
+];
+const xesc = (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+write(
+  'rss.xml',
+  `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>맞혀봐</title><link>${SITE}/</link><description>직접 써서 맞히는 주관식 퀴즈, 뽑기 게임, 1위 맞히기 랭킹</description><language>ko</language>\n${rssItems
+    .map((it) => `<item><title>${xesc(it.t)}</title><link>${it.u}</link><guid>${it.u}</guid><description>${xesc(it.d)}</description></item>`)
+    .join('\n')}\n</channel></rss>\n`
 );
 write('robots.txt', `User-agent: *\nAllow: /\nDisallow: /tools/\n\nSitemap: ${SITE}/sitemap.xml\n`);
 

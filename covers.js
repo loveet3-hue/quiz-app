@@ -511,6 +511,14 @@ const COVERS = (() => {
       <rect x="140" y="222" width="120" height="34" rx="17" fill="#4fd18b"/>
       <text x="200" y="246" font-family="${KO}" font-size="20" font-weight="800" fill="#fff" text-anchor="middle">쉬움</text>`),
 
+    // 어려운 상식: 학사모 + 불꽃 별 세 개
+    'trivia-hard': make('#2d3142', '#5b4a9e', `
+      ${shadow(200, 254, 110)}
+      <path d="M200 92 L320 140 L200 188 L80 140 Z" fill="#1d1b26" stroke="#ffd93d" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M130 162 V214 Q200 248 270 214 V162 L200 188 Z" fill="#1d1b26" stroke="#ffd93d" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M300 148 V206" stroke="#ffd93d" stroke-width="5"/><circle cx="300" cy="214" r="10" fill="#ffd93d"/>
+      ${[[110, 70], [200, 52], [290, 70]].map(([x, y]) => `<path d="M${x} ${y - 16}l5 11 12 2-9 8 2 12-10-6-10 6 2-12-9-8 12-2z" fill="#ff8a7a"/>`).join('')}`),
+
     // 일반 상식: 펼친 책 + 전구
     trivia: make('#e3f0ff', '#b8d4ff', `
       ${shadow(200, 254, 120)}

@@ -77,6 +77,15 @@ const QUIZZES = [
     questions: [],
   },
   {
+    id: 'trivia-hard',
+    title: '어려운 상식 퀴즈 (고급)',
+    desc: '골든벨 마지막 문제급! 상식 고수만 도전하세요',
+    category: '상식',
+    perPlay: 10,
+    cover: { image: COVERS['trivia-hard'] },
+    questions: [],
+  },
+  {
     id: 'life-trivia',
     title: '생활·과학 상식 퀴즈',
     desc: '물은 몇 도에서 끓을까? 일상 속 과학 상식',
@@ -956,7 +965,7 @@ for (const quiz of QUIZZES) {
   if (QUESTIONS[quiz.id] && QUESTIONS[quiz.id].length) quiz.questions = QUESTIONS[quiz.id];
 }
 // 새로 나온 퀴즈 (홈 '새로 나온 퀴즈' 줄과 NEW 표시)
-const NEW_QUIZZES = ['catchmind', 'trivia-easy', 'trivia', 'life-trivia', 'lol-champs', 'melody', 'songs', 'char-colors', 'plots', 'movie-ratings', 'dialect', 'memes', 'mbti', 'cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
+const NEW_QUIZZES = ['trivia-hard', 'catchmind', 'trivia-easy', 'trivia', 'life-trivia', 'lol-champs', 'melody', 'songs', 'char-colors', 'plots', 'movie-ratings', 'dialect', 'memes', 'mbti', 'cars', 'flowers', 'fruits-veg', 'dogs', 'food-photos', 'game-chars', 'anime-chars', 'birds', 'sea', 'cats', 'insects', 'vehicles', 'instruments', 'celeb-photos'];
 for (const quiz of QUIZZES) if (NEW_QUIZZES.includes(quiz.id)) quiz.isNew = true;
 // 표지를 첫 문제 사진으로 쓰는 퀴즈
 for (const quiz of QUIZZES) {
