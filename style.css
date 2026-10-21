@@ -1430,3 +1430,26 @@ a.rank-name:hover { color: var(--primary); }
 .mini-rank li b { flex: 1; text-align: left; }
 .mini-rank li em { font-style: normal; font-size: 14px; color: var(--text-3); }
 .mini-rank li.last { background: rgba(224, 49, 43, .12); }
+
+/* 기념일 로고: 로고 위에 소품 + 옆에 기념일 이름 */
+.logo-mark { position: relative; display: inline-flex; flex: none; }
+.logo-deco { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.logo.festive img { animation: festive-pop .6s ease; }
+@keyframes festive-pop { 0% { transform: scale(.8) rotate(-8deg); } 60% { transform: scale(1.08) rotate(3deg); } 100% { transform: none; } }
+.logo-day {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 2px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.logo-day b { font-weight: 400; }
+@media (max-width: 560px) { .logo-day span { display: none; } .logo-day { padding: 3px 6px; } }
