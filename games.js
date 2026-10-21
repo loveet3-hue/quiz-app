@@ -2372,15 +2372,29 @@ function renderMini(root) {
 
 /* ═════════════════════ 카드 짝 맞추기 ═════════════════════ */
 
-const MEMORY_FACES = ['🍎', '🍌', '🍇', '🍓', '🍒', '🍑', '🥝', '🍍', '🐶', '🐱', '🐰', '🐼', '🦊', '🐸', '🐧', '🦄', '⚽', '🎲', '🎈', '🚗', '🌈', '⭐', '🍩', '🎁'];
-// 그림마다 다른 파스텔 바탕 (짝끼리 같은 색이라 찾기 재밌게)
-const MEMORY_COLORS = ['#ffd6d6', '#fff1b8', '#e3d7ff', '#ffd6ec', '#ffe0c2', '#d6f5e3', '#d6ecff', '#fff6cf', '#e8f7d0', '#ffe3f1', '#dff4ff', '#f1e6ff'];
+// 테마별 그림 (한 판에 같은 테마로만 나와서 더 예쁘게)
+const MEMORY_SETS = {
+  동물: ['🐶', '🐱', '🐰', '🐼', '🦊', '🐸', '🐧', '🐯', '🦁', '🐨', '🐷', '🐹', '🐻', '🐮'],
+  과일: ['🍎', '🍌', '🍇', '🍓', '🍒', '🍑', '🥝', '🍍', '🍋', '🍉', '🥥', '🫐', '🍊', '🍐'],
+  간식: ['🍩', '🍪', '🧁', '🍰', '🍦', '🍭', '🍫', '🍿', '🥨', '🧇', '🍬', '🥐', '🍮', '🍡'],
+  우주: ['🚀', '🪐', '🌙', '⭐', '☄️', '🛸', '🌍', '☀️', '👽', '🌈', '⚡', '🌟', '🔭', '🌠'],
+};
+// 짝마다 서로 다른 그라데이션 (한 판 안에서 색이 겹치지 않게 짝 순서대로 나눠 줌)
+const MEMORY_GRADS = [
+  ['#ff9a9e', '#fecfef'], ['#a1c4fd', '#c2e9fb'], ['#84fab0', '#8fd3f4'], ['#fbc2eb', '#a6c1ee'],
+  ['#fddb92', '#f6a96b'], ['#c3a6ff', '#8ec5fc'], ['#ffecd2', '#fcb69f'], ['#a8edea', '#7ed6c1'],
+  ['#f6d365', '#fda085'], ['#d4fc79', '#96e6a1'], ['#ff8fb1', '#ffc3a0'], ['#b8c6ff', '#e0c3fc'],
+];
 
 function renderMemory(root) {
-  const saved = gameStore.get('memory') || { pairs: 8, two: false };
+  const saved = gameStore.get('memory') || { pairs: 8, two: false, theme: '동물' };
   let pairs = saved.pairs;
   let two = saved.two;
+  let theme = MEMORY_SETS[saved.theme] ? saved.theme : '동물';
   root.innerHTML = `
+    <div class="opt-row" role="group" aria-label="테마">
+      ${Object.keys(MEMORY_SETS).map((t) => `<button class="chip" data-theme="${t}" aria-pressed="${t === theme}">${MEMORY_SETS[t][0]} ${t}</button>`).join('')}
+    </div>
     <div class="opt-row" role="group" aria-label="카드 수">
       ${[6, 8, 10, 12].map((p) => `<button class="chip" data-p="${p}" aria-pressed="${p === pairs}">${p * 2}장</button>`).join('')}
       <button class="chip" data-two aria-pressed="${two}">👥 2인 대결</button>
@@ -2429,8 +2443,9 @@ function renderMemory(root) {
 
   function setup() {
     clear();
-    gameStore.save('memory', { pairs, two });
-    const pick = shuffle(MEMORY_FACES.map((f, i) => i)).slice(0, pairs);
+    gameStore.save('memory', { pairs, two, theme });
+    const faces = shuffle(MEMORY_SETS[theme]).slice(0, pairs);
+    const pick = faces.map((_, i) => i); // 짝 번호 0..pairs-1 → 그림·색
     cards = shuffle([...pick, ...pick]);
     open = [];
     moves = 0;
@@ -2441,7 +2456,10 @@ function renderMemory(root) {
     score = [0, 0];
     grid.style.setProperty('--cols', pairs <= 8 ? 4 : pairs <= 10 ? 5 : 6);
     grid.innerHTML = cards
-      .map((f, i) => `<button class="mem-card" data-i="${i}" aria-label="카드"><span class="mem-in"><span class="mem-back"><b>?</b></span><span class="mem-front" style="--bg:${MEMORY_COLORS[f % MEMORY_COLORS.length]}"><i>${MEMORY_FACES[f]}</i></span></span></button>`)
+      .map((f, i) => {
+        const [c1, c2] = MEMORY_GRADS[f % MEMORY_GRADS.length];
+        return `<button class="mem-card" data-i="${i}" aria-label="카드"><span class="mem-in"><span class="mem-back"><img src="/icons/logo.svg" alt=""></span><span class="mem-front" style="--c1:${c1};--c2:${c2}"><i>${faces[f]}</i></span></span></button>`;
+      })
       .join('');
     // 시작할 때 전체를 한 번 보여 줌 (카드가 많을수록 조금 더 길게)
     let n = 3;
@@ -2503,6 +2521,13 @@ function renderMemory(root) {
     b.addEventListener('click', () => {
       pairs = +b.dataset.p;
       root.querySelectorAll('[data-p]').forEach((x) => x.setAttribute('aria-pressed', x === b));
+      setup();
+    })
+  );
+  root.querySelectorAll('[data-theme]').forEach((b) =>
+    b.addEventListener('click', () => {
+      theme = b.dataset.theme;
+      root.querySelectorAll('[data-theme]').forEach((x) => x.setAttribute('aria-pressed', x === b));
       setup();
     })
   );

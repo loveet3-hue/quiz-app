@@ -1492,21 +1492,28 @@ a.icon-btn { display: inline-grid; place-items: center; }
 }
 .mem-back {
   background:
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .22) 0 30%, transparent 31%),
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, .12) 0 6px, transparent 6px 12px),
-    linear-gradient(160deg, #7c5cff, #c86bff);
-  box-shadow: 0 3px 0 #5a3fd6, inset 0 0 0 3px rgba(255, 255, 255, .35);
+    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, .35) 0 8%, transparent 9%),
+    radial-gradient(circle at 80% 85%, rgba(255, 255, 255, .25) 0 10%, transparent 11%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, .09) 0 8px, transparent 8px 16px),
+    linear-gradient(160deg, #7c5cff, #ff6b9a);
+  box-shadow: 0 4px 0 #5a3fd6, inset 0 0 0 3px rgba(255, 255, 255, .45);
 }
-.mem-back b { color: #fff; font-size: clamp(18px, 5vw, 26px); font-weight: 900; text-shadow: 0 2px 0 rgba(0, 0, 0, .15); }
+.mem-back img { width: 46%; height: auto; border-radius: 22%; box-shadow: 0 4px 10px rgba(40, 20, 90, .35); opacity: .95; }
 .mem-front {
   transform: rotateY(180deg) translateZ(0);
-  background: radial-gradient(circle at 50% 40%, #fff 0 34%, transparent 35%), var(--bg, #fff);
-  box-shadow: 0 3px 0 rgba(0, 0, 0, .12), inset 0 0 0 3px rgba(255, 255, 255, .7);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(255, 255, 255, .55) 0 32%, transparent 58%),
+    linear-gradient(160deg, var(--c1, #ffd6d6), var(--c2, #fecfef));
+  box-shadow: 0 4px 0 rgba(0, 0, 0, .14), inset 0 0 0 3px rgba(255, 255, 255, .8);
 }
-.mem-front i { font-style: normal; font-size: clamp(26px, 8vw, 40px); line-height: 1; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .15)); }
-.mem-card.done .mem-front { box-shadow: 0 0 0 3px #2bb24c, 0 3px 0 rgba(0, 0, 0, .12); }
-.mem-card.done .mem-front i { animation: mem-pop .4s ease; }
-@keyframes mem-pop { 50% { transform: scale(1.25) rotate(-8deg); } }
+.mem-front::before, .mem-front::after { content: '✦'; position: absolute; color: rgba(255, 255, 255, .9); font-size: 14px; }
+.mem-front::before { top: 8%; left: 12%; }
+.mem-front::after { bottom: 9%; right: 12%; font-size: 10px; }
+.mem-front i { font-style: normal; font-size: clamp(34px, 11vw, 58px); line-height: 1; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, .18)); }
+.mem-card.done .mem-front { box-shadow: 0 0 0 3px #fff, 0 0 0 6px #2bb24c, 0 4px 0 rgba(0, 0, 0, .14); }
+.mem-card.done .mem-front i { animation: mem-pop .45s ease; }
+@keyframes mem-pop { 40% { transform: scale(1.3) rotate(-10deg); } 70% { transform: scale(.95) rotate(4deg); } }
 
 /* 사과 게임 */
 .apple-bar { display: flex; align-items: center; gap: 10px; font-weight: 900; }

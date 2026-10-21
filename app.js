@@ -353,39 +353,33 @@ function renderQuizList(fmt) {
         </a>`;
       }).join('')}
     </div>
-    <section class="home-sec" id="all" hidden>
-      <h2 class="sec-title">찾은 퀴즈</h2>
+    <section class="home-sec" id="all">
+      <div class="sec-head"><h2 class="sec-title">🔥 전체 퀴즈 <small>인기순</small></h2></div>
+      <div class="chips" role="group" aria-label="분류">
+        ${cats.map((c) => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === home.category}">${esc(c)}</button>`).join('')}
+      </div>
       <div class="grid"></div>
     </section>
     ${adHtml('homeBottom')}
     ${SITE_FOOT}`;
 
   const search = app.querySelector('.search');
-  const showSearch = () => {
-    const on = !!normalize(home.query);
-    app.querySelector('#all').hidden = !on;
-    app.querySelector('.fmt-grid').hidden = on;
-    if (on) renderGrid();
-  };
-  if (search) {
+  if (search)
     search.addEventListener('input', (e) => {
       home.query = e.target.value;
-      showSearch();
+      renderGrid();
     });
-    showSearch();
-  } else {
-    app.querySelectorAll('.chip').forEach((btn) =>
-      btn.addEventListener('click', () => {
-        home.category = btn.dataset.cat;
-        app.querySelectorAll('.chip').forEach((b) => b.setAttribute('aria-pressed', b === btn));
-        renderGrid();
-      })
-    );
-    renderGrid();
-  }
+  app.querySelectorAll('.chip').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      home.category = btn.dataset.cat;
+      app.querySelectorAll('.chip').forEach((b) => b.setAttribute('aria-pressed', b === btn));
+      renderGrid();
+    })
+  );
+  renderGrid();
   fillAds();
   counts.refresh().then((fresh) => {
-    if (fresh && app.querySelector('.grid:not([hidden])') && !play && (format || normalize(home.query))) renderGrid();
+    if (fresh && app.querySelector('.grid') && !play) renderGrid();
   });
 }
 
@@ -425,16 +419,14 @@ function renderGrid() {
   const stats = store.get();
   const q = normalize(home.query);
   const plays = counts.get();
-  // 전체 목록은 분류 순서대로 (같은 분류끼리 모아서)
-  const catOrder = new Map(CATEGORIES.map((c, i) => [c, i]));
+  // 참여 많은 순 (같으면 원래 순서)
   const order = new Map(QUIZZES.map((quiz, i) => [quiz.id, i]));
-  const inFormat = !!home.format;
   const list = QUIZZES.filter(
     (quiz) =>
-      (inFormat
-        ? quiz.format === home.format && (home.category === '전체' || quiz.category === home.category)
-        : !!q && normalize(quiz.title + quiz.desc + quiz.category).includes(q))
-  ).sort((a, b) => catOrder.get(a.category) - catOrder.get(b.category) || order.get(a.id) - order.get(b.id));
+      (!home.format || quiz.format === home.format) &&
+      (home.category === '전체' || quiz.category === home.category) &&
+      (!q || normalize(quiz.title + quiz.desc + quiz.category).includes(q))
+  ).sort((a, b) => (plays[b.id] || 0) - (plays[a.id] || 0) || order.get(a.id) - order.get(b.id));
   const grid = app.querySelector('.grid');
   if (!list.length) {
     grid.innerHTML = '';
