@@ -11,6 +11,9 @@ const GAMES = [
   { id: 'lots', title: '제비뽑기', desc: '종이를 하나씩 펼쳐서 당첨 찾기', cover: () => COVERS['game-lots'] },
   { id: 'bomb', title: '폭탄 돌리기', desc: '폰을 돌리다 터지면 벌칙!', cover: () => COVERS['game-bomb'] },
   { id: 'teams', title: '팀 나누기', desc: '이름만 넣으면 공평하게 팀 배정', cover: () => COVERS['game-teams'] },
+  { id: 'memory', title: '카드 짝 맞추기', desc: '같은 그림 두 장을 찾아 뒤집기, 혼자 또는 2인 대결', cover: () => COVERS['game-memory'] },
+  { id: 'apple', title: '사과 게임', desc: '숫자 합이 10이 되게 묶어서 사과 지우기', cover: () => COVERS['game-apple'] },
+  { id: 'balance', title: '균형 잡기', desc: '황새가 외나무다리를 오래 걷게 균형을 잡아요', cover: () => COVERS['game-balance'] },
   { id: 'liar', title: '라이어 게임', desc: '한 명만 제시어를 몰라요. 라이어를 찾아라!', cover: () => COVERS['game-liar'] },
   { id: 'mini', title: '10초 미니게임 대결', desc: '연타·반응속도·10초 맞히기, 꼴찌는 벌칙', cover: () => COVERS['game-mini'] },
   { id: 'croc', title: '악어 룰렛', desc: '이빨을 번갈아 누르다 물리면 당첨!', cover: () => COVERS['game-croc'] },
@@ -69,7 +72,7 @@ function countdown(overlay, done) {
 }
 
 // 새로 나온 게임 (홈 '새로 나온 게임' 줄과 NEW 표시)
-const NEW_GAMES = ['liar', 'mini', 'croc', 'lol', 'bomb'];
+const NEW_GAMES = ['memory', 'apple', 'balance', 'liar', 'mini', 'croc'];
 
 // 게임 참여 수는 퀴즈와 같은 집계 서버에 'game-<id>'로 셈 (하루 한 번, 익명)
 const gamePlays = (plays, g) => plays['game-' + g.id] || 0;
@@ -128,7 +131,7 @@ function renderGame(id) {
     <div class="game-body"></div>`;
   app.querySelector('[data-act="home"]').addEventListener('click', () => nav('/games/'));
   const body = app.querySelector('.game-body');
-  ({ wheel: renderWheel, ladder: renderLadder, marble: renderMarble, horse: renderHorse, lots: renderLots, bomb: renderBomb, teams: renderTeams, lol: renderLol, dice: renderDice, liar: renderLiar, croc: renderCroc, mini: renderMini })[id](body);
+  ({ wheel: renderWheel, ladder: renderLadder, marble: renderMarble, horse: renderHorse, lots: renderLots, bomb: renderBomb, teams: renderTeams, lol: renderLol, dice: renderDice, liar: renderLiar, croc: renderCroc, mini: renderMini, memory: renderMemory, apple: renderApple, balance: renderBalance })[id](body);
 }
 
 /* ═════════════════════ 돌림판 ═════════════════════ */
@@ -2365,4 +2368,481 @@ function renderMini(root) {
 
   root.querySelector('[data-act="start"]').addEventListener('click', start);
   gameCleanup = stop;
+}
+
+/* ═════════════════════ 카드 짝 맞추기 ═════════════════════ */
+
+const MEMORY_FACES = ['🍎', '🍌', '🍇', '🍓', '🍒', '🍑', '🥝', '🍍', '🐶', '🐱', '🐰', '🐼', '🦊', '🐸', '🐧', '🦄', '⚽', '🎲', '🎈', '🚗'];
+
+function renderMemory(root) {
+  const saved = gameStore.get('memory') || { pairs: 8, two: false };
+  let pairs = saved.pairs;
+  let two = saved.two;
+  root.innerHTML = `
+    <div class="opt-row" role="group" aria-label="카드 수">
+      ${[6, 8, 10, 12].map((p) => `<button class="chip" data-p="${p}" aria-pressed="${p === pairs}">${p * 2}장</button>`).join('')}
+      <button class="chip" data-two aria-pressed="${two}">👥 2인 대결</button>
+    </div>
+    <p class="game-result" role="status"></p>
+    <div class="mem-grid"></div>
+    <div class="game-actions">
+      <button class="btn block" data-act="reset">새 게임 (다시 시작)</button>
+      <button class="btn ghost block" data-act="peek">처음에 3초 보여주기</button>
+    </div>`;
+  const grid = root.querySelector('.mem-grid');
+  const resultEl = root.querySelector('.game-result');
+  let cards = [];
+  let open = [];
+  let lock = false;
+  let moves = 0;
+  let found = 0;
+  let t0 = 0;
+  let turn = 0;
+  let score = [0, 0];
+  let timers = [];
+  const clear = () => { timers.forEach(clearTimeout); timers = []; };
+  const best = () => gameStore.get('memory-best-' + pairs);
+
+  function status(msg) {
+    if (two) resultEl.innerHTML = `${msg ? msg + '<br>' : ''}<small class="sub">${turn === 0 ? '👉 ' : ''}1번 ${score[0]}점 · ${turn === 1 ? '👉 ' : ''}2번 ${score[1]}점</small>`;
+    else {
+      const b = best();
+      resultEl.innerHTML = `${msg ? msg + '<br>' : ''}<small class="sub">${moves}번 뒤집음 · 찾은 짝 ${found}/${pairs}${b ? ` · 최고 ${b.moves}번(${b.sec}초)` : ''}</small>`;
+    }
+  }
+
+  function setup() {
+    clear();
+    gameStore.save('memory', { pairs, two });
+    const faces = shuffle(MEMORY_FACES).slice(0, pairs);
+    cards = shuffle([...faces, ...faces]);
+    open = [];
+    lock = false;
+    moves = 0;
+    found = 0;
+    t0 = 0;
+    turn = 0;
+    score = [0, 0];
+    grid.style.setProperty('--cols', pairs <= 6 ? 4 : pairs <= 8 ? 4 : pairs <= 10 ? 5 : 6);
+    grid.innerHTML = cards.map((f, i) => `<button class="mem-card" data-i="${i}" aria-label="카드"><span class="mem-in"><span class="mem-back">?</span><span class="mem-front">${f}</span></span></button>`).join('');
+    status(two ? '1번부터 카드 두 장을 뒤집어 보세요' : '같은 그림 두 장을 찾아보세요');
+  }
+
+  grid.addEventListener('click', (e) => {
+    const c = e.target.closest('.mem-card');
+    if (!c || lock || c.classList.contains('open') || c.classList.contains('done')) return;
+    if (!t0) t0 = performance.now();
+    c.classList.add('open');
+    open.push(c);
+    if (open.length < 2) return;
+    moves++;
+    const [a, b] = open;
+    if (cards[a.dataset.i] === cards[b.dataset.i]) {
+      a.classList.add('done');
+      b.classList.add('done');
+      open = [];
+      found++;
+      buzz(30);
+      if (two) score[turn]++;
+      if (found === pairs) {
+        const sec = Math.round((performance.now() - t0) / 1000);
+        if (two) {
+          const w = score[0] === score[1] ? '무승부!' : `🏆 ${score[0] > score[1] ? 1 : 2}번 승리!`;
+          status(`${w}`);
+        } else {
+          const b0 = best();
+          const isBest = !b0 || moves < b0.moves || (moves === b0.moves && sec < b0.sec);
+          if (isBest) gameStore.save('memory-best-' + pairs, { moves, sec });
+          status(`🎉 다 찾았어요! ${moves}번 만에 ${sec}초${isBest ? ' · 최고 기록!' : ''}`);
+        }
+      } else status(two ? `짝 찾기! ${turn + 1}번 한 번 더` : '짝을 찾았어요! 👏');
+    } else {
+      lock = true;
+      timers.push(
+        setTimeout(() => {
+          a.classList.remove('open');
+          b.classList.remove('open');
+          open = [];
+          lock = false;
+          if (two) turn = 1 - turn;
+          status(two ? `${turn + 1}번 차례` : '');
+        }, 800)
+      );
+    }
+  });
+  root.querySelectorAll('[data-p]').forEach((b) =>
+    b.addEventListener('click', () => {
+      pairs = +b.dataset.p;
+      root.querySelectorAll('[data-p]').forEach((x) => x.setAttribute('aria-pressed', x === b));
+      setup();
+    })
+  );
+  root.querySelector('[data-two]').addEventListener('click', (e) => {
+    two = !two;
+    e.currentTarget.setAttribute('aria-pressed', two);
+    setup();
+  });
+  root.querySelector('[data-act="reset"]').addEventListener('click', setup);
+  root.querySelector('[data-act="peek"]').addEventListener('click', () => {
+    setup();
+    lock = true;
+    grid.querySelectorAll('.mem-card').forEach((c) => c.classList.add('open'));
+    timers.push(
+      setTimeout(() => {
+        grid.querySelectorAll('.mem-card').forEach((c) => c.classList.remove('open'));
+        lock = false;
+      }, 3000)
+    );
+  });
+  setup();
+  gameCleanup = clear;
+}
+
+/* ═════════════════════ 사과 게임 (합이 10) ═════════════════════ */
+
+// 숫자 사과판에서 네모로 드래그해 묶은 숫자의 합이 10이면 사과가 사라짐. 2분 동안 최대한 많이!
+function renderApple(root) {
+  const wide = window.innerWidth >= 720;
+  const COLS = wide ? 17 : 10;
+  const ROWS = wide ? 10 : 15;
+  const LIMIT = 120;
+  root.innerHTML = `
+    <div class="apple-bar"><span class="apple-score">0개</span><span class="apple-time"><i></i></span><span class="apple-best"></span></div>
+    <div class="apple-board" style="--cols:${COLS}"></div>
+    <p class="game-result" role="status">손가락(마우스)으로 네모를 그려서 숫자 합이 <b>10</b>이 되게 묶으세요!</p>
+    <div class="game-actions">
+      <button class="btn block" data-act="start">시작</button>
+      <button class="btn ghost block" data-act="reset">다시 시작</button>
+    </div>`;
+  const board = root.querySelector('.apple-board');
+  const scoreEl = root.querySelector('.apple-score');
+  const bar = root.querySelector('.apple-time i');
+  const bestEl = root.querySelector('.apple-best');
+  const resultEl = root.querySelector('.game-result');
+  const startBtn = root.querySelector('[data-act="start"]');
+  let nums = [];
+  let score = 0;
+  let playing = false;
+  let t0 = 0;
+  let raf = 0;
+  let sel = null;
+  const showBest = () => {
+    const b = gameStore.get('apple-best');
+    bestEl.textContent = b ? `최고 ${b}개` : '';
+  };
+
+  function make() {
+    // 전체 합이 10의 배수가 되게 만들어 끝까지 지울 여지를 남김
+    nums = Array.from({ length: COLS * ROWS }, () => 1 + Math.floor(Math.random() * 9));
+    const r = nums.reduce((a, b) => a + b, 0) % 10;
+    if (r) nums[nums.length - 1] = ((nums[nums.length - 1] - 1 + (10 - r)) % 9) + 1;
+    board.innerHTML = nums.map((n, i) => `<span class="apple" data-i="${i}">${n}</span>`).join('');
+    score = 0;
+    scoreEl.textContent = '0개';
+    bar.style.width = '100%';
+    showBest();
+  }
+  const cellAt = (x, y) => {
+    const r = board.getBoundingClientRect();
+    const c = Math.min(COLS - 1, Math.max(0, Math.floor(((x - r.left) / r.width) * COLS)));
+    const w = Math.min(ROWS - 1, Math.max(0, Math.floor(((y - r.top) / r.height) * ROWS)));
+    return [c, w];
+  };
+  function paintSel() {
+    board.querySelectorAll('.apple.sel').forEach((a) => a.classList.remove('sel'));
+    if (!sel) return 0;
+    const [c1, r1] = sel.a;
+    const [c2, r2] = sel.b;
+    let sum = 0;
+    for (let r = Math.min(r1, r2); r <= Math.max(r1, r2); r++)
+      for (let c = Math.min(c1, c2); c <= Math.max(c1, c2); c++) {
+        const i = r * COLS + c;
+        if (nums[i]) {
+          sum += nums[i];
+          board.children[i].classList.add('sel');
+        }
+      }
+    board.classList.toggle('ten', sum === 10);
+    return sum;
+  }
+  board.addEventListener('pointerdown', (e) => {
+    if (!playing) return;
+    e.preventDefault();
+    board.setPointerCapture(e.pointerId);
+    const p = cellAt(e.clientX, e.clientY);
+    sel = { a: p, b: p };
+    paintSel();
+  });
+  board.addEventListener('pointermove', (e) => {
+    if (!sel) return;
+    sel.b = cellAt(e.clientX, e.clientY);
+    paintSel();
+  });
+  const finishSel = () => {
+    if (!sel) return;
+    const sum = paintSel();
+    if (sum === 10) {
+      const gone = [...board.querySelectorAll('.apple.sel')];
+      gone.forEach((a) => {
+        nums[a.dataset.i] = 0;
+        a.classList.add('gone');
+        a.textContent = '';
+      });
+      score += gone.length;
+      scoreEl.textContent = `${score}개`;
+      buzz(20);
+    }
+    sel = null;
+    paintSel();
+    board.classList.remove('ten');
+  };
+  board.addEventListener('pointerup', finishSel);
+  board.addEventListener('pointercancel', finishSel);
+
+  function tick() {
+    const left = LIMIT - (performance.now() - t0) / 1000;
+    bar.style.width = `${Math.max(0, (left / LIMIT) * 100)}%`;
+    bar.classList.toggle('low', left < 15);
+    if (left <= 0) return end();
+    raf = requestAnimationFrame(tick);
+  }
+  function start() {
+    make();
+    playing = true;
+    t0 = performance.now();
+    startBtn.disabled = true;
+    resultEl.innerHTML = '합이 <b>10</b>이 되게 네모로 묶으세요! 2분!';
+    raf = requestAnimationFrame(tick);
+  }
+  function end() {
+    playing = false;
+    sel = null;
+    paintSel();
+    startBtn.disabled = false;
+    startBtn.textContent = '한 판 더';
+    const b = gameStore.get('apple-best') || 0;
+    if (score > b) gameStore.save('apple-best', score);
+    resultEl.innerHTML = `⏰ 끝! 사과 <b>${score}개</b>${score > b ? ' · 최고 기록! 🎉' : ''}`;
+    showBest();
+    buzz([100, 50, 100]);
+  }
+  startBtn.addEventListener('click', start);
+  root.querySelector('[data-act="reset"]').addEventListener('click', () => {
+    cancelAnimationFrame(raf);
+    playing = false;
+    startBtn.disabled = false;
+    startBtn.textContent = '시작';
+    make();
+    resultEl.innerHTML = '손가락(마우스)으로 네모를 그려서 숫자 합이 <b>10</b>이 되게 묶으세요!';
+  });
+  make();
+  gameCleanup = () => cancelAnimationFrame(raf);
+}
+
+/* ═════════════════════ 균형 잡기 (황새 오래 걷기) ═════════════════════ */
+
+// 황새가 외나무다리를 걸어가요. 몸이 기울면 반대쪽을 눌러 균형을 잡으세요. 넘어지면 끝!
+function renderBalance(root) {
+  root.innerHTML = `
+    <div class="bal-wrap">
+      <canvas class="bal-canvas" width="360" height="420" aria-label="균형 잡기"></canvas>
+      <button class="bal-btn left" aria-label="왼쪽으로">◀</button>
+      <button class="bal-btn right" aria-label="오른쪽으로">▶</button>
+    </div>
+    <p class="game-result" role="status">기울어지는 반대쪽 버튼을 꾹 눌러 균형을 잡으세요! (키보드 ← →)</p>
+    <div class="game-actions">
+      <button class="btn block" data-act="start">출발</button>
+      <button class="btn ghost block" data-act="reset">다시 시작</button>
+    </div>`;
+  const canvas = root.querySelector('canvas');
+  const ctx = canvas.getContext('2d');
+  const resultEl = root.querySelector('.game-result');
+  const startBtn = root.querySelector('[data-act="start"]');
+  let st = null;
+  let raf = 0;
+  const press = { l: false, r: false };
+
+  const reset = () => {
+    st = { a: 0, w: 0, dist: 0, t: 0, alive: false, gust: 0, step: 0 };
+    draw();
+  };
+
+  function draw() {
+    const W = canvas.width;
+    const H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#bfe3ff');
+    sky.addColorStop(1, '#eaf6ff');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, H);
+    // 흘러가는 구름·물
+    const off = (st.dist * 40) % W;
+    ctx.fillStyle = 'rgba(255,255,255,.9)';
+    [[60, 70], [250, 110], [160, 40]].forEach(([x, y]) => {
+      const cx = ((x - off * 0.3) % (W + 80) + W + 80) % (W + 80) - 40;
+      ctx.beginPath();
+      ctx.ellipse(cx, y, 34, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.fillStyle = '#5aa9e6';
+    ctx.fillRect(0, H - 90, W, 90);
+    // 외나무다리
+    ctx.fillStyle = '#8a5a2b';
+    ctx.fillRect(0, H - 104, W, 16);
+    ctx.fillStyle = '#6b4220';
+    for (let x = -off; x < W; x += 40) ctx.fillRect(x, H - 104, 3, 16);
+    // 황새 (발을 축으로 기울어짐)
+    const fx = W / 2;
+    const fy = H - 104;
+    ctx.save();
+    ctx.translate(fx, fy);
+    // 다리 (걸음)
+    const s = Math.sin(st.step) * 10;
+    ctx.strokeStyle = '#e8623a';
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(-6 + s, 0);
+    ctx.lineTo(-2, -70);
+    ctx.moveTo(6 - s, 0);
+    ctx.lineTo(2, -70);
+    ctx.stroke();
+    ctx.rotate(st.a);
+    // 몸통
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = '#2d3142';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.ellipse(0, -100, 34, 26, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#2d3142';
+    ctx.beginPath();
+    ctx.ellipse(-22, -98, 18, 12, -0.3, 0, Math.PI * 2);
+    ctx.fill();
+    // 목·머리
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 10;
+    ctx.beginPath();
+    ctx.moveTo(16, -116);
+    ctx.quadraticCurveTo(30, -150, 22, -176);
+    ctx.stroke();
+    ctx.strokeStyle = '#2d3142';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(22, -182, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#e0312b';
+    ctx.beginPath();
+    ctx.arc(22, -188, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#2d3142';
+    ctx.beginPath();
+    ctx.arc(26, -184, 2.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f2a33a';
+    ctx.beginPath();
+    ctx.moveTo(32, -184);
+    ctx.lineTo(58, -178);
+    ctx.lineTo(32, -176);
+    ctx.fill();
+    // 날개 (누르는 쪽으로 펼침)
+    ctx.fillStyle = '#2d3142';
+    if (press.l) {
+      ctx.beginPath();
+      ctx.moveTo(-10, -110);
+      ctx.lineTo(-70, -130);
+      ctx.lineTo(-30, -96);
+      ctx.fill();
+    }
+    if (press.r) {
+      ctx.beginPath();
+      ctx.moveTo(10, -110);
+      ctx.lineTo(70, -130);
+      ctx.lineTo(30, -96);
+      ctx.fill();
+    }
+    ctx.restore();
+    // 기울기 막대 + 거리
+    ctx.fillStyle = 'rgba(0,0,0,.25)';
+    ctx.fillRect(W / 2 - 100, 18, 200, 10);
+    const lim = 1.05;
+    ctx.fillStyle = Math.abs(st.a) > lim * 0.7 ? '#e0312b' : '#2bb24c';
+    ctx.fillRect(W / 2 - 3 + (st.a / lim) * 100, 14, 6, 18);
+    ctx.fillStyle = '#1d1b26';
+    ctx.font = '900 26px Pretendard, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${st.dist.toFixed(1)} m`, W / 2, 62);
+  }
+
+  function loop(prev) {
+    raf = requestAnimationFrame((now) => {
+      const dt = Math.min(0.05, (now - prev) / 1000);
+      st.t += dt;
+      const level = 1 + st.t / 20; // 시간이 갈수록 어려워짐
+      // 바람: 가끔 방향이 바뀌는 흔들림
+      if (Math.random() < dt * 0.8) st.gust = (Math.random() - 0.5) * 2.2 * level;
+      const push = (press.r ? 1 : 0) - (press.l ? 1 : 0);
+      // 기울수록 더 기울어짐(불안정) + 바람 + 누르는 힘
+      st.w += (Math.sin(st.a) * 3.2 * level + st.gust - push * 4.2) * dt;
+      st.w *= 1 - 0.6 * dt;
+      st.a += st.w * dt;
+      st.dist += dt * (1.2 + st.t * 0.04);
+      st.step += dt * 9;
+      draw();
+      if (Math.abs(st.a) > 1.05) return fall();
+      loop(now);
+    });
+  }
+  function start() {
+    reset();
+    st.alive = true;
+    st.a = (Math.random() - 0.5) * 0.1;
+    startBtn.disabled = true;
+    resultEl.textContent = '균형을 잡으세요!';
+    loop(performance.now());
+  }
+  function fall() {
+    st.alive = false;
+    buzz([200, 60, 200]);
+    const best = gameStore.get('balance-best') || 0;
+    if (st.dist > best) gameStore.save('balance-best', +st.dist.toFixed(1));
+    resultEl.innerHTML = `💦 풍덩! <b>${st.dist.toFixed(1)} m</b> 걸었어요${st.dist > best ? ' · 최고 기록! 🎉' : best ? ` (최고 ${best} m)` : ''}`;
+    startBtn.disabled = false;
+    startBtn.textContent = '다시 도전';
+  }
+  const bind = (el, k) => {
+    const on = (e) => { e.preventDefault(); press[k] = true; };
+    const off = () => { press[k] = false; };
+    el.addEventListener('pointerdown', on);
+    el.addEventListener('pointerup', off);
+    el.addEventListener('pointerleave', off);
+    el.addEventListener('pointercancel', off);
+  };
+  bind(root.querySelector('.bal-btn.left'), 'l');
+  bind(root.querySelector('.bal-btn.right'), 'r');
+  const key = (e) => {
+    if (e.key === 'ArrowLeft') press.l = e.type === 'keydown';
+    if (e.key === 'ArrowRight') press.r = e.type === 'keydown';
+  };
+  window.addEventListener('keydown', key);
+  window.addEventListener('keyup', key);
+  startBtn.addEventListener('click', start);
+  root.querySelector('[data-act="reset"]').addEventListener('click', () => {
+    cancelAnimationFrame(raf);
+    startBtn.disabled = false;
+    startBtn.textContent = '출발';
+    reset();
+    resultEl.textContent = '기울어지는 반대쪽 버튼을 꾹 눌러 균형을 잡으세요! (키보드 ← →)';
+  });
+  reset();
+  gameCleanup = () => {
+    cancelAnimationFrame(raf);
+    window.removeEventListener('keydown', key);
+    window.removeEventListener('keyup', key);
+  };
 }

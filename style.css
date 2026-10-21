@@ -1466,3 +1466,67 @@ a.rank-name:hover { color: var(--primary); }
 a.icon-btn { display: inline-grid; place-items: center; }
 .fmt-covers .flag-grid { padding: 6px; gap: 4px; }
 .fmt-covers .flag-grid img { border-radius: 4px; }
+
+/* 카드 짝 맞추기 */
+.mem-grid { display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); gap: 8px; }
+.mem-card { aspect-ratio: 3 / 4; padding: 0; border: 0; background: none; perspective: 600px; cursor: pointer; }
+.mem-in { position: relative; display: block; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .35s ease; }
+.mem-card.open .mem-in, .mem-card.done .mem-in { transform: rotateY(180deg); }
+.mem-back, .mem-front { position: absolute; inset: 0; display: grid; place-items: center; border-radius: 12px; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.mem-back { background: linear-gradient(160deg, #7c5cff, #b48cff); color: rgba(255, 255, 255, .8); font-size: 24px; font-weight: 900; box-shadow: 0 3px 0 #5a3fd6; }
+.mem-front { transform: rotateY(180deg); background: var(--surface); border: 2px solid var(--line); font-size: clamp(24px, 7vw, 40px); }
+.mem-card.done .mem-front { border-color: #2bb24c; background: rgba(43, 178, 76, .12); animation: pop .35s ease; }
+
+/* 사과 게임 */
+.apple-bar { display: flex; align-items: center; gap: 10px; font-weight: 900; }
+.apple-score { flex: none; min-width: 52px; color: #e0312b; font-size: 18px; }
+.apple-best { flex: none; font-size: 13px; color: var(--text-3); }
+.apple-time { flex: 1; height: 10px; border-radius: 5px; background: var(--surface-2); overflow: hidden; }
+.apple-time i { display: block; height: 100%; width: 100%; background: #2bb24c; transition: width .2s linear; }
+.apple-time i.low { background: #e0312b; }
+.apple-board {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: 2px;
+  padding: 6px;
+  border-radius: 14px;
+  background: #e9f7e4;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.apple {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff8a7a, #e0312b 70%);
+  color: #fff;
+  font-size: clamp(11px, 3.4vw, 17px);
+  font-weight: 900;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .35);
+}
+.apple.sel { outline: 3px solid #4f8cff; outline-offset: -1px; }
+.apple-board.ten .apple.sel { outline-color: #ffd93d; transform: scale(1.06); }
+.apple.gone { background: transparent; outline: 0; }
+
+/* 균형 잡기 */
+.bal-wrap { position: relative; width: min(100%, 360px); margin: 0 auto; }
+.bal-canvas { display: block; width: 100%; height: auto; border-radius: var(--radius); }
+.bal-btn {
+  position: absolute;
+  bottom: 12px;
+  width: 30%;
+  height: 74px;
+  border: 0;
+  border-radius: 18px;
+  background: rgba(29, 27, 38, .55);
+  color: #fff;
+  font-size: 30px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.bal-btn:active { background: rgba(124, 92, 255, .85); }
+.bal-btn.left { left: 12px; }
+.bal-btn.right { right: 12px; }

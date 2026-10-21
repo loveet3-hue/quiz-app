@@ -372,6 +372,32 @@ const COVERS = (() => {
       <path d="M70 178 L340 178 L340 196 Q330 236 200 238 Q80 236 70 196 Z" fill="#4fbf6a"/>
       <path d="M78 182 L332 182 L332 192 Q200 206 78 192 Z" fill="#e86f7f"/>`),
 
+    // 카드 짝 맞추기: 뒤집힌 카드 + 짝 카드
+    'game-memory': make('#efe7ff', '#c8f0d8', `
+      ${shadow(200, 254, 120)}
+      ${[[96, 80, '?', 0], [164, 80, '🍎', 1], [232, 80, '?', 0], [96, 168, '?', 0], [164, 168, '?', 0], [232, 168, '🍎', 1]].map(([x, y, t, o]) => `<rect x="${x}" y="${y}" width="58" height="76" rx="10" fill="${o ? '#fff' : '#7c5cff'}" stroke="${o ? '#2bb24c' : '#5a3fd6'}" stroke-width="4"/><text x="${x + 29}" y="${y + 50}" font-family="${NUM}" font-size="${o ? 34 : 30}" font-weight="700" fill="#fff" text-anchor="middle">${t}</text>`).join('')}`),
+
+    // 사과 게임: 숫자 사과 + 네모 선택
+    'game-apple': make('#e9f7e4', '#ffd6cf', `
+      ${shadow(200, 256, 120)}
+      ${[5, 3, 8, 2, 6, 1, 4, 9, 7, 5, 2, 8].map((n, i) => { const x = 100 + (i % 4) * 66, y = 80 + Math.floor(i / 4) * 62; return `<circle cx="${x}" cy="${y}" r="26" fill="#e0312b"/><path d="M${x} ${y - 26} q4 -10 12 -12" stroke="#3f8a3a" stroke-width="4" fill="none"/><text x="${x}" y="${y + 9}" font-family="${NUM}" font-size="26" font-weight="700" fill="#fff" text-anchor="middle">${n}</text>`; }).join('')}
+      <rect x="68" y="48" width="130" height="64" rx="10" fill="none" stroke="#ffd93d" stroke-width="5" stroke-dasharray="10 6"/>`),
+
+    // 균형 잡기: 외나무다리 위 황새
+    'game-balance': make('#d8edff', '#bfe3ff', `
+      <rect x="0" y="226" width="400" height="74" fill="#5aa9e6"/>
+      <rect x="0" y="214" width="400" height="14" fill="#8a5a2b"/>
+      <g transform="rotate(-12 200 214)">
+        <path d="M194 214 L198 150 M206 214 L202 150" stroke="#e8623a" stroke-width="5" stroke-linecap="round"/>
+        <ellipse cx="200" cy="130" rx="38" ry="28" fill="#fff" stroke="#2d3142" stroke-width="3"/>
+        <ellipse cx="176" cy="132" rx="20" ry="13" fill="#2d3142"/>
+        <path d="M218 116 Q234 82 224 56" stroke="#2d3142" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M218 116 Q234 82 224 56" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <circle cx="224" cy="50" r="13" fill="#fff" stroke="#2d3142" stroke-width="3"/><circle cx="224" cy="43" r="5" fill="#e0312b"/>
+        <path d="M235 50 l30 6 l-30 4z" fill="#f2a33a"/>
+        <path d="M190 118 L120 92 L170 136z" fill="#2d3142"/>
+      </g>
+      <path d="M80 70 q16 -10 32 0 M290 90 q14 -8 28 0" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>`),
+
     // 뽑기 게임: 주사위·동전
     'game-dice': make('#d9fbea', '#9eefcf', `
       ${shadow(200, 256, 110)}
