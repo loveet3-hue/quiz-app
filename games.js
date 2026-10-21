@@ -2808,7 +2808,7 @@ function renderBalance(root) {
     // 기울기 막대 + 거리
     ctx.fillStyle = 'rgba(0,0,0,.25)';
     ctx.fillRect(W / 2 - 100, 18, 200, 10);
-    const lim = 1.05;
+    const lim = 1.15;
     ctx.fillStyle = Math.abs(st.a) > lim * 0.7 ? '#e0312b' : '#2bb24c';
     ctx.fillRect(W / 2 - 3 + (st.a / lim) * 100, 14, 6, 18);
     ctx.fillStyle = '#1d1b26';
@@ -2821,19 +2821,20 @@ function renderBalance(root) {
     raf = requestAnimationFrame((now) => {
       const dt = Math.min(0.05, (now - prev) / 1000);
       st.t += dt;
-      const level = 1 + st.t / 20; // 시간이 갈수록 어려워짐
+      const level = 1 + st.t / 40; // 시간이 갈수록 조금씩 어려워짐
       // 바람: 가끔 방향이 바뀌는 흔들림
-      if (Math.random() < dt * 0.8) st.gust = (Math.random() - 0.5) * 2.2 * level;
+      if (Math.random() < dt * 0.6) st.gust = (Math.random() - 0.5) * 1.4 * level;
       const push = (press.r ? 1 : 0) - (press.l ? 1 : 0);
       // 기울수록 더 기울어짐(불안정) + 바람 + 누르는 힘
       // ◀ 누르면 왼쪽(뒤)으로, ▶ 누르면 오른쪽(앞)으로 몸을 당김
-      st.w += (Math.sin(st.a) * 3.2 * level + st.gust + push * 4.2) * dt;
-      st.w *= 1 - 0.6 * dt;
+      // 기울수록 더 넘어지려 하지만, 버튼 힘(4.0)이 더 세서 40° 넘게 기울어도 다시 일으킬 수 있음
+      st.w += (Math.sin(st.a) * 2.2 * level + st.gust + push * 4.0) * dt;
+      st.w *= 1 - 1.6 * dt;
       st.a += st.w * dt;
       st.dist += dt * (1.2 + st.t * 0.04);
       st.step += dt * 9;
       draw();
-      if (Math.abs(st.a) > 1.05) return fall();
+      if (Math.abs(st.a) > 1.15) return fall();
       loop(now);
     });
   }
