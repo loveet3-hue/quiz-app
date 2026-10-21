@@ -2697,6 +2697,8 @@ function renderBalance(root) {
     const fy = H - 104;
     ctx.save();
     ctx.translate(fx, fy);
+    // 발을 축으로 다리·몸통이 한 덩어리로 기울어짐
+    ctx.rotate(st.a);
     // 다리 (걸음)
     const s = Math.sin(st.step) * 10;
     ctx.strokeStyle = '#e8623a';
@@ -2708,7 +2710,6 @@ function renderBalance(root) {
     ctx.moveTo(6 - s, 0);
     ctx.lineTo(2, -70);
     ctx.stroke();
-    ctx.rotate(st.a);
     // 몸통
     ctx.fillStyle = '#fff';
     ctx.strokeStyle = '#2d3142';
