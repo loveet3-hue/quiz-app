@@ -975,3 +975,22 @@ for (const quiz of QUIZZES) {
 for (let i = QUIZZES.length - 1; i >= 0; i--) {
   if (!QUIZZES[i].generate && !QUIZZES[i].questions.length) QUIZZES.splice(i, 1);
 }
+
+// 퀴즈 형식 (퀴즈 탭 첫 화면에서 형식별로 나눠 들어감). 퀴즈에 format을 직접 쓰면 그걸 따르고,
+// 없으면 문제 모양으로 정함: 멜로디 → 소리, 초성 → 초성, 사진·그림 → 이미지, 나머지 → 문제
+const QUIZ_FORMATS = [
+  { id: 'chosung', title: '초성 퀴즈', emoji: '🔤', desc: '초성만 보고 단어를 떠올려요' },
+  { id: 'image', title: '이미지 퀴즈', emoji: '🖼️', desc: '사진·국기·그림을 보고 맞혀요' },
+  { id: 'text', title: '문제 퀴즈', emoji: '📝', desc: '상식·설명 문제를 읽고 정답을 써요' },
+  { id: 'sound', title: '소리 퀴즈', emoji: '🎵', desc: '멜로디를 듣고 맞혀요' },
+];
+for (const quiz of QUIZZES) {
+  if (quiz.format) continue;
+  const sample = quiz.generate ? quiz.generate(5) : quiz.questions;
+  const count = {};
+  for (const q of sample) {
+    const k = q.melody ? 'sound' : q.chosung ? 'chosung' : q.image ? 'image' : 'text';
+    count[k] = (count[k] || 0) + 1;
+  }
+  quiz.format = Object.entries(count).sort((a, b) => b[1] - a[1])[0]?.[0] || 'text';
+}

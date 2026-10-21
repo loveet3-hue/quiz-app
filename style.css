@@ -1436,3 +1436,33 @@ a.rank-name:hover { color: var(--primary); }
 .logo-deco { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .logo.festive img { animation: festive-pop .6s ease; }
 @keyframes festive-pop { 0% { transform: scale(.8) rotate(-8deg); } 60% { transform: scale(1.08) rotate(3deg); } 100% { transform: none; } }
+
+/* 퀴즈 탭: 형식 고르기 */
+.fmt-grid { display: grid; gap: 12px; margin-top: 16px; }
+.fmt-grid[hidden], #all[hidden] { display: none; }
+@media (min-width: 760px) { .fmt-grid { grid-template-columns: 1fr 1fr; } }
+.fmt-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: 'emoji text count' 'covers covers covers';
+  align-items: center;
+  gap: 12px 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.fmt-card:hover { border-color: var(--primary); }
+.fmt-emoji { grid-area: emoji; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 16px; background: var(--primary-soft); font-size: 28px; }
+.fmt-text { grid-area: text; display: grid; gap: 2px; min-width: 0; }
+.fmt-text b { font-size: 19px; font-weight: 900; letter-spacing: -0.02em; }
+.fmt-text small { font-size: 13px; color: var(--text-3); }
+.fmt-count { grid-area: count; font-size: 14px; font-weight: 800; color: var(--primary); white-space: nowrap; }
+.fmt-covers { grid-area: covers; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.fmt-covers .cover { aspect-ratio: 4 / 3; border-radius: 12px; overflow: hidden; }
+.fmt-covers .cover img.full { width: 100%; height: 100%; object-fit: cover; }
+.fmt-desc { margin: -6px 0 6px; font-size: 14px; color: var(--text-3); }
+a.icon-btn { display: inline-grid; place-items: center; }
+.fmt-covers .flag-grid { padding: 6px; gap: 4px; }
+.fmt-covers .flag-grid img { border-radius: 4px; }

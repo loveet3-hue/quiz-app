@@ -15,9 +15,10 @@ const tpl = read('index.html');
 const scripts = [...tpl.matchAll(/<script src="\/([^"?]+\.js)/g)].map((m) => m[1]).filter((f) => f !== 'app.js');
 const ctx = { localStorage: { getItem: () => null, setItem() {} }, console };
 vm.createContext(ctx);
-vm.runInContext(scripts.map((f) => read(f)).join('\n;\n') + '\n;this.Q = QUIZZES; this.G = GAMES; this.R = RANKINGS; this.RG = RANK_GROUPS; this.RL = rankLink;', ctx);
+vm.runInContext(scripts.map((f) => read(f)).join('\n;\n') + '\n;this.Q = QUIZZES; this.QF = QUIZ_FORMATS; this.G = GAMES; this.R = RANKINGS; this.RG = RANK_GROUPS; this.RL = rankLink;', ctx);
 const QUIZZES = ctx.Q;
 const GAMES = ctx.G;
+const QUIZ_FORMATS = ctx.QF;
 const RANKINGS = ctx.R;
 const RANK_GROUPS = ctx.RG;
 const rankLink = ctx.RL;
@@ -111,6 +112,21 @@ write(
   })
 );
 urls.push('/quizzes/');
+for (const f of QUIZ_FORMATS) {
+  const list = QUIZZES.filter((q) => q.format === f.id);
+  if (!list.length) continue;
+  write(
+    `quizzes/${f.id}/index.html`,
+    page({
+      title: `${f.title} - 맞혀봐`,
+      desc: `${f.desc}. ${list.slice(0, 6).map((q) => q.title).join(', ')} 등`,
+      url: `${SITE}/quizzes/${f.id}/`,
+      image: ogFile('home'),
+      body: `<h1>${esc(f.title)}</h1><p>${esc(f.desc)}</p><ul>${list.map((q) => `<li><a href="/q/${q.id}/">${esc(q.title)}</a> - ${esc(q.desc)}</li>`).join('')}</ul>`,
+    })
+  );
+  urls.push(`/quizzes/${f.id}/`);
+}
 
 // 게임
 write(

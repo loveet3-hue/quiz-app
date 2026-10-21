@@ -187,7 +187,7 @@ function fillAds() {
 
 /* ───────── 목록 화면 ───────── */
 
-const home = { category: '전체', query: '' };
+const home = { category: '전체', query: '', format: '' };
 
 // 카테고리별 표지 바탕색 (사진 표지도 그림 표지와 같은 틀로 보이게)
 const CAT_COLORS = {
@@ -306,38 +306,86 @@ function renderHome() {
 }
 
 // 퀴즈 탭: 전체 퀴즈 (검색 + 분류)
-function renderQuizList() {
-  document.title = '퀴즈 · 맞혀봐';
-  app.innerHTML = `
-    <section class="hero">
-      <h1>퀴즈</h1>
-      <p>사진·초성·설명·멜로디를 보고 정답을 직접 써 보세요</p>
-    </section>
+// 퀴즈 탭: 첫 화면은 형식(초성·이미지·문제·소리) 고르기 + 전체 검색, 형식에 들어가면 분류 태그로 거르기
+function renderQuizList(fmt) {
+  const format = QUIZ_FORMATS.find((f) => f.id === fmt);
+  if (fmt && !format) {
+    nav('/quizzes/');
+    return;
+  }
+  if (home.format !== (fmt || '')) {
+    home.format = fmt || '';
+    home.category = '전체';
+  }
+  document.title = format ? `${format.title} · 맞혀봐` : '퀴즈 · 맞혀봐';
+  const cats = ['전체', ...new Set(QUIZZES.filter((q) => !format || q.format === format.id).map((q) => q.category))];
+  if (!cats.includes(home.category)) home.category = '전체';
+  app.innerHTML = format
+    ? `
+    <div class="play-head">
+      <a class="icon-btn" href="/quizzes/" aria-label="퀴즈 형식 고르기로">←</a>
+      <h1 class="page-title">${format.emoji} ${esc(format.title)}</h1>
+    </div>
+    <p class="fmt-desc">${esc(format.desc)}</p>
     <section class="home-sec" id="all">
-      <input class="search" type="search" placeholder="퀴즈 찾기" value="${esc(home.query)}" aria-label="퀴즈 찾기">
-      <div class="chips" role="group" aria-label="카테고리">
-        ${CATEGORIES.map((c) => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === home.category}">${esc(c)}</button>`).join('')}
+      <div class="chips" role="group" aria-label="분류">
+        ${cats.map((c) => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === home.category}">${esc(c)}</button>`).join('')}
       </div>
       <div class="grid"></div>
     </section>
     ${adHtml('homeBottom')}
-    ${SITE_FOOT}
-  `;
-  app.querySelector('.search').addEventListener('input', (e) => {
-    home.query = e.target.value;
+    ${SITE_FOOT}`
+    : `
+    <section class="hero">
+      <h1>퀴즈</h1>
+      <p>어떤 방식으로 풀어 볼까요?</p>
+    </section>
+    <input class="search" type="search" placeholder="퀴즈 찾기 (예: 국기, 상식, 노래)" value="${esc(home.query)}" aria-label="퀴즈 찾기">
+    <div class="fmt-grid">
+      ${QUIZ_FORMATS.map((f) => {
+        const list = QUIZZES.filter((q) => q.format === f.id);
+        if (!list.length) return '';
+        return `<a class="fmt-card" href="/quizzes/${f.id}/">
+          <span class="fmt-emoji" aria-hidden="true">${f.emoji}</span>
+          <span class="fmt-text"><b>${esc(f.title)}</b><small>${esc(f.desc)}</small></span>
+          <span class="fmt-covers" aria-hidden="true">${list.slice(0, 3).map((q) => `<span class="cover">${coverHtml(q).replace(/ loading="lazy"/g, '')}</span>`).join('')}</span>
+          <span class="fmt-count">${list.length}개 ›</span>
+        </a>`;
+      }).join('')}
+    </div>
+    <section class="home-sec" id="all" hidden>
+      <h2 class="sec-title">찾은 퀴즈</h2>
+      <div class="grid"></div>
+    </section>
+    ${adHtml('homeBottom')}
+    ${SITE_FOOT}`;
+
+  const search = app.querySelector('.search');
+  const showSearch = () => {
+    const on = !!normalize(home.query);
+    app.querySelector('#all').hidden = !on;
+    app.querySelector('.fmt-grid').hidden = on;
+    if (on) renderGrid();
+  };
+  if (search) {
+    search.addEventListener('input', (e) => {
+      home.query = e.target.value;
+      showSearch();
+    });
+    showSearch();
+  } else {
+    app.querySelectorAll('.chip').forEach((btn) =>
+      btn.addEventListener('click', () => {
+        home.category = btn.dataset.cat;
+        app.querySelectorAll('.chip').forEach((b) => b.setAttribute('aria-pressed', b === btn));
+        renderGrid();
+      })
+    );
     renderGrid();
-  });
-  app.querySelectorAll('.chip').forEach((btn) =>
-    btn.addEventListener('click', () => {
-      home.category = btn.dataset.cat;
-      app.querySelectorAll('.chip').forEach((b) => b.setAttribute('aria-pressed', b === btn));
-      renderGrid();
-    })
-  );
-  renderGrid();
+  }
   fillAds();
   counts.refresh().then((fresh) => {
-    if (fresh && app.querySelector('.grid') && !play) renderGrid();
+    if (fresh && app.querySelector('.grid:not([hidden])') && !play && (format || normalize(home.query))) renderGrid();
   });
 }
 
@@ -380,10 +428,12 @@ function renderGrid() {
   // 전체 목록은 분류 순서대로 (같은 분류끼리 모아서)
   const catOrder = new Map(CATEGORIES.map((c, i) => [c, i]));
   const order = new Map(QUIZZES.map((quiz, i) => [quiz.id, i]));
+  const inFormat = !!home.format;
   const list = QUIZZES.filter(
     (quiz) =>
-      (home.category === '전체' || quiz.category === home.category) &&
-      (!q || normalize(quiz.title + quiz.desc + quiz.category).includes(q))
+      (inFormat
+        ? quiz.format === home.format && (home.category === '전체' || quiz.category === home.category)
+        : !!q && normalize(quiz.title + quiz.desc + quiz.category).includes(q))
   ).sort((a, b) => catOrder.get(a.category) - catOrder.get(b.category) || order.get(a.id) - order.get(b.id));
   const grid = app.querySelector('.grid');
   if (!list.length) {
@@ -605,8 +655,9 @@ function renderQuestion() {
   });
   app.querySelector('[data-act="quit"]').addEventListener('click', () => {
     if (play.idx === 0 || confirm('퀴즈를 그만할까요? 지금까지 푼 기록은 남지 않아요.')) {
+      const f = play.quiz.format;
       play = null;
-      nav('/quizzes/');
+      nav(f ? `/quizzes/${f}/` : '/quizzes/');
     }
   });
 }
@@ -758,7 +809,7 @@ function renderResult() {
   app.querySelectorAll('[data-act="home"]').forEach((b) =>
     b.addEventListener('click', () => {
       play = null;
-      nav('/quizzes/');
+      nav(quiz.format ? `/quizzes/${quiz.format}/` : '/quizzes/');
     })
   );
   app.querySelector('[data-act="share"]').addEventListener('click', () => share(quiz, score, total));
@@ -818,7 +869,7 @@ function route() {
   const q = path.match(/^\/q\/([\w-]+)$/);
   const g = path.match(/^\/game\/([\w-]+)$/);
   const r = path.match(/^\/ranking\/([\w-]+)$/);
-  const tab = g || path === '/games' ? 'games' : r || path === '/rankings' ? 'rank' : q || path === '/quizzes' ? 'quiz' : 'home';
+  const tab = g || path === '/games' ? 'games' : r || path === '/rankings' ? 'rank' : q || path.startsWith('/quizzes') ? 'quiz' : 'home';
   document.querySelectorAll('.top-tabs a').forEach((el) => {
     if (el.dataset.tab === tab) el.setAttribute('aria-current', 'page');
     else el.removeAttribute('aria-current');
@@ -843,9 +894,9 @@ function route() {
   } else if (path === '/games') {
     play = null;
     renderGamesHome();
-  } else if (path === '/quizzes') {
+  } else if (path === '/quizzes' || /^\/quizzes\/[\w-]+$/.test(path)) {
     play = null;
-    renderQuizList();
+    renderQuizList(path.split('/')[2]);
   } else {
     play = null;
     renderHome();
