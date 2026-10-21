@@ -2826,7 +2826,8 @@ function renderBalance(root) {
       if (Math.random() < dt * 0.8) st.gust = (Math.random() - 0.5) * 2.2 * level;
       const push = (press.r ? 1 : 0) - (press.l ? 1 : 0);
       // 기울수록 더 기울어짐(불안정) + 바람 + 누르는 힘
-      st.w += (Math.sin(st.a) * 3.2 * level + st.gust - push * 4.2) * dt;
+      // ◀ 누르면 왼쪽(뒤)으로, ▶ 누르면 오른쪽(앞)으로 몸을 당김
+      st.w += (Math.sin(st.a) * 3.2 * level + st.gust + push * 4.2) * dt;
       st.w *= 1 - 0.6 * dt;
       st.a += st.w * dt;
       st.dist += dt * (1.2 + st.t * 0.04);
