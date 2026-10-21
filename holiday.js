@@ -24,6 +24,13 @@
     candy: `<line x1="88" y1="-2" x2="88" y2="40" stroke="#fff" stroke-width="5" stroke-linecap="round"/><circle cx="88" cy="-12" r="14" fill="#ff8aa0"/><path d="M88 -12 m0 -9 a9 9 0 1 1 -9 9 a6 6 0 1 1 6 -6 a3 3 0 1 1 -3 3" fill="none" stroke="#fff" stroke-width="3"/>`,
     pepero: `${[[70, -26, -14], [80, -30, -4], [90, -26, 8]].map(([x, y, r]) => `<g transform="rotate(${r} ${x} 10)"><rect x="${x - 3}" y="${y}" width="6" height="40" rx="3" fill="#e8c38a"/><rect x="${x - 3.5}" y="${y}" width="7" height="26" rx="3.5" fill="#5a3a22"/></g>`).join('')}`,
     witch: `<path d="M2 26 Q50 12 98 26 Q50 36 2 26 Z" fill="#2d1b4e"/><path d="M24 24 L50 -36 Q58 -30 66 -26 L74 24 Z" fill="#3b2566"/><rect x="26" y="14" width="48" height="8" fill="#ff9f1c"/><circle cx="90" cy="-10" r="12" fill="#ff9f1c"/><path d="M90 -22 v-4" stroke="#3f8a3a" stroke-width="3"/>`,
+    birthday: `<rect x="22" y="-6" width="56" height="26" rx="5" fill="#ffe0ea"/><path d="M22 2 q7 6 14 0 t14 0 t14 0 t14 0" fill="none" stroke="#ff8aa0" stroke-width="5"/><rect x="18" y="16" width="64" height="8" rx="4" fill="#fff"/>${[34, 50, 66].map((x, i) => `<rect x="${x - 2.5}" y="-22" width="5" height="16" rx="2" fill="${['#4f8cff', '#ffd93d', '#4fd18b'][i]}"/><path d="M${x} -32 q5 6 0 10 q-5 -4 0 -10z" fill="#ff9f1c"/>`).join('')}`,
+    suneung: `<path d="M2 18 Q50 4 98 18 L98 32 Q50 18 2 32 Z" fill="#fff" stroke="#e0312b" stroke-width="2.5"/><text x="50" y="26" font-size="15" font-weight="900" fill="#e0312b" text-anchor="middle" font-family="sans-serif">필승</text><circle cx="18" cy="24" r="4" fill="#e0312b"/><circle cx="82" cy="24" r="4" fill="#e0312b"/><path d="M98 24 l10 8 l-4 10 M98 26 l12 0 l2 10" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round"/>`,
+    sailor: `<path d="M6 24 Q50 4 94 24 L90 32 Q50 18 10 32 Z" fill="#1f3a6e"/><path d="M14 22 Q14 -10 50 -12 Q86 -10 86 22 Q50 10 14 22 Z" fill="#fff" stroke="#d8deea" stroke-width="2"/><path d="M42 4 q8 -6 16 0 M40 10 l4 -4 M60 10 l-4 -4" stroke="#1f3a6e" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M50 -2 v12 M44 6 q6 6 12 0" stroke="#1f3a6e" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+    cat: `<path d="M8 26 L14 -18 L40 12 Z" fill="#ffad5a" stroke="#e8893a" stroke-width="2.5" stroke-linejoin="round"/><path d="M16 14 L18 -6 L31 10 Z" fill="#ffc9d6"/><path d="M92 26 L86 -18 L60 12 Z" fill="#ffad5a" stroke="#e8893a" stroke-width="2.5" stroke-linejoin="round"/><path d="M84 14 L82 -6 L69 10 Z" fill="#ffc9d6"/><g stroke="#5a3a22" stroke-width="2.5" stroke-linecap="round"><path d="M2 62 l16 2 M2 70 l16 -1 M98 62 l-16 2 M98 70 l-16 -1"/></g>`,
+    dog: `<path d="M10 6 Q-12 10 -6 50 Q-2 70 12 60 Q20 40 22 18 Z" fill="#a0673c"/><path d="M90 6 Q112 10 106 50 Q102 70 88 60 Q80 40 78 18 Z" fill="#a0673c"/><ellipse cx="50" cy="90" rx="9" ry="6" fill="#2d1b10"/><path d="M50 96 v6 q8 6 12 -2" stroke="#ff7a90" stroke-width="5" fill="none" stroke-linecap="round"/>`,
+    earth: `<circle cx="84" cy="-12" r="18" fill="#4f8cff"/><path d="M72 -20 q6 -4 10 2 t8 6 q-4 8 -10 4 t-8 -12z M90 -2 q4 -2 8 2 q-2 6 -8 4z M76 -28 q6 -2 8 2" fill="#5cc35a"/><circle cx="84" cy="-12" r="18" fill="none" stroke="#2a5bd7" stroke-width="2"/>`,
+    groucho: `<circle cx="32" cy="46" r="14" fill="rgba(255,255,255,.25)" stroke="#1d1b26" stroke-width="5"/><circle cx="66" cy="46" r="14" fill="rgba(255,255,255,.25)" stroke="#1d1b26" stroke-width="5"/><path d="M46 44 h6" stroke="#1d1b26" stroke-width="5"/><path d="M18 34 q14 -10 26 0 M54 34 q14 -10 26 0" stroke="#1d1b26" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M49 52 q4 12 -2 16 q6 4 8 -2" fill="#ffc9a8" stroke="#c98a6a" stroke-width="2"/><path d="M30 74 q10 -8 19 -2 q9 -6 19 2 q-9 6 -19 0 q-10 6 -19 0z" fill="#1d1b26"/>`,
   };
 
   window.HOLIDAY_PARTS = PARTS; // 시험 화면(tools/)에서 소품을 크게 보려고
@@ -34,6 +41,12 @@
     '02-14': ['hearts', '밸런타인데이', '💝'],
     '03-01': ['flag', '삼일절', '🇰🇷'],
     '03-14': ['candy', '화이트데이', '🍭'],
+    '04-01': ['groucho', '만우절', '🤡'],
+    '04-22': ['earth', '지구의 날', '🌍'],
+    '05-31': ['sailor', '바다의 날', '🌊'],
+    '08-08': ['cat', '세계 고양이의 날', '🐱'],
+    '08-26': ['dog', '세계 개의 날', '🐶'],
+    '10-19': ['birthday', '맞혀봐 생일', '🎂'],
     '04-05': ['sprout', '식목일', '🌱'],
     '05-05': ['pinwheel', '어린이날', '🎈'],
     '05-08': ['carnation', '어버이날', '💐'],
@@ -55,6 +68,7 @@
     // 설날 연휴(앞뒤 하루 포함) · 부처님오신날 · 추석 연휴
     '2026-02-16': ['bokjumeoni', '설날 연휴', '🧧'], '2026-02-17': ['bokjumeoni', '설날', '🧧'], '2026-02-18': ['bokjumeoni', '설날 연휴', '🧧'],
     '2026-05-24': ['lantern', '부처님오신날', '🏮'],
+    '2026-11-19': ['suneung', '수능 날', '📝'], // 수능은 해마다 날짜가 정해짐 (11월 셋째 목요일 무렵)
     '2026-09-24': ['rabbit', '추석 연휴', '🌕'], '2026-09-25': ['rabbit', '추석', '🌕'], '2026-09-26': ['rabbit', '추석 연휴', '🌕'],
     '2027-02-06': ['bokjumeoni', '설날 연휴', '🧧'], '2027-02-07': ['bokjumeoni', '설날', '🧧'], '2027-02-08': ['bokjumeoni', '설날 연휴', '🧧'],
     '2027-05-13': ['lantern', '부처님오신날', '🏮'],
