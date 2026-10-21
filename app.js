@@ -113,6 +113,8 @@ const quizUrl = (id) => `${location.origin}/q/${id}/`;
 /* ───────── 참여 수 (익명 집계) ───────── */
 // 퀴즈를 끝까지 풀면 퀴즈 id만 보낸다. 같은 기기에서 같은 퀴즈는 하루 한 번만 센다.
 
+// 내 컴퓨터에서 시험하는 접속(localhost)은 참여 수에 세지 않음 (읽기만 함)
+const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
 const countOn = () => typeof CONFIG !== 'undefined' && !!CONFIG.COUNT_API;
 
 const counts = {
@@ -137,7 +139,7 @@ const counts = {
 };
 
 function reportPlay(quizId) {
-  if (!countOn()) return;
+  if (!countOn() || isLocal) return;
   const today = new Date().toISOString().slice(0, 10);
   let done = {};
   try { done = JSON.parse(localStorage.getItem('quiz-counted') || '{}'); } catch { /* 무시 */ }
