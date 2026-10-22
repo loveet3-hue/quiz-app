@@ -34,7 +34,7 @@ QUESTIONS['movies'] = [
   { chosung: true, answer: '쉬리', text: '서울에서 테러를 꾸미는 북한 특수부대를 쫓는 정보 요원들' },
   { chosung: true, answer: '박하사탕', text: '한 남자의 20년 인생을 시간을 거슬러 보여 주는 이야기' },
   { chosung: true, answer: '집으로', text: '서울 소년이 말 못 하는 시골 외할머니 댁에 맡겨진다' },
-  { chosung: true, answer: '엽기적인 그녀', text: '지하철에서 술 취한 그녀를 만난 대학생 견우의 수난기' },
+  { appHidden: true, chosung: true, answer: '엽기적인 그녀', text: '지하철에서 술 취한 그녀를 만난 대학생 견우의 수난기' },
   { chosung: true, answer: '말아톤', text: '자폐가 있는 청년 초원이 마라톤 풀코스에 도전한다' },
   { chosung: true, answer: '웰컴 투 동막골', alias: ['동막골'], text: '한국전쟁 중 국군·인민군·연합군 병사가 한 산골 마을에 모인다' },
   { chosung: true, answer: '타짜', text: '도박판에서 돈을 잃은 청년이 전설의 타짜에게 기술을 배운다' },

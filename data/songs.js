@@ -81,7 +81,7 @@ QUESTIONS['songs'] = [
   { chosung: true, answer: '내 여자라니까', text: '이승기 · 2004 · 데뷔곡', alias: [] },
   { chosung: true, answer: '결혼해줄래', text: '이승기 · 2009', alias: [] },
   { chosung: true, answer: '사랑비', text: '김태우 · 2009', alias: ['사랑 비'] },
-  { chosung: true, answer: '소주 한 잔', text: '임창정 · 2003', alias: [] },
+  { appHidden: true, chosung: true, answer: '소주 한 잔', text: '임창정 · 2003', alias: [] },
   { chosung: true, answer: '보고싶다', text: '김범수 · 2002', alias: [] },
   { chosung: true, answer: '응급실', text: 'izi · 2005 · 드라마 \'쾌걸춘향\' OST', alias: [] },
   { chosung: true, answer: '가시', text: '버즈', alias: [] },

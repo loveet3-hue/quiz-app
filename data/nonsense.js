@@ -65,7 +65,7 @@ QUESTIONS['nonsense'] = [
   { text: '세 사람만 탈 수 있는 차는?', answer: '인삼차' },
   { text: '중학생과 고등학생이 타는 차는?', answer: '중고차' },
   { text: '세탁소 주인이 좋아하는 차는?', answer: '구기자차' },
-  { text: '우주인이 술 마시는 곳은?', answer: '스페이스바' },
+  { appHidden: true, text: '우주인이 술 마시는 곳은?', answer: '스페이스바' },
   { text: '세상에서 문제가 가장 많은 종이는?', answer: '시험지' },
   { text: '사람의 몸무게가 가장 많이 나갈 때는?', answer: '철들 때', alias: ['철들었을 때'] },
   { text: '날마다 가슴에 흑심을 품고 있는 것은?', answer: '연필' },

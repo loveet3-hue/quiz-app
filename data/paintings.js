@@ -68,7 +68,7 @@ QUESTIONS['paintings'] = [
   { image: WM('Arnold Böcklin - Die Toteninsel I (Basel, Kunstmuseum).jpg'), answer: '죽음의 섬', alias: ['사자의 섬'], by: '아르놀트 뵈클린' },
   { image: WM('Grant Wood - American Gothic (1930).jpg'), answer: '아메리칸 고딕', by: '그랜트 우드' },
   { image: WM('Manet, Edouard - Young Flautist, or The Fifer, 1866 (2).jpg'), answer: '피리 부는 소년', alias: ['피리를 부는 소년', '피리 부는 사람'], by: '에두아르 마네' },
-  { image: WM('"Un Bar aux Folies-Bergère" by Édouard Manet (1882).jpg'), answer: '폴리베르제르의 술집', alias: ['폴리베르제르의 바'], by: '에두아르 마네' },
+  { appHidden: true, image: WM('"Un Bar aux Folies-Bergère" by Édouard Manet (1882).jpg'), answer: '폴리베르제르의 술집', alias: ['폴리베르제르의 바'], by: '에두아르 마네' },
   { image: WM('Claude Monet - Woman with a Parasol - Madame Monet and Her Son - Google Art Project.jpg'), answer: '양산을 쓴 여인', alias: ['양산을 든 여인', '파라솔을 든 여인'], by: '클로드 모네' },
   { image: WM('Claude Monet - Poppy Field - Google Art Project.jpg'), answer: '개양귀비', alias: ['양귀비', '양귀비 들판', '아르장퇴유의 개양귀비'], by: '클로드 모네' },
   { image: WM('Claude Monet - The Saint-Lazare Station - Google Art Project.jpg'), answer: '생라자르역', alias: ['생라자르 기차역'], by: '클로드 모네' },

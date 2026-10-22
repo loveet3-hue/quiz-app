@@ -4,7 +4,7 @@ QUESTIONS['lol-champs'] = [
   { big: '데마시아의 힘', text: '칭호 · 전사·탱커', answer: '가렌', alias: ['Garen'] },
   { big: '위대한 석상', text: '칭호 · 탱커·마법사', answer: '갈리오', alias: ['Galio'] },
   { big: '바다의 무법자', text: '칭호 · 전사', answer: '갱플랭크', alias: ['Gangplank'] },
-  { big: '술취한 난동꾼', text: '칭호 · 전사·마법사', answer: '그라가스', alias: ['Gragas'] },
+  { appHidden: true, big: '술취한 난동꾼', text: '칭호 · 전사·마법사', answer: '그라가스', alias: ['Gragas'] },
   { big: '무법자', text: '칭호 · 원거리 딜러', answer: '그레이브즈', alias: ['Graves'] },
   { big: '신성한 재봉사', text: '칭호 · 전사', answer: '그웬', alias: ['Gwen'] },
   { big: '잃어버린 고리', text: '칭호 · 전사·탱커', answer: '나르', alias: ['Gnar'] },
