@@ -118,8 +118,6 @@ a { color: inherit; text-decoration: none; }
 
 .logo img { border-radius: 8px; }
 
-.top-right { display: flex; align-items: center; gap: 6px; }
-.sound-btn { width: 34px; height: 34px; flex: none; display: inline-grid; place-items: center; border: 0; border-radius: 999px; background: var(--surface-2); font-size: 16px; cursor: pointer; }
 .top-tabs { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--surface-2); }
 .top-tabs a {
   height: 32px;

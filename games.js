@@ -1285,9 +1285,6 @@ function renderHorse(root) {
 // 소리는 사용자가 버튼을 누른 뒤에만 켤 수 있어서(휴대폰 정책), 누를 때 unlock() 호출
 const gameAudio = {
   ctx: null,
-  get muted() {
-    try { return localStorage.getItem('sound-off') === '1'; } catch { return false; }
-  },
   unlock() {
     try {
       this.ctx ||= new (window.AudioContext || window.webkitAudioContext)();
@@ -1296,7 +1293,7 @@ const gameAudio = {
   },
   beep(freq, dur = 0.05, vol = 0.12) {
     const c = this.ctx;
-    if (!c || this.muted) return;
+    if (!c) return;
     const o = c.createOscillator();
     const g = c.createGain();
     o.type = 'square';
@@ -1309,7 +1306,7 @@ const gameAudio = {
   },
   boom() {
     const c = this.ctx;
-    if (!c || this.muted) return;
+    if (!c) return;
     const len = Math.floor(c.sampleRate * 0.9);
     const buf = c.createBuffer(1, len, c.sampleRate);
     const d = buf.getChannelData(0);
@@ -1342,7 +1339,6 @@ const gameAudio = {
   },
   // 이름으로 부르는 효과음: ok 정답 · bad 오답 · pop 지우기 · flip 뒤집기 · match 짝 · win 성공 · lose 실패 · boost 질주 · roll 굴리기
   sfx(name) {
-    if (this.muted) return;
     this.unlock();
     if (!this.ctx) return;
     const T = (f, d, o) => this.tone(f, d, o);
@@ -1363,22 +1359,6 @@ const gameAudio = {
 const sfx = (name) => { try { gameAudio.sfx(name); } catch { /* 소리 없이 진행 */ } };
 // 첫 터치 때 소리 준비 (휴대폰은 사용자가 건드려야 소리가 남)
 if (typeof document !== 'undefined') ['pointerdown', 'keydown'].forEach((ev) => document.addEventListener(ev, () => gameAudio.unlock(), { once: true, capture: true }));
-// 상단 소리 켜기/끄기 버튼
-function syncSoundBtn() {
-  const b = document.querySelector('.sound-btn');
-  if (!b) return;
-  b.textContent = gameAudio.muted ? '🔇' : '🔊';
-  b.setAttribute('aria-label', gameAudio.muted ? '소리 켜기' : '소리 끄기');
-  b.setAttribute('aria-pressed', String(!gameAudio.muted));
-}
-if (typeof document !== 'undefined') {
-  document.querySelector('.sound-btn')?.addEventListener('click', () => {
-    try { localStorage.setItem('sound-off', gameAudio.muted ? '0' : '1'); } catch { /* 저장 불가 */ }
-    syncSoundBtn();
-    sfx('pop');
-  });
-  syncSoundBtn();
-}
 const buzz = (p) => { try { navigator.vibrate?.(p); } catch { /* 진동 없는 기기 */ } };
 
 /* ═════════════════════ 제비뽑기 ═════════════════════ */
