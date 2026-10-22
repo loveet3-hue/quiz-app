@@ -63,6 +63,7 @@ function countdown(overlay, done) {
   overlay.hidden = false;
   const show = () => {
     overlay.innerHTML = `<span class="count-num">${steps[i]}</span>`;
+    sfx(i < steps.length - 1 ? 'tick' : 'ok');
     i++;
     if (i < steps.length) timer = setTimeout(show, 750);
     else
@@ -281,6 +282,7 @@ function renderWheel(root) {
         lastWinner = idx;
         liveEl.textContent = '';
         resultEl.innerHTML = `🎉 <b>${esc(list[lastWinner])}</b> 당첨!`;
+        sfx('win');
         removeBtn.hidden = list.length <= 2;
       }
     };
@@ -931,6 +933,7 @@ function renderMarble(root) {
       const w = r === 'first' ? finished[0] : live.length ? live[0] : finished[finished.length - 1];
       resultEl.dataset.shown = '1';
       resultEl.innerHTML = `🎉 <b>${esc(w.name)}</b> 당첨! ${r === 'last' ? '(꼴찌)' : '(1등 도착)'}`;
+      sfx('win');
       slowEl.hidden = true;
     }
     if (live.length === 0 || Date.now() - startedAt > 180000) {
@@ -1086,7 +1089,7 @@ function renderHorse(root) {
   function setup() {
     stop();
     const names = parseNames(ta.value, 10);
-    horses = names.map((name, i) => ({ name, i, p: 0, v: 0, target: 0, next: 0, burst: 0, place: 0, ...HORSE_COLORS[i % HORSE_COLORS.length] }));
+    horses = names.map((name, i) => ({ name, i, p: 0, v: 0, target: 0, next: 0, burst: 0, rocket: 0, trip: 0, place: 0, ...HORSE_COLORS[i % HORSE_COLORS.length] }));
     if (pick >= horses.length) pick = -1;
     track.innerHTML = horses
       .map(
@@ -1096,6 +1099,7 @@ function renderHorse(root) {
           <div class="lane-run">
             <div class="horse" style="--x:0">
               ${horseSvg(h)}
+              <span class="horse-fx" aria-hidden="true"></span>
               <span class="horse-name">${esc(h.name)}</span>
             </div>
           </div>
@@ -1143,8 +1147,11 @@ function renderHorse(root) {
       h.target = 0.085 + Math.random() * 0.01;
       h.next = 0;
       h.burst = 0;
+      h.rocket = 0;
+      h.trip = 0;
       h.place = 0;
     });
+    track.querySelectorAll('.horse').forEach((el) => el.classList.remove('rocket', 'trip'));
     track.querySelectorAll('.horse').forEach((el) => el.style.setProperty('--x', 0));
     track.querySelectorAll('.lane-place').forEach((el) => (el.textContent = ''));
     startBtn.disabled = true;
@@ -1164,6 +1171,8 @@ function renderHorse(root) {
     let leader = -1;
     let lastCall = 0;
     let said = { half: false, stretch: false };
+    // 역전 이벤트 2번: 선두가 이 지점을 지나면 뒤처진 말이 폭주하거나 선두가 휘청
+    const events = [0.3 + Math.random() * 0.15, 0.6 + Math.random() * 0.15];
     const els = [...track.querySelectorAll('.horse')];
     const places = [...track.querySelectorAll('.lane-place')];
     resultEl.textContent = '출발!';
@@ -1177,6 +1186,25 @@ function renderHorse(root) {
       const dt = Math.min(0.05, (now - last) / 1000) * scale;
       last = now;
       t += dt;
+      if (events.length && lead >= events[0] && sorted.length > 2) {
+        events.shift();
+        const back = sorted.slice(Math.ceil(sorted.length / 2));
+        const top = sorted[0];
+        if (Math.random() < 0.6 || !back.length) {
+          // 뒤에서 폭주 (가끔은 선두도 같이 휘청)
+          const h = back.length ? back[Math.floor(Math.random() * back.length)] : sorted[sorted.length - 1];
+          h.rocket = 1.6;
+          if (Math.random() < 0.35) top.trip = 0.9;
+          resultEl.innerHTML = `🚀 <b>${h.i + 1}번 ${esc(h.name)}</b> 폭주! 무섭게 따라붙어요!`;
+          sfx('boost');
+        } else {
+          top.trip = 1.1;
+          resultEl.innerHTML = `😵 선두 <b>${top.i + 1}번 ${esc(top.name)}</b> 휘청! 기회예요!`;
+          sfx('bad');
+        }
+        buzz(40);
+        lastCall = now;
+      }
       for (const h of horses) {
         if (h.place) continue;
         // 목표 속도를 자주 바꾸고 가끔 질주. 앞선 말은 조금 느려지고 뒤처진 말은 따라붙어서 끝까지 엎치락뒤치락
@@ -1186,14 +1214,19 @@ function renderHorse(root) {
           h.next = t + 0.3 + Math.random() * 0.6;
         }
         const catchUp = h.p < lead - 0.08 ? 1.15 : h.p >= lead ? 0.95 : 1;
-        const want = h.target * catchUp * (h.burst > 0 ? 1.55 : 1);
+        const want = h.target * catchUp * (h.burst > 0 ? 1.55 : 1) * (h.rocket > 0 ? 2.1 : 1) * (h.trip > 0 ? 0.35 : 1);
         h.burst -= dt;
+        h.rocket -= dt;
+        h.trip -= dt;
+        els[h.i].classList.toggle('rocket', h.rocket > 0);
+        els[h.i].classList.toggle('trip', h.trip > 0);
         h.v += (want - h.v) * Math.min(1, dt * 3.5);
         h.p += h.v * dt;
         if (h.p >= 1) {
           h.p = 1;
           h.place = ++finished;
           places[h.i].textContent = `${h.place}등`;
+          els[h.i].classList.remove('rocket', 'trip');
         }
         els[h.i].style.setProperty('--x', h.p.toFixed(4));
       }
@@ -1226,6 +1259,7 @@ function renderHorse(root) {
     slowEl.hidden = true;
     const winner = horses.find((h) => h.place === 1);
     const mine = horses[pick];
+    sfx(mine.place === 1 ? 'win' : 'lose');
     resultEl.innerHTML =
       mine.place === 1
         ? `🎉 적중! <b>${mine.i + 1}번 ${esc(mine.name)}</b> 1등!`
@@ -1251,6 +1285,9 @@ function renderHorse(root) {
 // 소리는 사용자가 버튼을 누른 뒤에만 켤 수 있어서(휴대폰 정책), 누를 때 unlock() 호출
 const gameAudio = {
   ctx: null,
+  get muted() {
+    try { return localStorage.getItem('sound-off') === '1'; } catch { return false; }
+  },
   unlock() {
     try {
       this.ctx ||= new (window.AudioContext || window.webkitAudioContext)();
@@ -1259,7 +1296,7 @@ const gameAudio = {
   },
   beep(freq, dur = 0.05, vol = 0.12) {
     const c = this.ctx;
-    if (!c) return;
+    if (!c || this.muted) return;
     const o = c.createOscillator();
     const g = c.createGain();
     o.type = 'square';
@@ -1272,7 +1309,7 @@ const gameAudio = {
   },
   boom() {
     const c = this.ctx;
-    if (!c) return;
+    if (!c || this.muted) return;
     const len = Math.floor(c.sampleRate * 0.9);
     const buf = c.createBuffer(1, len, c.sampleRate);
     const d = buf.getChannelData(0);
@@ -1287,7 +1324,61 @@ const gameAudio = {
     src.connect(f).connect(g).connect(c.destination);
     src.start();
   },
+  // 짧은 음 하나 (at: 지금부터 몇 초 뒤, slide: 끝 주파수)
+  tone(freq, dur, { type = 'sine', vol = 0.15, at = 0, slide = 0 } = {}) {
+    const c = this.ctx;
+    const t = c.currentTime + at;
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(c.destination);
+    o.start(t);
+    o.stop(t + dur + 0.02);
+  },
+  // 이름으로 부르는 효과음: ok 정답 · bad 오답 · pop 지우기 · flip 뒤집기 · match 짝 · win 성공 · lose 실패 · boost 질주 · roll 굴리기
+  sfx(name) {
+    if (this.muted) return;
+    this.unlock();
+    if (!this.ctx) return;
+    const T = (f, d, o) => this.tone(f, d, o);
+    switch (name) {
+      case 'ok': T(880, 0.12, { type: 'triangle' }); T(1318, 0.22, { type: 'triangle', at: 0.09 }); break;
+      case 'bad': T(330, 0.16, { type: 'square', vol: 0.07 }); T(220, 0.28, { type: 'square', vol: 0.07, at: 0.13 }); break;
+      case 'pop': T(600, 0.09, { type: 'sine', vol: 0.2, slide: 1500 }); break;
+      case 'flip': T(1200, 0.04, { type: 'triangle', vol: 0.06 }); break;
+      case 'match': T(1046, 0.1, { type: 'sine' }); T(1568, 0.25, { type: 'sine', at: 0.08 }); break;
+      case 'win': [523, 659, 784, 1046].forEach((f, i) => T(f, i === 3 ? 0.45 : 0.14, { type: 'triangle', at: i * 0.1 })); break;
+      case 'lose': [392, 349, 311, 262].forEach((f, i) => T(f, i === 3 ? 0.5 : 0.18, { type: 'triangle', vol: 0.12, at: i * 0.16 })); break;
+      case 'boost': T(300, 0.45, { type: 'sawtooth', vol: 0.06, slide: 1200 }); break;
+      case 'roll': for (let i = 0; i < 6; i++) T(500 + Math.random() * 500, 0.03, { type: 'square', vol: 0.05, at: i * 0.07 }); break;
+      case 'tick': T(1500, 0.03, { type: 'square', vol: 0.05 }); break;
+    }
+  },
 };
+const sfx = (name) => { try { gameAudio.sfx(name); } catch { /* 소리 없이 진행 */ } };
+// 첫 터치 때 소리 준비 (휴대폰은 사용자가 건드려야 소리가 남)
+if (typeof document !== 'undefined') ['pointerdown', 'keydown'].forEach((ev) => document.addEventListener(ev, () => gameAudio.unlock(), { once: true, capture: true }));
+// 상단 소리 켜기/끄기 버튼
+function syncSoundBtn() {
+  const b = document.querySelector('.sound-btn');
+  if (!b) return;
+  b.textContent = gameAudio.muted ? '🔇' : '🔊';
+  b.setAttribute('aria-label', gameAudio.muted ? '소리 켜기' : '소리 끄기');
+  b.setAttribute('aria-pressed', String(!gameAudio.muted));
+}
+if (typeof document !== 'undefined') {
+  document.querySelector('.sound-btn')?.addEventListener('click', () => {
+    try { localStorage.setItem('sound-off', gameAudio.muted ? '0' : '1'); } catch { /* 저장 불가 */ }
+    syncSoundBtn();
+    sfx('pop');
+  });
+  syncSoundBtn();
+}
 const buzz = (p) => { try { navigator.vibrate?.(p); } catch { /* 진동 없는 기기 */ } };
 
 /* ═════════════════════ 제비뽑기 ═════════════════════ */
@@ -1356,6 +1447,7 @@ function renderLots(root) {
           if (win) {
             found++;
             buzz(80);
+            sfx('win');
           }
           if (!quick) status(win ? `🎉 <b>${i + 1}번</b> 종이 ${esc(cur.label)}!` : `${i + 1}번은 꽝… 😅`);
           else status(found >= cur.wins ? '모두 펼쳤어요' : '');
@@ -1595,6 +1687,7 @@ function renderTeams(root) {
             splitBtn.textContent = '다시 나누기';
             copyBtn.hidden = false;
             resultEl.textContent = '🎉 팀이 정해졌어요!';
+            sfx('win');
           }
         }, 300 + i * gap)
       );
@@ -1722,6 +1815,7 @@ function renderDice(root) {
         hist.dice = [sum, ...hist.dice].slice(0, 15);
         showHist();
         buzz(30);
+        sfx('pop');
         rollBtn.disabled = false;
       }, 900 + dice.length * 100)
     );
@@ -1744,6 +1838,7 @@ function renderDice(root) {
         hist.coin = [head ? '앞' : '뒤', ...hist.coin].slice(0, 15);
         showHist();
         buzz(30);
+        sfx('pop');
         rollBtn.disabled = false;
       }, 1650)
     );
@@ -1943,6 +2038,7 @@ function renderLol(root) {
         copyBtn.hidden = false;
         resultEl.textContent = '⚔️ 팀이 정해졌어요!';
         buzz(40);
+        sfx('win');
       }, 1100)
     );
   }
@@ -2092,6 +2188,7 @@ function renderLiar(root) {
         clearInterval(timer);
         t.textContent = '시간 끝!';
         buzz(200);
+        sfx('lose');
       }
     }, 1000);
     stage.querySelector('[data-act="vote"]').addEventListener('click', () => {
@@ -2191,6 +2288,7 @@ function renderCroc(root) {
     } else {
       t.classList.add('down');
       buzz(15);
+      sfx('pop');
       const left = box.querySelectorAll('.tooth:not(.down)').length;
       resultEl.textContent = `휴~ 살았다! 남은 이빨 ${left}개`;
     }
@@ -2297,6 +2395,7 @@ function renderMini(root) {
         if (left <= 0) {
           clearInterval(iv);
           buzz(80);
+          sfx('ok');
           setTimeout(() => done(n, `<b>${n}번</b> 눌렀어요!`), 400);
         }
       }, 50);
@@ -2350,6 +2449,7 @@ function renderMini(root) {
           void b.offsetWidth;
           b.classList.add('miss');
           buzz(30);
+          sfx('bad');
           return;
         }
         b.classList.add('hit');
@@ -2375,6 +2475,7 @@ function renderMini(root) {
         <div class="game-actions"><button class="btn block" data-act="next">다음 라운드</button><button class="btn ghost block" data-act="end">그만하기</button></div>
       </div>`;
     buzz([120, 60, 120]);
+    sfx('lose');
     stage.querySelector('[data-act="next"]').addEventListener('click', () => {
       round++;
       nextRound();
@@ -2504,6 +2605,7 @@ function renderMemory(root) {
     if (!c || lock || c.classList.contains('open') || c.classList.contains('done')) return;
     if (!t0) t0 = performance.now();
     c.classList.add('open');
+    sfx('flip');
     open.push(c);
     if (open.length < 2) return;
     moves++;
@@ -2512,10 +2614,12 @@ function renderMemory(root) {
       open = [];
       found++;
       buzz(30);
+      sfx('match');
       if (two) score[turn]++;
       // 다 뒤집힌 뒤에 '찾음' 표시 (뒤집는 중 끊겨 보이지 않게)
       timers.push(setTimeout(() => { a.classList.add('done'); b.classList.add('done'); }, 380));
       if (found === pairs) {
+        timers.push(setTimeout(() => sfx('win'), 350));
         const sec = Math.round((performance.now() - t0) / 1000);
         if (two) {
           status(score[0] === score[1] ? '무승부!' : `🏆 ${score[0] > score[1] ? 1 : 2}번 승리!`);
@@ -2578,7 +2682,7 @@ function renderApple(root) {
   const wide = window.innerWidth >= 720;
   const COLS = wide ? 17 : 10;
   const ROWS = wide ? 10 : 15;
-  let LIMIT = (gameStore.get('apple') || {}).limit || 120;
+  let LIMIT = (gameStore.get('apple') || {}).limit || 60;
   root.innerHTML = `
     <div class="opt-row" role="group" aria-label="제한 시간">
       ${[60, 120].map((t) => `<button class="chip" data-limit="${t}" aria-pressed="${t === LIMIT}">${t}초</button>`).join('')}
@@ -2674,6 +2778,7 @@ function renderApple(root) {
       score += gone.length;
       scoreEl.textContent = `${score}개`;
       buzz(20);
+      sfx('pop');
     }
     sel = null;
     paintSel();
@@ -2711,6 +2816,7 @@ function renderApple(root) {
     resultEl.innerHTML = `⏰ 끝! 사과 <b>${score}개</b>${score > b ? ' · 최고 기록! 🎉' : ''}`;
     showBest();
     buzz([100, 50, 100]);
+    sfx('win');
   }
   startBtn.addEventListener('click', start);
   root.querySelectorAll('[data-limit]').forEach((b) =>
@@ -2888,7 +2994,7 @@ function renderBalance(root) {
       const dt = Math.min(0.05, (now - prev) / 1000);
       st.t += dt;
       // 시간이 갈수록 걸음이 빨라지고(최대 초속 6m), 빨라질수록 몸이 더 흔들려 균형 잡기가 어려워짐
-      st.speed = Math.min(6, 1.2 + st.t * 0.2);
+      st.speed = Math.min(7, 1.2 + st.t * 0.35);
       const level = 1 + (st.speed - 1.2) * 0.35;
       // 바람: 빨라질수록 더 자주, 더 세게
       if (Math.random() < dt * (0.6 + st.t * 0.03)) st.gust = (Math.random() - 0.5) * 1.4 * level;
@@ -2917,6 +3023,7 @@ function renderBalance(root) {
   function fall() {
     st.alive = false;
     buzz([200, 60, 200]);
+    sfx('lose');
     const best = gameStore.get('balance-best') || 0;
     if (st.dist > best) gameStore.save('balance-best', +st.dist.toFixed(1));
     resultEl.innerHTML = `💦 풍덩! <b>${st.dist.toFixed(1)} m</b> 걸었어요${st.dist > best ? ' · 최고 기록! 🎉' : best ? ` (최고 ${best} m)` : ''}`;

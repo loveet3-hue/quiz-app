@@ -687,6 +687,7 @@ function showFeedback(result) {
 
   const last = play.idx === play.items.length - 1;
   const good = !!result;
+  sfx(good ? 'ok' : 'bad');
   const msg = good ? (result === 'close' ? '정답! (비슷하게 써도 인정)' : '정답!') : item.passed ? '정답은' : '아쉬워요, 정답은';
 
   app.querySelector('[data-role="after"]').innerHTML = `
@@ -741,6 +742,7 @@ function renderResult() {
   const isBest = !prev || score > prev.best;
   // 전부 맞혔을 때만 시간 기록 (가장 빠른 기록 하나 보관)
   const perfect = score === total;
+  sfx(score * 2 >= total ? 'win' : 'lose');
   const prevTime = prev?.bestTime;
   const newTimeRecord = perfect && (!prevTime || timeMs < prevTime);
   stats[quiz.id] = {

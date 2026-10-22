@@ -235,6 +235,7 @@ function renderRanking(id) {
     app.querySelector('.rank-row.first').classList.add(ok ? 'ok' : 'no');
     app.querySelector('.rank-guess').hidden = true;
     app.querySelector('.game-actions').hidden = false;
+    sfx(ok ? 'win' : 'bad');
     resultEl.innerHTML = ok
       ? `🎉 정답! 1위는 <b>${esc(b.answer)}</b>`
       : `${mine ? `'${esc(mine)}'${josa(mine, '은', '는')} 아니에요. ` : ''}1위는 <b>${esc(b.answer)}</b>${josa(b.answer, '이었어요', '였어요')}`;

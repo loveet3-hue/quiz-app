@@ -118,6 +118,8 @@ a { color: inherit; text-decoration: none; }
 
 .logo img { border-radius: 8px; }
 
+.top-right { display: flex; align-items: center; gap: 6px; }
+.sound-btn { width: 34px; height: 34px; flex: none; display: inline-grid; place-items: center; border: 0; border-radius: 999px; background: var(--surface-2); font-size: 16px; cursor: pointer; }
 .top-tabs { display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--surface-2); }
 .top-tabs a {
   height: 32px;
@@ -882,6 +884,15 @@ a.btn { display: flex; align-items: center; justify-content: center; }
 @keyframes legA { 0%, 100% { transform: rotate(28deg); } 50% { transform: rotate(-24deg); } }
 @keyframes legB { 0%, 100% { transform: rotate(-24deg); } 50% { transform: rotate(28deg); } }
 @keyframes tail { 50% { transform: rotate(-18deg); } }
+.horse-fx { position: absolute; inset: 0; pointer-events: none; }
+.horse.rocket .horse-fx::after { content: '🔥'; position: absolute; left: -16px; top: 8px; font-size: 18px; animation: fx-flame .2s ease-in-out infinite alternate; }
+.horse.trip .horse-fx::after { content: '💫'; position: absolute; left: 50%; top: -14px; font-size: 16px; transform: translateX(-50%); animation: fx-spin .6s linear infinite; }
+.track.running .horse.rocket .pony, .track.running .horse.rocket .pony g, .track.running .horse.rocket .pony .tail { animation-duration: .16s; }
+.horse.rocket .pony { filter: drop-shadow(0 0 6px #ffb020) drop-shadow(0 2px 2px rgba(0, 0, 0, .25)); }
+.track.running .horse.trip .pony { animation: trip .5s ease-in-out infinite; }
+@keyframes fx-flame { to { transform: scale(1.25) translateX(-3px); } }
+@keyframes fx-spin { to { transform: translateX(-50%) rotate(360deg); } }
+@keyframes trip { 50% { transform: rotate(14deg) translateY(2px); } }
 .horse-name { font-size: 10px; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.5); white-space: nowrap; }
 .lane-place { color: #fff; font-weight: 800; font-size: 13px; text-align: right; }
 .pick-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
