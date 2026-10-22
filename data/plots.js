@@ -39,7 +39,7 @@ QUESTIONS['plots'] = [
   { text: '신미양요 때 미국으로 건너간 노비 소년이 미 해병대 장교가 되어 조선에 돌아온다', ask: '이 작품의 제목은?', answer: '미스터 션샤인', alias: ['Mr. Sunshine', '미스터 선샤인'], hint: '드라마 · 2018' },
   { text: '제주에서 태어난 당찬 소녀 애순과 무쇠처럼 우직한 소년 관식의 평생에 걸친 이야기', ask: '이 작품의 제목은?', answer: '폭싹 속았수다', alias: ['When Life Gives You Tangerines'], hint: '드라마 · 2025' },
   { text: '강원도 시골 돌담병원의 괴짜 천재 외과의가 젊은 의사들을 가르치며 환자를 살린다', ask: '이 작품의 제목은?', answer: '낭만닥터 김사부', alias: ['김사부', 'Dr. Romantic'], hint: '드라마 · 2016' },
-  { text: '남미의 한 나라에서 사업하던 한국인이 마약왕을 잡으려는 국정원의 작전에 끌려든다', ask: '이 작품의 제목은?', answer: '수리남', alias: ['Narco-Saints'], hint: '드라마 · 2022' },
+  { appHidden: true, text: '남미의 한 나라에서 사업하던 한국인이 마약왕을 잡으려는 국정원의 작전에 끌려든다', ask: '이 작품의 제목은?', answer: '수리남', alias: ['Narco-Saints'], hint: '드라마 · 2022' },
   { text: '군대에서 탈영병을 쫓아 잡는 군무이탈 체포조에 배치된 이등병과 상병', ask: '이 작품의 제목은?', answer: 'D.P.', alias: ['디피', 'DP'], hint: '드라마 · 2021' },
   { text: '경기도 끝자락 산포에 사는 삼남매가 지루한 서울 출퇴근 속에서 해방을 꿈꾼다', ask: '이 작품의 제목은?', answer: '나의 해방일지', alias: ['해방일지', 'My Liberation Notes'], hint: '드라마 · 2022' },
 
@@ -47,7 +47,7 @@ QUESTIONS['plots'] = [
   { text: '1980년대 미국 작은 마을, 사라진 친구를 찾던 아이들이 초능력 소녀를 만난다', ask: '이 작품의 제목은?', answer: '기묘한 이야기', alias: ['Stranger Things'], hint: '드라마 · 2016' },
   { text: '뉴욕에 사는 여섯 친구가 단골 카페 센트럴 퍼크에 모여 울고 웃는 시트콤', ask: '이 작품의 제목은?', answer: '프렌즈', alias: ['Friends'], hint: '드라마 · 1994' },
   { text: '웨스테로스 대륙의 가문들이 철왕좌를 차지하려 다투는 사이 북쪽 장벽 너머에서 위협이 온다', ask: '이 작품의 제목은?', answer: '왕좌의 게임', alias: ['Game of Thrones', '왕겜'], hint: '드라마 · 2011' },
-  { text: '시한부 판정을 받은 평범한 고등학교 화학 교사가 가족을 위해 마약 제조에 손을 댄다', ask: '이 작품의 제목은?', answer: '브레이킹 배드', alias: ['Breaking Bad'], hint: '드라마 · 2008' },
+  { appHidden: true, text: '시한부 판정을 받은 평범한 고등학교 화학 교사가 가족을 위해 마약 제조에 손을 댄다', ask: '이 작품의 제목은?', answer: '브레이킹 배드', alias: ['Breaking Bad'], hint: '드라마 · 2008' },
   { text: '아담스 가족의 무표정한 딸이 괴짜들이 모인 네버모어 학교에 들어가 사건을 파헤친다', ask: '이 작품의 제목은?', answer: '웬즈데이', alias: ['Wednesday', '웬즈데이 아담스'], hint: '드라마 · 2022' },
   { text: '교수라 불리는 천재가 도시 이름을 코드명으로 쓰는 강도단을 모아 조폐국을 턴다', ask: '이 작품의 제목은?', answer: '종이의 집', alias: ['Money Heist', 'La casa de papel'], hint: '드라마 · 2017' },
   { text: '현대 런던, 괴짜 천재 탐정과 아프가니스탄에서 돌아온 군의관이 함께 사건을 푼다', ask: '이 작품의 제목은?', answer: '셜록', alias: ['Sherlock'], hint: '드라마 · 2010' },

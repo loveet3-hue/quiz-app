@@ -6,7 +6,7 @@ QUESTIONS['movies'] = [
   { chosung: true, answer: '부산행', alias: ['Train to Busan'], text: '좀비 바이러스가 퍼진 KTX 안에서 살아남기' },
   { chosung: true, answer: '올드보이', alias: ['Oldboy'], text: '이유도 모른 채 15년 동안 갇혀 있던 남자의 복수' },
   { chosung: true, answer: '명량', text: '이순신 장군이 12척의 배로 왜군을 막아 낸 해전' },
-  { chosung: true, answer: '극한직업', text: '잠복 수사를 위해 치킨집을 차린 마약반 형사들' },
+  { appHidden: true, chosung: true, answer: '극한직업', text: '잠복 수사를 위해 치킨집을 차린 마약반 형사들' },
   { chosung: true, answer: '택시운전사', text: '1980년 광주로 외국인 기자를 태우고 간 서울 택시 기사' },
   { chosung: true, answer: '국제시장', text: '흥남 철수부터 파독 광부까지, 한 아버지의 일생' },
   { chosung: true, answer: '해운대', text: '부산 바닷가 도시에 초대형 쓰나미가 덮친다' },
