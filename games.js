@@ -2725,7 +2725,7 @@ function renderBalance(root) {
   const press = { l: false, r: false };
 
   const reset = () => {
-    st = { a: 0, w: 0, dist: 0, t: 0, alive: false, gust: 0, step: 0 };
+    st = { a: 0, w: 0, dist: 0, t: 0, alive: false, gust: 0, step: 0, speed: 1.2 };
     draw();
   };
 
@@ -2840,24 +2840,30 @@ function renderBalance(root) {
     ctx.font = '900 26px Pretendard, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(`${st.dist.toFixed(1)} m`, W / 2, 62);
+    if (st.speed > 1.3) {
+      ctx.font = '800 15px Pretendard, sans-serif';
+      ctx.fillStyle = st.speed > 4 ? '#e0312b' : '#4a4560';
+      ctx.fillText(`${st.speed > 4 ? '🔥 ' : '🏃 '}초속 ${st.speed.toFixed(1)}m`, W / 2, 84);
+    }
   }
 
   function loop(prev) {
     raf = requestAnimationFrame((now) => {
       const dt = Math.min(0.05, (now - prev) / 1000);
       st.t += dt;
-      const level = 1 + st.t / 40; // 시간이 갈수록 조금씩 어려워짐
-      // 바람: 가끔 방향이 바뀌는 흔들림
-      if (Math.random() < dt * 0.6) st.gust = (Math.random() - 0.5) * 1.4 * level;
+      // 시간이 갈수록 걸음이 빨라지고(최대 초속 6m), 빨라질수록 몸이 더 흔들려 균형 잡기가 어려워짐
+      st.speed = Math.min(6, 1.2 + st.t * 0.08);
+      const level = 1 + (st.speed - 1.2) * 0.35;
+      // 바람: 빨라질수록 더 자주, 더 세게
+      if (Math.random() < dt * (0.6 + st.t * 0.03)) st.gust = (Math.random() - 0.5) * 1.4 * level;
       const push = (press.r ? 1 : 0) - (press.l ? 1 : 0);
-      // 기울수록 더 기울어짐(불안정) + 바람 + 누르는 힘
-      // ◀ 누르면 왼쪽(뒤)으로, ▶ 누르면 오른쪽(앞)으로 몸을 당김
-      // 기울수록 더 넘어지려 하지만, 버튼 힘(4.0)이 더 세서 40° 넘게 기울어도 다시 일으킬 수 있음
-      st.w += (Math.sin(st.a) * 2.2 * level + st.gust + push * 4.0) * dt;
+      // 기울수록 더 넘어지려 함 + 바람 + 걸음마다 흔들림 + ◀(뒤)·▶(앞) 버튼 힘
+      const wobble = Math.sin(st.step) * 0.25 * st.speed;
+      st.w += (Math.sin(st.a) * 2.2 * level + st.gust + wobble + push * 4.0) * dt;
       st.w *= 1 - 1.6 * dt;
       st.a += st.w * dt;
-      st.dist += dt * (1.2 + st.t * 0.04);
-      st.step += dt * 9;
+      st.dist += dt * st.speed;
+      st.step += dt * (4 + st.speed * 2.2);
       draw();
       if (Math.abs(st.a) > 1.15) return fall();
       loop(now);
