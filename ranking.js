@@ -270,6 +270,6 @@ function renderRanking(id) {
     const next = list[Math.floor(Math.random() * list.length)];
     nav(`/ranking/${next.id}/`);
   });
-  input.focus();
+  if (!matchMedia('(pointer: coarse)').matches) input.focus(); // 휴대폰은 순위표부터 보이게 키보드를 바로 안 띄움
   fillAds();
 }

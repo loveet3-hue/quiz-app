@@ -613,7 +613,13 @@ function renderQuestion() {
   if (next?.image) new Image().src = next.image;
 
   const input = app.querySelector('.answer-input');
-  input.focus();
+  // 휴대폰: 첫 문제에서는 키보드를 바로 띄우지 않음 (문제가 가려지지 않게). 한 번 입력을 시작하면 다음 문제부터는 키보드 유지
+  const touch = matchMedia('(pointer: coarse)').matches;
+  input.addEventListener('focus', () => {
+    play.typing = true;
+    if (touch) setTimeout(() => app.querySelector('.qcard')?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 300);
+  });
+  if (!touch || play.typing) input.focus();
 
   const melodyBtn = app.querySelector('[data-act="melody"]');
   if (melodyBtn) {
