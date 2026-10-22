@@ -42,6 +42,13 @@ const parseNames = (text, max) =>
 // 보기 좋은 색 (이름 순서대로)
 const gameColor = (i, n) => `hsl(${Math.round((i * 360) / Math.max(n, 1) + 8) % 360} 72% 62%)`;
 
+// 휴대폰: 게임을 시작하면 판이 메뉴 바로 아래에 오게 화면을 내려 줌 (시작 버튼이 판 아래에 있어도 판이 보이게)
+function focusBoard(el) {
+  if (!el || window.innerWidth > 760) return;
+  const y = el.getBoundingClientRect().top + window.scrollY - (document.querySelector('.topbar')?.offsetHeight || 56) - 8;
+  if (Math.abs(window.scrollY - y) > 24) window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+}
+
 let gameCleanup = null;
 function stopGame() {
   if (gameCleanup) gameCleanup();
@@ -237,6 +244,7 @@ function renderWheel(root) {
 
   function spin() {
     const list = items();
+    focusBoard(root.querySelector('.wheel-wrap'));
     if (list.length < 2) {
       resultEl.textContent = '항목을 2개 이상 넣어 주세요.';
       return;
@@ -504,6 +512,7 @@ function renderLadder(root) {
   root.querySelector('[data-act="make"]').addEventListener('click', make);
   allBtn.addEventListener('click', () => {
     if (!ladder) return;
+    focusBoard(box);
     allBtn.disabled = true;
     resultEl.textContent = '다 같이 출발!';
     ladder.names.forEach((_, c) => timers.push(setTimeout(() => ride(c, true), c * 500)));
@@ -848,9 +857,17 @@ function renderMarble(root) {
       ctx.lineWidth = 1.5;
       ctx.strokeStyle = 'rgba(0,0,0,.25)';
       ctx.stroke();
-      // 이름: 흰 글씨 + 진한 테두리 (밝은·어두운 화면 모두 잘 보이게)
+    }
+    // 이름: 흰 글씨 + 진한 테두리. 앞서가는 구슬부터 쓰고, 다른 이름과 겹치면 그 이름은 잠시 생략 (빽빽할 때 글자가 뭉개지지 않게)
+    const placed = [];
+    const live = marbles.filter((m) => !m.done && m.y >= top && m.y <= bottom).sort((a, b) => b.y - a.y);
+    ctx.lineJoin = 'round';
+    for (const m of live) {
       const label = m.name.length > 4 ? m.name.slice(0, 4) : m.name;
-      ctx.lineJoin = 'round';
+      const w = ctx.measureText(label).width + 4;
+      const box = { l: m.x - w / 2, r: m.x + w / 2, t: m.y - R - 14, b: m.y - R - 1 };
+      if (placed.some((p) => box.l < p.r && box.r > p.l && box.t < p.b && box.b > p.t)) continue;
+      placed.push(box);
       ctx.lineWidth = 3;
       ctx.strokeStyle = 'rgba(20,16,36,.85)';
       ctx.strokeText(label, m.x, m.y - R - 3);
@@ -928,6 +945,7 @@ function renderMarble(root) {
 
   function start() {
     const names = parseNames(ta.value, 50);
+    focusBoard(root.querySelector('.marble-stage'));
     if (names.length < 2) {
       resultEl.textContent = '참가자를 2명 이상 넣어 주세요.';
       return;
@@ -1116,6 +1134,7 @@ function renderHorse(root) {
 
   function start() {
     if (pick < 0) return;
+    focusBoard(root.querySelector('.track-wrap'));
     gameStore.save('horse', { names: ta.value });
     stop();
     horses.forEach((h) => {
@@ -2454,7 +2473,11 @@ function renderMemory(root) {
     turn = 0;
     hints = 0;
     score = [0, 0];
-    grid.style.setProperty('--cols', pairs <= 8 ? 4 : pairs <= 10 ? 5 : 6);
+    const cols = pairs <= 8 ? 4 : pairs <= 10 ? 5 : 6;
+    grid.style.setProperty('--cols', cols);
+    grid.style.setProperty('--rows', Math.ceil((pairs * 2) / cols));
+    grid.style.setProperty('--grid-top', `${(document.querySelector('.topbar')?.offsetHeight || 56) + resultEl.offsetHeight + 24}px`);
+    focusBoard(resultEl);
     grid.innerHTML = cards
       .map((f, i) => {
         const [c1, c2] = MEMORY_GRADS[f % MEMORY_GRADS.length];
@@ -2561,7 +2584,7 @@ function renderApple(root) {
       ${[60, 120].map((t) => `<button class="chip" data-limit="${t}" aria-pressed="${t === LIMIT}">${t}초</button>`).join('')}
     </div>
     <div class="apple-bar"><span class="apple-score">0개</span><span class="apple-time"><i></i></span><span class="apple-best"></span></div>
-    <div class="apple-board" style="--cols:${COLS}"></div>
+    <div class="apple-board" style="--cols:${COLS};--rows:${ROWS}"></div>
     <p class="game-result" role="status">손가락(마우스)으로 네모를 그려서 숫자 합이 <b>10</b>이 되게 묶으세요!</p>
     <div class="game-actions">
       <button class="btn block" data-act="start">시작</button>
@@ -2579,6 +2602,13 @@ function renderApple(root) {
   let t0 = 0;
   let raf = 0;
   let sel = null;
+  // 판 크기를 화면 높이에 맞춤: 위쪽 메뉴·시간 막대를 뺀 높이 안에 판 전체가 들어가게
+  const fit = () => {
+    const top = (document.querySelector('.topbar')?.offsetHeight || 60) + root.querySelector('.apple-bar').offsetHeight + 28;
+    board.style.setProperty('--apple-top', `${top}px`);
+  };
+  fit();
+  window.addEventListener('resize', fit);
   const showBest = () => {
     const b = gameStore.get('apple-best-' + LIMIT);
     bestEl.textContent = b ? `${LIMIT}초 최고 ${b}개` : '';
@@ -2664,6 +2694,9 @@ function renderApple(root) {
     playing = true;
     t0 = performance.now();
     startBtn.disabled = true;
+    // 시간 막대가 맨 위에 오게 내려서 판 전체가 한 화면에 보이게
+    fit();
+    focusBoard(root.querySelector('.apple-bar'));
     resultEl.innerHTML = `합이 <b>10</b>이 되게 네모로 묶으세요! ${LIMIT}초!`;
     raf = requestAnimationFrame(tick);
   }
@@ -2698,7 +2731,10 @@ function renderApple(root) {
     resultEl.innerHTML = '손가락(마우스)으로 네모를 그려서 숫자 합이 <b>10</b>이 되게 묶으세요!';
   });
   make();
-  gameCleanup = () => cancelAnimationFrame(raf);
+  gameCleanup = () => {
+    cancelAnimationFrame(raf);
+    window.removeEventListener('resize', fit);
+  };
 }
 
 /* ═════════════════════ 균형 잡기 (황새 오래 걷기) ═════════════════════ */
@@ -2871,6 +2907,7 @@ function renderBalance(root) {
   }
   function start() {
     reset();
+    focusBoard(root.querySelector('.bal-wrap'));
     st.alive = true;
     st.a = (Math.random() - 0.5) * 0.1;
     startBtn.disabled = true;
