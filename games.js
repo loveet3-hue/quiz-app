@@ -2888,7 +2888,7 @@ function renderBalance(root) {
       const dt = Math.min(0.05, (now - prev) / 1000);
       st.t += dt;
       // 시간이 갈수록 걸음이 빨라지고(최대 초속 6m), 빨라질수록 몸이 더 흔들려 균형 잡기가 어려워짐
-      st.speed = Math.min(6, 1.2 + st.t * 0.08);
+      st.speed = Math.min(6, 1.2 + st.t * 0.2);
       const level = 1 + (st.speed - 1.2) * 0.35;
       // 바람: 빨라질수록 더 자주, 더 세게
       if (Math.random() < dt * (0.6 + st.t * 0.03)) st.gust = (Math.random() - 0.5) * 1.4 * level;

@@ -1473,7 +1473,7 @@ a.icon-btn { display: inline-grid; place-items: center; }
   grid-template-columns: repeat(var(--cols, 4), 1fr);
   gap: 8px;
   /* 카드 전체가 한 화면에: 남은 높이 × (칸÷줄) × 카드 비율(3/4) 와 화면 너비 중 작은 쪽 */
-  width: min(100%, 460px, calc((100dvh - var(--grid-top, 200px)) * var(--cols, 4) / var(--rows, 3) * 0.72));
+  width: min(100%, 460px, calc((100svh - var(--grid-top, 200px)) * var(--cols, 4) / var(--rows, 3) * 0.72));
   margin: 0 auto;
 }
 .mem-card { aspect-ratio: 3 / 4; padding: 0; border: 0; background: none; perspective: 700px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
@@ -1533,7 +1533,7 @@ a.icon-btn { display: inline-grid; place-items: center; }
   display: grid;
   grid-template-columns: repeat(var(--cols), 1fr);
   /* 판 너비 = 남은 화면 높이 × (칸 수 ÷ 줄 수) 와 화면 너비 중 작은 쪽 → 판 전체가 한 화면에 */
-  width: min(100%, calc((100dvh - var(--apple-top, 220px)) * var(--cols) / var(--rows)));
+  width: min(100%, calc((100svh - var(--apple-top, 220px)) * var(--cols) / var(--rows)));
   margin: 0 auto;
   gap: 2px;
   padding: 6px;
@@ -1606,10 +1606,10 @@ a.icon-btn { display: inline-grid; place-items: center; }
 /* 휴대폰: 게임 판이 시작 버튼과 함께 한 화면에 들어오게 */
 @media (max-width: 640px) {
   .page-title { font-size: 22px; }
-  .wheel-wrap { width: min(100%, 400px, 48dvh); }
-  .bal-wrap { width: min(100%, 360px, calc((100dvh - 340px) * 360 / 420)); }
+  .wheel-wrap { width: min(100%, 400px, 48svh); }
+  .bal-wrap { width: min(100%, 360px, calc((100svh - 340px) * 360 / 420)); }
   .lane-run { height: 40px; }
   .track { gap: 3px; padding: 8px; }
-  .ladder-box { max-height: 50dvh; overflow: auto; }
-  .ladder-svg { max-height: calc(50dvh - 20px); width: auto; }
+  .ladder-box { max-height: 50svh; overflow: auto; }
+  .ladder-svg { max-height: calc(50svh - 20px); width: auto; }
 }
