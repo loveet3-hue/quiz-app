@@ -77,7 +77,7 @@ QUESTIONS['landmarks'] = [
   { image: WM("Kilimanjaro from Amboseli.jpg"), text: '이곳의 이름은?', answer: '킬리만자로산', alias: ["킬리만자로"], credit: "사진: Sergey Pesterev · CC BY-SA 4.0" },
   { image: WM("Cataratas Victoria, Zambia-Zimbabue, 2018-07-27, DD 04.jpg"), text: '이곳의 이름은?', answer: '빅토리아 폭포', credit: "사진: Diego Delso · CC BY-SA 4.0" },
   { image: WM("Matterhorn from Domhütte - 2.jpg"), text: '이곳의 이름은?', answer: '마터호른', alias: ['마테호른'], credit: "사진: chil · CC BY-SA 3.0" },
-  { image: WM("Bruxelles Manneken Pis cropped.jpg"), text: '이곳의 이름은?', answer: '오줌싸개 동상', alias: ['오줌싸개 소년', '마네켄 피스'], credit: "사진: Myrabella · CC BY-SA 3.0" },
+  { appHidden: true, image: WM("Bruxelles Manneken Pis cropped.jpg"), text: '이곳의 이름은?', answer: '오줌싸개 동상', alias: ['오줌싸개 소년', '마네켄 피스'], credit: "사진: Myrabella · CC BY-SA 3.0" },
   { image: WM("Cappadocia balloon trip, Ortahisar Castle (11893715185).jpg"), text: '이곳의 이름은?', answer: '카파도키아', credit: "사진: Arian Zwegers from Brussels, Belgium · CC BY 2.0" },
   { image: WM("Lincoln Memorial east side.JPG"), text: '이곳의 이름은?', answer: '링컨 기념관', credit: "사진: Martin Falbisoner · CC BY-SA 3.0" },
   { image: WM("The walls of the fortress and View of the old city. panorama.jpg"), text: '이곳의 이름은?', answer: '두브로브니크', credit: "사진: Zysko serhii · CC BY-SA 4.0" },

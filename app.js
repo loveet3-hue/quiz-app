@@ -21,6 +21,8 @@ const IN_APP = (() => {
 })();
 // 앱에서는 appHidden 퀴즈(실존 인물 사진 등)를 아예 목록에서 뺀다 → 주소로 들어와도 '없는 퀴즈'
 if (IN_APP) for (let i = QUIZZES.length - 1; i >= 0; i--) if (QUIZZES[i].appHidden) QUIZZES.splice(i, 1);
+// 앱(구글 플레이 등급)에서는 누드·폭력이 담긴 명화 같은 문제도 뺀다
+if (IN_APP) for (const k in QUESTIONS) QUESTIONS[k] = QUESTIONS[k].filter((q) => !q.appHidden);
 
 const CATEGORIES = ['전체', ...new Set(QUIZZES.map((q) => q.category))];
 
