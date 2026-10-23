@@ -43,6 +43,21 @@ const parseNames = (text, max) =>
 const gameColor = (i, n) => `hsl(${Math.round((i * 360) / Math.max(n, 1) + 8) % 360} 72% 62%)`;
 
 // 휴대폰: 게임을 시작하면 판이 메뉴 바로 아래에 오게 화면을 내려 줌 (시작 버튼이 판 아래에 있어도 판이 보이게)
+// 게임판 한가운데에 띄우는 큰 시작 버튼. show(라벨)로 다시 띄우고, 누르면 hidden 처리는 각 게임이 함
+function boardStart(label, sub, onClick) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'board-start';
+  b.show = (l) => {
+    if (l) label = l;
+    b.innerHTML = `<b>▶ ${label}</b><small>${sub()}</small>`;
+    b.hidden = false;
+  };
+  b.show();
+  if (onClick) b.addEventListener('click', onClick);
+  return b;
+}
+
 function focusBoard(el) {
   if (!el || window.innerWidth > 760) return;
   const y = el.getBoundingClientRect().top + window.scrollY - (document.querySelector('.topbar')?.offsetHeight || 56) - 8;
@@ -2519,6 +2534,10 @@ function renderMemory(root) {
   let timers = [];
   const clear = () => { timers.forEach(clearTimeout); timers = []; };
   const best = () => gameStore.get('memory-best-' + pairs);
+  const startBtn = boardStart('시작', () => `${pairs * 2}장 · ${pairs <= 6 ? 3 : pairs <= 8 ? 4 : 5}초 동안 외우기`, () => {
+    if (found === pairs) setup();
+    start();
+  });
 
   function status(msg) {
     if (two) resultEl.innerHTML = `${msg ? msg + '<br>' : ''}<small class="sub">${turn === 0 ? '👉 ' : ''}1번 ${score[0]}점 · ${turn === 1 ? '👉 ' : ''}2번 ${score[1]}점</small>`;
@@ -2565,7 +2584,15 @@ function renderMemory(root) {
         return `<button class="mem-card" data-i="${i}" aria-label="카드"><span class="mem-in"><span class="mem-back"><img src="/icons/logo.svg" alt=""></span><span class="mem-front" style="--c1:${c1};--c2:${c2}"><i>${faces[f]}</i></span></span></button>`;
       })
       .join('');
-    // 시작할 때 전체를 한 번 보여 줌 (카드가 많을수록 조금 더 길게)
+    grid.append(startBtn);
+    startBtn.show();
+    lock = true;
+    status(two ? '2명이 번갈아 뒤집어요. 시작을 누르세요' : '시작을 누르면 카드를 잠깐 보여 줘요');
+  }
+
+  // 시작: 전체를 한 번 보여 줬다가 덮음 (카드가 많을수록 조금 더 길게)
+  function start() {
+    startBtn.hidden = true;
     let n = 3;
     const sec = pairs <= 6 ? 3 : pairs <= 8 ? 4 : 5;
     n = sec;
@@ -2600,6 +2627,7 @@ function renderMemory(root) {
       timers.push(setTimeout(() => { a.classList.add('done'); b.classList.add('done'); }, 380));
       if (found === pairs) {
         timers.push(setTimeout(() => sfx('win'), 350));
+        timers.push(setTimeout(() => startBtn.show('한 판 더'), 1200));
         const sec = Math.round((performance.now() - t0) / 1000);
         if (two) {
           status(score[0] === score[1] ? '무승부!' : `🏆 ${score[0] > score[1] ? 1 : 2}번 승리!`);
@@ -2645,7 +2673,7 @@ function renderMemory(root) {
   });
   root.querySelector('[data-act="reset"]').addEventListener('click', setup);
   root.querySelector('[data-act="hint"]').addEventListener('click', () => {
-    if (lock || found === pairs) return;
+    if (lock || found === pairs || !startBtn.hidden) return;
     open.forEach((c) => c.classList.remove('open'));
     open = [];
     hints++;
@@ -2671,7 +2699,6 @@ function renderApple(root) {
     <div class="apple-board" style="--cols:${COLS};--rows:${ROWS}"></div>
     <p class="game-result" role="status">손가락(마우스)으로 네모를 그려서 숫자 합이 <b>10</b>이 되게 묶으세요!</p>
     <div class="game-actions">
-      <button class="btn block" data-act="start">시작</button>
       <button class="btn ghost block" data-act="reset">다시 시작</button>
     </div>`;
   const board = root.querySelector('.apple-board');
@@ -2679,7 +2706,8 @@ function renderApple(root) {
   const bar = root.querySelector('.apple-time i');
   const bestEl = root.querySelector('.apple-best');
   const resultEl = root.querySelector('.game-result');
-  const startBtn = root.querySelector('[data-act="start"]');
+  // 시작 버튼은 판 한가운데에 띄움 (들어오자마자 보이게)
+  const startBtn = boardStart('시작', () => `${LIMIT}초 · 합이 10이 되게 묶기`);
   let nums = [];
   let score = 0;
   let playing = false;
@@ -2704,6 +2732,7 @@ function renderApple(root) {
     const r = nums.reduce((a, b) => a + b, 0) % 10;
     if (r) nums[nums.length - 1] = ((nums[nums.length - 1] - 1 + (10 - r)) % 9) + 1;
     board.innerHTML = nums.map((n, i) => `<span class="apple" data-i="${i}">${n}</span>`).join('');
+    board.append(startBtn);
     score = 0;
     scoreEl.textContent = '0개';
     bar.style.width = '100%';
@@ -2778,7 +2807,7 @@ function renderApple(root) {
     make();
     playing = true;
     t0 = performance.now();
-    startBtn.disabled = true;
+    startBtn.hidden = true;
     // 시간 막대가 맨 위에 오게 내려서 판 전체가 한 화면에 보이게
     fit();
     focusBoard(root.querySelector('.apple-bar'));
@@ -2789,8 +2818,7 @@ function renderApple(root) {
     playing = false;
     sel = null;
     paintSel();
-    startBtn.disabled = false;
-    startBtn.textContent = '한 판 더';
+    startBtn.show('한 판 더');
     const b = gameStore.get('apple-best-' + LIMIT) || 0;
     if (score > b) gameStore.save('apple-best-' + LIMIT, score);
     resultEl.innerHTML = `⏰ 끝! 사과 <b>${score}개</b>${score > b ? ' · 최고 기록! 🎉' : ''}`;
@@ -2806,14 +2834,14 @@ function renderApple(root) {
       gameStore.save('apple', { limit: LIMIT });
       root.querySelectorAll('[data-limit]').forEach((x) => x.setAttribute('aria-pressed', x === b));
       showBest();
+      if (!startBtn.hidden) startBtn.show();
     })
   );
   root.querySelector('[data-act="reset"]').addEventListener('click', () => {
     cancelAnimationFrame(raf);
     playing = false;
-    startBtn.disabled = false;
-    startBtn.textContent = '시작';
     make();
+    startBtn.show('시작');
     resultEl.innerHTML = '손가락(마우스)으로 네모를 그려서 숫자 합이 <b>10</b>이 되게 묶으세요!';
   });
   make();
