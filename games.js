@@ -122,7 +122,8 @@ function renderGamesHome() {
   document.title = '게임 · 맞혀봐';
   const draw = () => {
     const grid = app.querySelector('.games-grid');
-    if (grid) grid.innerHTML = GAMES.map((g) => gameCardHtml(g, { plays: counts.get() })).join('');
+    const plays = counts.get();
+    if (grid) grid.innerHTML = popularGames(plays, GAMES.length).map((g) => gameCardHtml(g, { plays })).join('');
   };
   app.innerHTML = `
     <div class="games-home">
@@ -2577,7 +2578,6 @@ function renderMemory(root) {
     grid.style.setProperty('--cols', cols);
     grid.style.setProperty('--rows', Math.ceil((pairs * 2) / cols));
     grid.style.setProperty('--grid-top', `${(document.querySelector('.topbar')?.offsetHeight || 56) + resultEl.offsetHeight + 24}px`);
-    focusBoard(resultEl);
     grid.innerHTML = cards
       .map((f, i) => {
         const [c1, c2] = MEMORY_GRADS[f % MEMORY_GRADS.length];
@@ -2593,6 +2593,8 @@ function renderMemory(root) {
   // 시작: 전체를 한 번 보여 줬다가 덮음 (카드가 많을수록 조금 더 길게)
   function start() {
     startBtn.hidden = true;
+    // 안내 문구가 맨 위에 오게 내려서 카드가 한 화면에 다 보이게
+    focusBoard(resultEl);
     let n = 3;
     const sec = pairs <= 6 ? 3 : pairs <= 8 ? 4 : 5;
     n = sec;

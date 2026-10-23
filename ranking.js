@@ -122,13 +122,17 @@ function renderRankings() {
     ${adHtml('homeBottom')}
     ${SITE_FOOT}`;
   const PREVIEW = 6; // '전체'에서는 분류마다 6개만 보여 주고 '모두 보기'
+  // 인기순(참여 수 많은 순, 같으면 원래 순서). 참여 수는 퀴즈와 같은 집계 서버에 'rank-<id>'로 셈
+  const rankPlays = (plays, b) => plays['rank-' + b.id] || 0;
   const draw = () => {
+    const plays = counts.get();
     const q = normalize(rankList.query);
     const all = rankList.group === '전체' && !q;
     const groups = RANK_GROUPS.filter((g) => rankList.group === '전체' || rankList.group === g.id);
     const html = groups
       .map((g) => {
-        const list = RANKINGS.filter((b) => b.group === g.id && (!q || normalize(b.title + b.q + b.items.slice(1).map((i) => i[0]).join('')).includes(q)));
+        const list = RANKINGS.filter((b) => b.group === g.id && (!q || normalize(b.title + b.q + b.items.slice(1).map((i) => i[0]).join('')).includes(q)))
+          .sort((a, b) => rankPlays(plays, b) - rankPlays(plays, a));
         if (!list.length) return '';
         const shown = all ? list.slice(0, PREVIEW) : list;
         return `<section class="rk-sec">
@@ -165,6 +169,7 @@ function renderRankings() {
     })
   );
   draw();
+  counts.refresh().then((fresh) => fresh && app.querySelector('.rank-sections') && draw());
   fillAds();
 }
 
@@ -187,6 +192,7 @@ function renderRanking(id) {
   }
   const g = groupOf(b.group);
   document.title = `${b.title} 1위는? · 맞혀봐 랭킹`;
+  reportPlay('rank-' + b.id);
   const row = (it, i, reveal) => {
     const [name, val, url] = it;
     const hidden = i === 0 && !reveal;
