@@ -265,7 +265,7 @@ function popularQuizzes(plays, n) {
 
 const SITE_FOOT = `
     <footer class="site-foot">
-      <a href="/about.html">소개</a> · <a href="/terms.html">이용약관</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a> · <a href="mailto:tminews@naver.com">문의</a>
+      <a href="/study/">공부하기</a> · <a href="/about.html">소개</a> · <a href="/terms.html">이용약관</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a> · <a href="mailto:tminews@naver.com">문의</a>
     </footer>`;
 
 // 홈: 오늘의 퀴즈 · 인기 퀴즈 · 새로 나온 퀴즈 · 인기 게임 · 새로 나온 게임
@@ -302,6 +302,7 @@ function renderHome() {
       <p>맞혀봐는 사진·초성·설명·멜로디를 보고 <b>정답을 직접 써서</b> 맞히는 주관식 퀴즈 사이트예요. 보기 중에 고르는 객관식이 아니라서 정말 알고 있어야 맞힐 수 있고, 띄어쓰기나 가벼운 오타는 정답으로 인정해 줘요.</p>
       <p>일반 상식·생활 과학부터 국기·수도·세계 명소, 사자성어·속담·맞춤법, 영화 줄거리·노래 제목·멜로디, 동물·꽃·우주 사진까지 50가지가 넘는 주제에 수천 개의 문제가 있어요. 퀴즈마다 안 본 문제부터 나오고, 끝까지 풀면 맞힌 개수와 시간이 기록돼요.</p>
       <p>모임에서 바로 쓸 수 있는 구슬 추첨·사다리 타기·돌림판·라이어 게임 같은 뽑기·파티 게임과, 2·3위를 보고 1위를 맞히는 랭킹 퀴즈도 있어요. 회원가입 없이 무료로 쓸 수 있어요.</p>
+      <p>퀴즈 전에 미리 훑어보고 싶다면 <a href="/study/">공부하기</a>에서 사자성어·맞춤법·속담·세계 수도·원소 기호 등을 표로 정리해 둔 페이지를 보세요.</p>
     </section>
     ${adHtml('homeBottom')}
     ${SITE_FOOT}

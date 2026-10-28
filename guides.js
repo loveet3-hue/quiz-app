@@ -59,6 +59,7 @@ function quizAboutHtml(quiz, all) {
     <ul>${how.map((h) => `<li>${h}</li>`).join('')}</ul>
     ${samples}
     ${quiz.credit ? `<p class="about-note">${E(quiz.credit)}</p>` : ''}
+    ${typeof STUDY_PAGES !== 'undefined' && STUDY_PAGES[quiz.id] ? `<h3>미리 공부하기</h3><p><a href="/study/${quiz.id}/">${E(STUDY_PAGES[quiz.id])}</a>에서 이 퀴즈에 나오는 내용을 표로 한눈에 정리해 두었어요.</p>` : ''}
     ${related.length ? `<h3>함께 풀어 볼 퀴즈</h3><ul class="about-links">${related.map((x) => `<li><a href="/q/${x.id}/">${E(x.title)}</a> — ${E(x.desc)}</li>`).join('')}</ul>` : ''}
   </section>`;
 }
@@ -155,3 +156,17 @@ function gameAboutHtml(game) {
     <p class="about-note">회원가입 없이 무료로 쓸 수 있고, 입력한 이름과 설정은 내 기기에만 저장돼요.</p>
   </section>`;
 }
+
+// 공부용 정리 페이지 (/study/<id>/, tools/build_pages.js가 만듦). 퀴즈 소개 아래에 '정리 보기' 링크로 연결
+const STUDY_PAGES = {
+  idioms: '사자성어 100개 뜻 모음',
+  spelling: '헷갈리는 맞춤법 100가지 정리',
+  proverbs: '우리말 속담 100개 모음',
+  slang: '요즘 줄임말 원래 뜻 모음',
+  antonyms: '반대말 100쌍 모음',
+  'baby-animals': '동물 새끼 이름 모음',
+  elements: '원소 기호 118개 전체 표',
+  capitals: '헷갈리는 세계 수도 100곳',
+  dialect: '지역별 사투리 표준어 뜻 모음',
+  history: '설명으로 알아보는 한국사 인물 100명',
+};
