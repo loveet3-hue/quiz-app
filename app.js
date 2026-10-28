@@ -265,7 +265,7 @@ function popularQuizzes(plays, n) {
 
 const SITE_FOOT = `
     <footer class="site-foot">
-      <a href="/about.html">소개</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a> · <a href="mailto:tminews@naver.com">문의</a>
+      <a href="/about.html">소개</a> · <a href="/terms.html">이용약관</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a> · <a href="mailto:tminews@naver.com">문의</a>
     </footer>`;
 
 // 홈: 오늘의 퀴즈 · 인기 퀴즈 · 새로 나온 퀴즈 · 인기 게임 · 새로 나온 게임

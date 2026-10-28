@@ -62,7 +62,7 @@ const ogFile = (name) => (fs.existsSync(path.join(ROOT, 'og', name + '.jpg')) ? 
 const urls = [];
 
 // 홈 (검색엔진용으로 퀴즈 목록을 글로도 넣어 둠 — 화면은 앱이 다시 그림)
-const homeBody = `<h1>맞혀봐 - 직접 써서 맞히는 퀴즈</h1><p>맞혀봐는 사진·초성·설명·멜로디를 보고 정답을 직접 써서 맞히는 주관식 퀴즈 사이트예요. 상식, 지리, 언어, 영화·음악, 동물·자연 등 50가지가 넘는 주제에 수천 개의 문제가 있고, 모임에서 쓰는 뽑기·파티 게임과 1위를 맞히는 랭킹 퀴즈도 있어요.</p><ul>${QUIZZES.map((q) => `<li><a href="/q/${q.id}/">${esc(q.title)}</a> - ${esc(q.desc)}</li>`).join('')}</ul><p><a href="/games/">뽑기 게임</a> · <a href="/about.html">소개</a> · <a href="/privacy.html">개인정보 처리방침</a></p>`;
+const homeBody = `<h1>맞혀봐 - 직접 써서 맞히는 퀴즈</h1><p>맞혀봐는 사진·초성·설명·멜로디를 보고 정답을 직접 써서 맞히는 주관식 퀴즈 사이트예요. 상식, 지리, 언어, 영화·음악, 동물·자연 등 50가지가 넘는 주제에 수천 개의 문제가 있고, 모임에서 쓰는 뽑기·파티 게임과 1위를 맞히는 랭킹 퀴즈도 있어요.</p><ul>${QUIZZES.map((q) => `<li><a href="/q/${q.id}/">${esc(q.title)}</a> - ${esc(q.desc)}</li>`).join('')}</ul><p><a href="/games/">뽑기 게임</a> · <a href="/about.html">소개</a> · <a href="/terms.html">이용약관</a> · <a href="/privacy.html">개인정보 처리방침</a></p>`;
 const homeHtml = page({
   title: '맞혀봐 - 상식 퀴즈 · 그림 퀴즈 · 뽑기 게임 · 랭킹',
   desc: `맞혀봐(맞춰봐)는 사진·초성·그림을 보고 정답을 직접 써서 맞히는 무료 주관식 퀴즈 사이트예요. 상식 퀴즈, 국기 퀴즈, 초성 퀴즈, 노래·영화 퀴즈와 라이어 게임·돌림판·사다리 같은 뽑기 게임, 1위 맞히기 랭킹까지`,
@@ -184,7 +184,7 @@ for (const b of RANKINGS) {
 
 // 사이트맵 · robots
 const today = new Date().toISOString().slice(0, 10);
-urls.push('/about.html', '/privacy.html', '/credits.html');
+urls.push('/about.html', '/terms.html', '/privacy.html', '/credits.html');
 write(
   'sitemap.xml',
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
