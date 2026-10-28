@@ -132,6 +132,11 @@ function renderGamesHome() {
         <p>누가 쏠지, 누가 갈지 공정하게 정해 보세요</p>
       </section>
       <div class="games-grid"></div>
+      <section class="about">
+        <h2>모임을 더 재밌게 만드는 무료 게임</h2>
+        <p>순서·당번·벌칙을 공정하게 정하는 구슬 추첨, 경주마, 사다리 타기, 돌림판, 제비뽑기와, 여럿이 휴대폰 하나로 즐기는 라이어 게임, 폭탄 돌리기, 10초 미니게임 대결, 악어 룰렛이 있어요. 혼자 기록에 도전하는 사과 게임, 카드 짝 맞추기, 균형 잡기도 있어요.</p>
+        <p>설치나 회원가입 없이 바로 쓸 수 있고, 입력한 이름과 설정은 다음에 다시 쓸 수 있게 내 기기에만 저장돼요. 게임마다 하는 방법과 활용 팁을 아래에 적어 두었어요.</p>
+      </section>
     </div>
     ${SITE_FOOT}`;
   draw();
@@ -152,7 +157,8 @@ function renderGame(id) {
       <button class="icon-btn" data-act="home" aria-label="게임 목록으로">←</button>
       <h1 class="page-title">${esc(game.title)}</h1>
     </div>
-    <div class="game-body"></div>`;
+    <div class="game-body"></div>
+    ${gameAboutHtml(game)}`;
   app.querySelector('[data-act="home"]').addEventListener('click', () => nav('/games/'));
   const body = app.querySelector('.game-body');
   ({ wheel: renderWheel, ladder: renderLadder, marble: renderMarble, horse: renderHorse, lots: renderLots, bomb: renderBomb, teams: renderTeams, lol: renderLol, dice: renderDice, liar: renderLiar, croc: renderCroc, mini: renderMini, memory: renderMemory, apple: renderApple, balance: renderBalance })[id](body);

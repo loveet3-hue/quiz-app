@@ -22,7 +22,7 @@ const IN_APP = (() => {
 // 앱에서는 appHidden 퀴즈(실존 인물 사진 등)를 아예 목록에서 뺀다 → 주소로 들어와도 '없는 퀴즈'
 if (IN_APP) for (let i = QUIZZES.length - 1; i >= 0; i--) if (QUIZZES[i].appHidden) QUIZZES.splice(i, 1);
 // 앱(구글 플레이 등급)에서는 누드·폭력이 담긴 명화 같은 문제도 뺀다
-if (IN_APP) for (const k in QUESTIONS) QUESTIONS[k] = QUESTIONS[k].filter((q) => !q.appHidden);
+if (IN_APP) for (const quiz of QUIZZES) if (quiz.questions) quiz.questions = quiz.questions.filter((q) => !q.appHidden);
 
 const CATEGORIES = ['전체', ...new Set(QUIZZES.map((q) => q.category))];
 
@@ -265,7 +265,7 @@ function popularQuizzes(plays, n) {
 
 const SITE_FOOT = `
     <footer class="site-foot">
-      <a href="/about.html">소개</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a>
+      <a href="/about.html">소개</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a> · <a href="mailto:tminews@naver.com">문의</a>
     </footer>`;
 
 // 홈: 오늘의 퀴즈 · 인기 퀴즈 · 새로 나온 퀴즈 · 인기 게임 · 새로 나온 게임
@@ -296,6 +296,12 @@ function renderHome() {
     <section class="home-sec">
       <div class="sec-head"><h2 class="sec-title">🆕 새로 나온 게임</h2><a class="sec-more" href="/games/">전체 보기 ›</a></div>
       <div class="row" data-row="new-games"></div>
+    </section>
+    <section class="about home-about">
+      <h2>맞혀봐는 어떤 곳인가요?</h2>
+      <p>맞혀봐는 사진·초성·설명·멜로디를 보고 <b>정답을 직접 써서</b> 맞히는 주관식 퀴즈 사이트예요. 보기 중에 고르는 객관식이 아니라서 정말 알고 있어야 맞힐 수 있고, 띄어쓰기나 가벼운 오타는 정답으로 인정해 줘요.</p>
+      <p>일반 상식·생활 과학부터 국기·수도·세계 명소, 사자성어·속담·맞춤법, 영화 줄거리·노래 제목·멜로디, 동물·꽃·우주 사진까지 50가지가 넘는 주제에 수천 개의 문제가 있어요. 퀴즈마다 안 본 문제부터 나오고, 끝까지 풀면 맞힌 개수와 시간이 기록돼요.</p>
+      <p>모임에서 바로 쓸 수 있는 구슬 추첨·사다리 타기·돌림판·라이어 게임 같은 뽑기·파티 게임과, 2·3위를 보고 1위를 맞히는 랭킹 퀴즈도 있어요. 회원가입 없이 무료로 쓸 수 있어요.</p>
     </section>
     ${adHtml('homeBottom')}
     ${SITE_FOOT}
@@ -608,6 +614,7 @@ function renderQuestion() {
       </div>
       ${q.credit || quiz.credit ? `<p class="credit">${esc(q.credit || quiz.credit)}</p>` : ''}
     </div>
+    ${quizAboutHtml(quiz, QUIZZES)}
   `;
 
   // 다음 문제 사진 미리 받아두기

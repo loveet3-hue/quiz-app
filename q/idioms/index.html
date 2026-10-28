@@ -52,7 +52,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="맞혀봐">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
-  <link rel="stylesheet" href="/style.css?v=89">
+  <link rel="stylesheet" href="/style.css?v=90">
 </head>
 <body>
   <header class="topbar">
@@ -70,68 +70,78 @@
     </div>
   </header>
 
-  <main id="app" class="container"><!--STATIC--><div class="seo-static"><h1>초성 보고 사자성어 맞히기</h1><p>초성과 뜻풀이를 보고 네 글자를 채워 보세요 · 100문제</p><p><a href="/">다른 퀴즈 보기</a></p></div><!--/STATIC--></main>
+  <main id="app" class="container"><!--STATIC--><div class="seo-static"><h1>초성 보고 사자성어 맞히기</h1><p>초성과 뜻풀이를 보고 네 글자를 채워 보세요 · 100문제</p><section class="about">
+    <h2>초성 보고 사자성어 맞히기 소개</h2>
+    <p>초성과 뜻풀이를 보고 네 글자를 채워 보세요. 언어 분야의 초성 퀴즈로, 모두 100개의 문제 가운데 한 판에 10문제가 무작위로 나와요.
+      보기 중에 고르는 객관식이 아니라 정답을 직접 떠올려 써야 해서, 알고 있다고 생각했던 것도 의외로 헷갈릴 수 있어요.</p>
+    <h3>푸는 방법</h3>
+    <ul><li>문제를 보고 떠오르는 정답을 입력칸에 쓴 뒤 <b>확인</b>(또는 엔터)을 누르세요.</li><li>화면에 크게 보이는 초성과 설명을 함께 보면 훨씬 쉬워요.</li><li>띄어쓰기나 가벼운 오타는 정답으로 인정하고, 널리 쓰이는 다른 이름도 함께 인정해요.</li><li>정말 모르겠으면 <b>모르겠어요</b>를 눌러 정답을 확인하고 다음 문제로 넘어가요.</li><li>한 판은 10문제이고, 끝나면 맞힌 개수와 걸린 시간이 기록돼요. 이미 본 문제는 다음 판에 뒤로 밀려요.</li></ul>
+    <h3>이런 문제가 나와요</h3><ol class="about-samples"><li><span>묻는 말에 전혀 엉뚱한 대답을 함</span><details><summary>정답 보기</summary>동문서답</details></li><li><span>입은 은혜가 뼈에 새겨져 잊히지 않음</span><details><summary>정답 보기</summary>각골난망</details></li><li><span>자기 몸을 바쳐 옳은 일을 이룸</span><details><summary>정답 보기</summary>살신성인</details></li><li><span>변치 않는 한결같은 참된 마음</span><details><summary>정답 보기</summary>일편단심</details></li><li><span>물건을 보면 갖고 싶은 마음이 생김</span><details><summary>정답 보기</summary>견물생심</details></li></ol>
+    
+    <h3>함께 풀어 볼 퀴즈</h3><ul class="about-links"><li><a href="/q/foods/">초성 보고 음식 맞히기</a> — 설명을 보면 군침부터 돌아요</li><li><a href="/q/proverbs/">속담 빈칸 채우기</a> — 빈칸에 들어갈 말을 써 보세요</li><li><a href="/q/english/">우리말 보고 영어 단어 쓰기</a> — 철자까지 정확하게 써 보세요</li><li><a href="/q/cities/">초성 보고 우리나라 도시 맞히기</a> — 명소와 먹거리로 떠올려 보세요</li><li><a href="/q/spelling/">맞춤법 퀴즈</a> — 둘 중 맞는 표기를 그대로 써 보세요</li><li><a href="/q/antonyms/">반대말 맞히기</a> — 보자마자 반대말이 떠오르나요?</li></ul>
+  </section><p><a href="/">다른 퀴즈 보기</a></p></div><!--/STATIC--></main>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script src="/holiday.js?v=89"></script>
-  <script src="/config.js?v=89"></script>
-  <script src="/data/_init.js?v=89"></script>
-  <script src="/data/flags.js?v=89"></script>
-  <script src="/data/flags-hard.js?v=89"></script>
-  <script src="/data/capitals.js?v=89"></script>
-  <script src="/data/idioms.js?v=89"></script>
-  <script src="/data/proverbs.js?v=89"></script>
-  <script src="/data/spelling.js?v=89"></script>
-  <script src="/data/antonyms.js?v=89"></script>
-  <script src="/data/nonsense.js?v=89"></script>
-  <script src="/data/slang.js?v=89"></script>
-  <script src="/data/english.js?v=89"></script>
-  <script src="/data/foods.js?v=89"></script>
-  <script src="/data/history.js?v=89"></script>
-  <script src="/data/celebs.js?v=89"></script>
-  <script src="/data/movies.js?v=89"></script>
-  <script src="/data/celeb-photos.js?v=89"></script>
-  <script src="/data/game-chars.js?v=89"></script>
-  <script src="/data/anime-chars.js?v=89"></script>
-  <script src="/data/mbti.js?v=89"></script>
-  <script src="/data/lol-champs.js?v=89"></script>
-  <script src="/data/melody.js?v=89"></script>
-  <script src="/data/songs.js?v=89"></script>
-  <script src="/data/char-colors.js?v=89"></script>
-  <script src="/data/plots.js?v=89"></script>
-  <script src="/data/movie-ratings.js?v=89"></script>
-  <script src="/data/dialect.js?v=89"></script>
-  <script src="/data/memes.js?v=89"></script>
-  <script src="/data/catchmind.js?v=89"></script>
-  <script src="/data/trivia-easy.js?v=89"></script>
-  <script src="/data/trivia.js?v=89"></script>
-  <script src="/data/trivia-hard.js?v=89"></script>
-  <script src="/data/life-trivia.js?v=89"></script>
-  <script src="/data/cities.js?v=89"></script>
-  <script src="/data/animals.js?v=89"></script>
-  <script src="/data/landmarks.js?v=89"></script>
-  <script src="/data/paintings.js?v=89"></script>
-  <script src="/data/space.js?v=89"></script>
-  <script src="/data/elements.js?v=89"></script>
-  <script src="/data/baby-animals.js?v=89"></script>
-  <script src="/data/cars.js?v=89"></script>
-  <script src="/data/vehicles.js?v=89"></script>
-  <script src="/data/dogs.js?v=89"></script>
-  <script src="/data/cats.js?v=89"></script>
-  <script src="/data/birds.js?v=89"></script>
-  <script src="/data/insects.js?v=89"></script>
-  <script src="/data/sea.js?v=89"></script>
-  <script src="/data/flowers.js?v=89"></script>
-  <script src="/data/fruits-veg.js?v=89"></script>
-  <script src="/data/food-photos.js?v=89"></script>
-  <script src="/data/instruments.js?v=89"></script>
-  <script src="/covers.js?v=89"></script>
-  <script src="/quizzes.js?v=89"></script>
-  <script src="/data/rankings.js?v=89"></script>
-  <script src="/games.js?v=89"></script>
-  <script src="/ranking.js?v=89"></script>
-  <script src="/app.js?v=89"></script>
+  <script src="/holiday.js?v=90"></script>
+  <script src="/config.js?v=90"></script>
+  <script src="/data/_init.js?v=90"></script>
+  <script src="/data/flags.js?v=90"></script>
+  <script src="/data/flags-hard.js?v=90"></script>
+  <script src="/data/capitals.js?v=90"></script>
+  <script src="/data/idioms.js?v=90"></script>
+  <script src="/data/proverbs.js?v=90"></script>
+  <script src="/data/spelling.js?v=90"></script>
+  <script src="/data/antonyms.js?v=90"></script>
+  <script src="/data/nonsense.js?v=90"></script>
+  <script src="/data/slang.js?v=90"></script>
+  <script src="/data/english.js?v=90"></script>
+  <script src="/data/foods.js?v=90"></script>
+  <script src="/data/history.js?v=90"></script>
+  <script src="/data/celebs.js?v=90"></script>
+  <script src="/data/movies.js?v=90"></script>
+  <script src="/data/celeb-photos.js?v=90"></script>
+  <script src="/data/game-chars.js?v=90"></script>
+  <script src="/data/anime-chars.js?v=90"></script>
+  <script src="/data/mbti.js?v=90"></script>
+  <script src="/data/lol-champs.js?v=90"></script>
+  <script src="/data/melody.js?v=90"></script>
+  <script src="/data/songs.js?v=90"></script>
+  <script src="/data/char-colors.js?v=90"></script>
+  <script src="/data/plots.js?v=90"></script>
+  <script src="/data/movie-ratings.js?v=90"></script>
+  <script src="/data/dialect.js?v=90"></script>
+  <script src="/data/memes.js?v=90"></script>
+  <script src="/data/catchmind.js?v=90"></script>
+  <script src="/data/trivia-easy.js?v=90"></script>
+  <script src="/data/trivia.js?v=90"></script>
+  <script src="/data/trivia-hard.js?v=90"></script>
+  <script src="/data/life-trivia.js?v=90"></script>
+  <script src="/data/cities.js?v=90"></script>
+  <script src="/data/animals.js?v=90"></script>
+  <script src="/data/landmarks.js?v=90"></script>
+  <script src="/data/paintings.js?v=90"></script>
+  <script src="/data/space.js?v=90"></script>
+  <script src="/data/elements.js?v=90"></script>
+  <script src="/data/baby-animals.js?v=90"></script>
+  <script src="/data/cars.js?v=90"></script>
+  <script src="/data/vehicles.js?v=90"></script>
+  <script src="/data/dogs.js?v=90"></script>
+  <script src="/data/cats.js?v=90"></script>
+  <script src="/data/birds.js?v=90"></script>
+  <script src="/data/insects.js?v=90"></script>
+  <script src="/data/sea.js?v=90"></script>
+  <script src="/data/flowers.js?v=90"></script>
+  <script src="/data/fruits-veg.js?v=90"></script>
+  <script src="/data/food-photos.js?v=90"></script>
+  <script src="/data/instruments.js?v=90"></script>
+  <script src="/covers.js?v=90"></script>
+  <script src="/quizzes.js?v=90"></script>
+  <script src="/data/rankings.js?v=90"></script>
+  <script src="/guides.js?v=90"></script>
+  <script src="/games.js?v=90"></script>
+  <script src="/ranking.js?v=90"></script>
+  <script src="/app.js?v=90"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
