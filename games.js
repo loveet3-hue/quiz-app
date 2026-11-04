@@ -15,7 +15,7 @@ const GAMES = [
   { id: 'apple', title: '사과 게임', desc: '숫자 합이 10이 되게 묶어서 사과 지우기', cover: () => COVERS['game-apple'] },
   { id: 'balance', title: '균형 잡기', desc: '황새가 외나무다리를 오래 걷게 균형을 잡아요', cover: () => COVERS['game-balance'] },
   { id: 'liar', title: '라이어 게임', desc: '한 명만 제시어를 몰라요. 라이어를 찾아라!', cover: () => COVERS['game-liar'] },
-  { id: 'mini', title: '10초 미니게임 대결', desc: '연타·반응속도·10초 맞히기, 꼴찌는 벌칙', cover: () => COVERS['game-mini'] },
+  { id: 'mini', title: '미니게임 13종 대결', desc: '반응속도·에임·리듬·기억력, 혼자 연습도 돼요', cover: () => COVERS['game-mini'] },
   { id: 'croc', title: '악어 룰렛', desc: '이빨을 번갈아 누르다 물리면 당첨!', cover: () => COVERS['game-croc'] },
   { id: 'lol', title: '롤 내전 팀 짜기', desc: '블루·레드 팀을 라인별로 섞기', cover: () => COVERS['game-lol'] },
   { id: 'dice', title: '주사위·동전', desc: '주사위 굴리기와 동전 던지기', cover: () => COVERS['game-dice'] },
@@ -134,7 +134,7 @@ function renderGamesHome() {
       <div class="games-grid"></div>
       <section class="about">
         <h2>모임을 더 재밌게 만드는 무료 게임</h2>
-        <p>순서·당번·벌칙을 공정하게 정하는 구슬 추첨, 경주마, 사다리 타기, 돌림판, 제비뽑기와, 여럿이 휴대폰 하나로 즐기는 라이어 게임, 폭탄 돌리기, 10초 미니게임 대결, 악어 룰렛이 있어요. 혼자 기록에 도전하는 사과 게임, 카드 짝 맞추기, 균형 잡기도 있어요.</p>
+        <p>순서·당번·벌칙을 공정하게 정하는 구슬 추첨, 경주마, 사다리 타기, 돌림판, 제비뽑기와, 여럿이 휴대폰 하나로 즐기는 라이어 게임, 폭탄 돌리기, 미니게임 13종 대결(반응속도·에임·리듬·기억력), 악어 룰렛이 있어요. 혼자 기록에 도전하는 사과 게임, 카드 짝 맞추기, 균형 잡기도 있어요.</p>
         <p>설치나 회원가입 없이 바로 쓸 수 있고, 입력한 이름과 설정은 다음에 다시 쓸 수 있게 내 기기에만 저장돼요. 게임마다 하는 방법과 활용 팁을 아래에 적어 두었어요.</p>
       </section>
     </div>
@@ -2303,28 +2303,46 @@ function renderCroc(root) {
   setup();
 }
 
-/* ═════════════════════ 10초 미니게임 대결 ═════════════════════ */
+/* ═════════════════════ 미니게임 대결 (13종) ═════════════════════ */
 
-// 폰 하나를 돌려 가며 한 명씩 도전 → 라운드마다 꼴찌가 벌칙. (여러 폰 동시 접속은 서버가 필요해서 한 폰으로 진행)
+// 폰 하나를 돌려 가며 한 명씩 도전 → 라운드마다 꼴찌가 벌칙. 혼자 넣으면 연습 모드(내 최고 기록과 비교)
+// better: 'high' = 클수록 잘함, 'low' = 작을수록 잘함. 실격은 high → -1, low → 99999
+const FAIL_HIGH = -1;
+const FAIL_LOW = 99999;
 const MINI_GAMES = [
-  { id: 'tap', title: '5초 연타', desc: '5초 동안 화면을 최대한 많이 누르세요!', better: 'high', unit: '번' },
-  { id: 'ten', title: '10초 맞히기', desc: '정확히 10.00초에 멈추세요! (3초 뒤 시계가 사라져요)', better: 'low', unit: '초 차이' },
-  { id: 'react', title: '반응 속도', desc: '화면이 초록색으로 바뀌는 순간 누르세요! (먼저 누르면 실격)', better: 'low', unit: 'ms' },
-  { id: 'order', title: '1→16 순서대로', desc: '숫자를 1부터 16까지 순서대로 빠르게 누르세요!', better: 'low', unit: '초' },
+  { id: 'tap', icon: '👆', title: '5초 연타', desc: '5초 동안 화면을 최대한 많이 누르세요!', better: 'high', fmt: (s) => `${s}번` },
+  { id: 'ten', icon: '⏱️', title: '10초 맞히기', desc: '정확히 10.00초에 멈추세요! (3초 뒤 시계가 사라져요)', better: 'low', fmt: (s) => `${s.toFixed(2)}초 차이` },
+  { id: 'react', icon: '🚦', title: '반응 속도', desc: '화면이 초록색으로 바뀌는 순간 누르세요! (먼저 누르면 실격)', better: 'low', fmt: (s) => `${s}ms` },
+  { id: 'order', icon: '🔢', title: '1→16 순서대로', desc: '숫자를 1부터 16까지 순서대로 빠르게 누르세요!', better: 'low', fmt: (s) => `${s.toFixed(2)}초` },
+  { id: 'aim', icon: '🎯', title: '풍선 터뜨리기', desc: '이리저리 떠다니는 풍선 10개를 빨리 터뜨려요! 헛손질은 0.5초 추가', better: 'low', fmt: (s) => `${s.toFixed(2)}초` },
+  { id: 'track', icon: '🐝', title: '꿀벌 따라가기', desc: '6초 동안 손가락(마우스)을 꿀벌 위에 꾹 대고 따라다니세요!', better: 'high', fmt: (s) => `${s}% 붙어 있음` },
+  { id: 'rhythm', icon: '🥁', title: '박자 맞추기', desc: '내려오는 북이 선에 닿을 때 그 칸을 눌러요! (키보드 D·F·J·K)', better: 'high', fmt: (s) => `${s}점` },
+  { id: 'last', icon: '🐉', title: '마지막 한 방', desc: '용 체력이 900 이하일 때만 한 방에 쓰러져요. 너무 일찍 치면 헛방, 0이 되면 놓침!', better: 'high', fmt: (s) => `체력 ${s}에서 처치` },
+  { id: 'gauge', icon: '🎚️', title: '초록 칸에 멈춰', desc: '왔다 갔다 하는 막대를 초록 칸 한가운데서 멈춰요 (3번)', better: 'low', fmt: (s) => `가운데서 평균 ${s.toFixed(1)}칸` },
+  { id: 'combo', icon: '🔤', title: '글자 콤보', desc: '위에 나온 글자 8개를 순서대로 빨리 눌러요! 틀리면 1초 추가', better: 'low', fmt: (s) => `${s.toFixed(2)}초` },
+  { id: 'stroop', icon: '🎨', title: '색깔 헷갈림', desc: '글자가 아니라 글자의 "색깔"을 골라요! 10문제, 틀리면 1초 추가', better: 'low', fmt: (s) => `${s.toFixed(2)}초` },
+  { id: 'simon', icon: '🧠', title: '순서 기억하기', desc: '깜빡이는 순서를 기억해서 그대로 눌러요. 한 번 틀리면 끝!', better: 'high', fmt: (s) => `${s}개 기억` },
+  { id: 'dodge', icon: '☄️', title: '별똥별 피하기', desc: '내 우주선을 끌어서 떨어지는 별똥별을 피해요. 오래 버틸수록 1등!', better: 'high', fmt: (s) => `${s.toFixed(1)}초 버팀` },
 ];
 
 function renderMini(root) {
-  const saved = gameStore.get('mini') || { names: '철수\n영희\n민수\n지은' };
+  const saved = gameStore.get('mini') || { names: '철수\n영희\n민수\n지은', pick: 'all' };
   root.innerHTML = `
     <div class="mini-stage"></div>
     <div class="mini-setup">
-      <label class="field"><span>참가자 (2~8명)</span><textarea class="names" rows="4">${esc(saved.names)}</textarea></label>
+      <label class="field"><span>참가자 (1~8명 · 혼자면 연습 모드)</span><textarea class="names" rows="4">${esc(saved.names)}</textarea></label>
+      <label class="field"><span>미니게임</span><select class="mini-pick">
+        <option value="all">🎲 13종 돌아가며 (무작위 순서)</option>
+        ${MINI_GAMES.map((g) => `<option value="${g.id}"${saved.pick === g.id ? ' selected' : ''}>${g.icon} ${esc(g.title)}</option>`).join('')}
+      </select></label>
       <button class="btn block" data-act="start">대결 시작</button>
-      <p class="lol-hint">한 라운드마다 미니게임이 하나씩 나와요. 폰을 돌려 가며 한 명씩 도전하고, 꼴찌는 벌칙!</p>
+      <p class="lol-hint">라운드마다 미니게임이 하나씩 나와요. 폰을 돌려 가며 한 명씩 도전하고, 꼴찌는 벌칙!</p>
     </div>`;
   const stage = root.querySelector('.mini-stage');
   const setupEl = root.querySelector('.mini-setup');
   const ta = root.querySelector('.names');
+  const pickEl = root.querySelector('.mini-pick');
+  if (saved.pick === 'all') pickEl.value = 'all';
   let names = [];
   let round = 0;
   let order = shuffle(MINI_GAMES);
@@ -2332,17 +2350,18 @@ function renderMini(root) {
   let turn = 0;
   let cleanup = () => {};
   const stop = () => { cleanup(); cleanup = () => {}; };
+  const solo = () => names.length === 1;
 
   function start() {
     names = parseNames(ta.value, 8);
-    if (names.length < 2) {
-      stage.innerHTML = '<p class="game-result">참가자를 2명 이상 넣어 주세요.</p>';
+    if (!names.length) {
+      stage.innerHTML = '<p class="game-result">참가자 이름을 1명 이상 넣어 주세요.</p>';
       return;
     }
-    gameStore.save('mini', { names: ta.value });
+    gameStore.save('mini', { names: ta.value, pick: pickEl.value });
     setupEl.hidden = true;
     round = 0;
-    order = shuffle(MINI_GAMES);
+    order = pickEl.value === 'all' ? shuffle(MINI_GAMES) : [MINI_GAMES.find((g) => g.id === pickEl.value)];
     nextRound();
   }
   const mg = () => order[round % order.length];
@@ -2358,24 +2377,48 @@ function renderMini(root) {
     const g = mg();
     stage.innerHTML = `
       <div class="liar-card">
-        <p class="sub">라운드 ${round + 1} · ${turn + 1} / ${names.length}</p>
-        <p class="liar-who">🎮 ${esc(g.title)}</p>
+        <p class="sub">${solo() ? `연습 ${round + 1}판` : `라운드 ${round + 1} · ${turn + 1} / ${names.length}`}</p>
+        <p class="liar-who">${g.icon} ${esc(g.title)}</p>
         <p>${esc(g.desc)}</p>
         <p class="liar-word"><b>${esc(names[turn])}</b> 차례!</p>
         <button class="btn block" data-act="go">준비됐으면 시작</button>
       </div>`;
-    stage.querySelector('[data-act="go"]').addEventListener('click', () => play(g));
+    stage.querySelector('[data-act="go"]').addEventListener('click', () => {
+      play(g);
+      focusBoard(stage);
+    });
   }
 
   function done(score, label) {
     stop();
     scores[turn] = score;
+    if (solo()) {
+      result();
+      return;
+    }
     stage.innerHTML = `<div class="liar-card"><p class="liar-who">${esc(names[turn])}</p><p class="liar-word">${label}</p><button class="btn block" data-act="next">${turn + 1 < names.length ? '다음 사람에게 넘기기' : '결과 보기'}</button></div>`;
     stage.querySelector('[data-act="next"]').addEventListener('click', () => {
       turn++;
       if (turn < names.length) ready();
       else result();
     });
+  }
+
+  // 게임마다 쓰는 넓은 판 (위에 안내 한 줄)
+  function arena(info, extra = '') {
+    stage.innerHTML = `<p class="game-result mini-info">${info}</p><div class="mini-arena">${extra}</div>`;
+    return { arena: stage.querySelector('.mini-arena'), info: stage.querySelector('.mini-info') };
+  }
+  // 반복 그리기 (cleanup 때 멈춤)
+  function loop(fn) {
+    let raf = 0;
+    let alive = true;
+    const step = (t) => {
+      if (!alive) return;
+      if (fn(t) !== false) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => { alive = false; cancelAnimationFrame(raf); };
   }
 
   function play(g) {
@@ -2430,7 +2473,7 @@ function renderMini(root) {
         e.preventDefault();
         if (!goAt) {
           clearTimeout(to);
-          done(99999, '<b>너무 빨랐어요!</b> 실격 😅');
+          done(FAIL_LOW, '<b>너무 빨랐어요!</b> 실격 😅');
         } else {
           const ms = Math.round(performance.now() - goAt);
           done(ms, `<b>${ms}ms</b> 만에 눌렀어요!`);
@@ -2461,23 +2504,465 @@ function renderMini(root) {
           done(sec, `<b>${sec.toFixed(2)}초</b> 걸렸어요!`);
         } else stage.querySelector('[data-role="want"]').textContent = want;
       });
+    } else if (g.id === 'aim') {
+      // 풍선이 벽에 튕기며 떠다님. 하나 터뜨리면 다음 풍선이 더 빨리 나옴
+      const { arena: box, info } = arena('남은 풍선 <b>10</b>개');
+      const W = box.clientWidth;
+      const H = box.clientHeight;
+      const R = 30;
+      let left = 10;
+      let penalty = 0;
+      const t0 = performance.now();
+      const ball = document.createElement('button');
+      ball.className = 'mini-balloon';
+      ball.textContent = '🎈';
+      box.appendChild(ball);
+      let x, y, vx, vy;
+      const spawn = () => {
+        x = R + Math.random() * (W - 2 * R);
+        y = R + Math.random() * (H - 2 * R);
+        const sp = 90 + (10 - left) * 22; // 점점 빨라짐 (px/초)
+        const a = Math.random() * Math.PI * 2;
+        vx = Math.cos(a) * sp;
+        vy = Math.sin(a) * sp;
+      };
+      spawn();
+      let last = performance.now();
+      cleanup = loop((t) => {
+        const dt = Math.min(0.1, (t - last) / 1000);
+        last = t;
+        x += vx * dt;
+        y += vy * dt;
+        if (x < R || x > W - R) { vx = -vx; x = Math.max(R, Math.min(W - R, x)); }
+        if (y < R || y > H - R) { vy = -vy; y = Math.max(R, Math.min(H - R, y)); }
+        ball.style.transform = `translate(${x - R}px, ${y - R}px)`;
+      });
+      box.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (e.target === ball) {
+          left--;
+          sfx('ok');
+          buzz(15);
+          if (!left) {
+            const sec = (performance.now() - t0) / 1000 + penalty;
+            done(sec, `<b>${sec.toFixed(2)}초</b>${penalty ? ` (헛손질 +${penalty.toFixed(1)}초 포함)` : ''}`);
+            return;
+          }
+          info.innerHTML = `남은 풍선 <b>${left}</b>개`;
+          spawn();
+        } else {
+          penalty += 0.5;
+          sfx('bad');
+        }
+      });
+    } else if (g.id === 'track') {
+      // 꿀벌이 부드럽게 날아다님. 누르고 있는 손가락이 꿀벌 근처에 있는 시간 비율
+      const { arena: box, info } = arena('꿀벌 위에 꾹 누르고 따라가세요 · <b>6.0</b>초');
+      const W = box.clientWidth;
+      const H = box.clientHeight;
+      const bee = document.createElement('div');
+      bee.className = 'mini-bee';
+      bee.textContent = '🐝';
+      box.appendChild(bee);
+      let bx = W / 2;
+      let by = H / 2;
+      let tx = bx;
+      let ty = by;
+      let px = -999;
+      let py = -999;
+      let down = false;
+      let started = 0;
+      let onMs = 0;
+      let last = performance.now();
+      const pick = () => { tx = 30 + Math.random() * (W - 60); ty = 30 + Math.random() * (H - 60); };
+      pick();
+      const pos = (e) => { const r = box.getBoundingClientRect(); px = e.clientX - r.left; py = e.clientY - r.top; };
+      box.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        box.setPointerCapture?.(e.pointerId);
+        down = true;
+        pos(e);
+        if (!started) started = performance.now();
+      });
+      box.addEventListener('pointermove', (e) => { if (down) pos(e); });
+      box.addEventListener('pointerup', () => { down = false; });
+      box.addEventListener('pointercancel', () => { down = false; });
+      cleanup = loop((t) => {
+        const dt = Math.min(0.1, (t - last) / 1000);
+        last = t;
+        const dx = tx - bx;
+        const dy = ty - by;
+        const d = Math.hypot(dx, dy);
+        const sp = 170; // px/초
+        if (d < 8) pick();
+        else { bx += (dx / d) * sp * dt; by += (dy / d) * sp * dt; }
+        bee.style.transform = `translate(${bx - 22}px, ${by - 22}px)`;
+        if (!started) return;
+        const on = down && Math.hypot(px - bx, py - by) < 40;
+        bee.classList.toggle('on', on);
+        if (on) onMs += dt * 1000;
+        const left = 6 - (t - started) / 1000;
+        info.innerHTML = `꿀벌 위에 꾹 누르고 따라가세요 · <b>${Math.max(0, left).toFixed(1)}</b>초`;
+        if (left <= 0) {
+          const pct = Math.round((onMs / 6000) * 100);
+          sfx('ok');
+          setTimeout(() => done(pct, `꿀벌에 <b>${pct}%</b> 붙어 있었어요!`), 50);
+          return false;
+        }
+      });
+    } else if (g.id === 'rhythm') {
+      // 4칸으로 북이 내려옴. 선에 닿는 순간 그 칸을 누름 (정확 100 · 좋아 50)
+      const KEYS = ['d', 'f', 'j', 'k'];
+      const { arena: box, info } = arena('점수 <b>0</b>', `${[0, 1, 2, 3].map((i) => `<div class="mini-lane" data-lane="${i}"></div>`).join('')}<div class="mini-hitline"></div><div class="mini-lane-btns">${KEYS.map((k, i) => `<button data-lane="${i}">${k.toUpperCase()}</button>`).join('')}</div>`);
+      const H = box.clientHeight - 64; // 아래 버튼 높이 빼고
+      const lineY = H - 24;
+      const SPEED = 260; // px/초
+      const notes = [];
+      let at = 1200;
+      for (let i = 0; i < 18; i++) {
+        notes.push({ lane: Math.floor(Math.random() * 4), time: at, el: null, done: false });
+        at += 380 + Math.random() * 420;
+      }
+      const lanes = [...box.querySelectorAll('.mini-lane')];
+      notes.forEach((n) => { n.el = document.createElement('div'); n.el.className = 'mini-note'; n.el.textContent = '🥁'; lanes[n.lane].appendChild(n.el); });
+      const end = notes[notes.length - 1].time + 900;
+      let score = 0;
+      let hits = 0;
+      const t0 = performance.now();
+      const now = () => performance.now() - t0;
+      const flash = (lane, cls) => { const l = lanes[lane]; l.classList.remove('good', 'bad'); void l.offsetWidth; l.classList.add(cls); };
+      const hit = (lane) => {
+        const t = now();
+        const n = notes.filter((x) => !x.done && x.lane === lane).sort((a, b) => Math.abs(a.time - t) - Math.abs(b.time - t))[0];
+        if (!n || Math.abs(n.time - t) > 160) { flash(lane, 'bad'); return; }
+        const d = Math.abs(n.time - t);
+        n.done = true;
+        n.el.remove();
+        score += d <= 70 ? 100 : 50;
+        hits++;
+        flash(lane, 'good');
+        sfx('tick');
+        info.innerHTML = `점수 <b>${score}</b> · ${d <= 70 ? '정확!' : '좋아'}`;
+      };
+      box.querySelector('.mini-lane-btns').addEventListener('pointerdown', (e) => {
+        const b = e.target.closest('[data-lane]');
+        if (!b) return;
+        e.preventDefault();
+        hit(+b.dataset.lane);
+      });
+      const onKey = (e) => { const i = KEYS.indexOf(e.key.toLowerCase()); if (i >= 0) hit(i); };
+      window.addEventListener('keydown', onKey);
+      const stopLoop = loop(() => {
+        const t = now();
+        for (const n of notes) {
+          if (n.done) continue;
+          const y = lineY - ((n.time - t) / 1000) * SPEED;
+          if (t - n.time > 160) { n.done = true; n.el.remove(); continue; }
+          n.el.style.transform = `translateY(${y - 18}px)`;
+        }
+        if (t > end) {
+          setTimeout(() => done(score, `<b>${score}점</b> (${hits} / ${notes.length}개 맞힘)`), 50);
+          return false;
+        }
+      });
+      cleanup = () => { stopLoop(); window.removeEventListener('keydown', onKey); };
+    } else if (g.id === 'last') {
+      // 용 체력이 들쭉날쭉 깎임. 900 이하에서 치면 처치(체력이 높을수록 과감 = 고득점), 900 넘을 때 치면 헛방, 0 되면 놓침
+      const MAXHP = 3000;
+      let hp = MAXHP;
+      stage.innerHTML = `<div class="mini-boss"><div class="mini-dragon">🐉</div><div class="mini-hp"><i></i><b>${MAXHP}</b><span class="mini-hp-mark" style="left:${(900 / MAXHP) * 100}%"></span></div><button class="btn block mini-big" data-act="hit">⚡ 한 방!</button><p class="lol-hint">빨간 선(900) 왼쪽으로 내려왔을 때 치세요</p></div>`;
+      const bar = stage.querySelector('.mini-hp i');
+      const num = stage.querySelector('.mini-hp b');
+      let to = 0;
+      const tick = () => {
+        hp -= 40 + Math.random() * (hp > 1500 ? 260 : 150);
+        if (hp <= 0) {
+          hp = 0;
+          draw();
+          sfx('lose');
+          done(FAIL_HIGH, '<b>놓쳤어요!</b> 용이 먼저 쓰러졌어요 😱');
+          return;
+        }
+        draw();
+        to = setTimeout(tick, 110 + Math.random() * 260);
+      };
+      const draw = () => { bar.style.width = `${(hp / MAXHP) * 100}%`; bar.classList.toggle('low', hp <= 900); num.textContent = Math.round(hp); };
+      to = setTimeout(tick, 600);
+      stage.querySelector('[data-act="hit"]').addEventListener('click', () => {
+        clearTimeout(to);
+        const h = Math.round(hp);
+        if (h > 900) { sfx('bad'); done(FAIL_HIGH, `<b>헛방!</b> 체력 ${h}에서 쳐서 못 잡았어요`); }
+        else { sfx('ok'); buzz(60); done(h, `체력 <b>${h}</b>에서 한 방에 처치!`); }
+      });
+      cleanup = () => clearTimeout(to);
+    } else if (g.id === 'gauge') {
+      // 막대가 좌우로 오감(점점 빨라짐). 초록 칸 가운데와의 거리(100칸 기준) 평균
+      let tries = 0;
+      const diffs = [];
+      stage.innerHTML = `<div class="mini-gauge-wrap"><p class="game-result" data-role="tries">1 / 3번째</p><div class="mini-gauge"><span class="zone"></span><i class="needle"></i></div><button class="btn block mini-big" data-act="stop">멈춰!</button></div>`;
+      const zone = stage.querySelector('.zone');
+      const needle = stage.querySelector('.needle');
+      const triesEl = stage.querySelector('[data-role="tries"]');
+      let center = 0;
+      let p = 0;
+      let dir = 1;
+      let speed = 0;
+      let paused = false;
+      const setup = () => {
+        center = 15 + Math.random() * 70;
+        zone.style.left = `${center - 5}%`;
+        speed = 70 + tries * 35; // 칸/초
+        p = Math.random() < 0.5 ? 0 : 100;
+        dir = p ? -1 : 1;
+        paused = false;
+      };
+      setup();
+      let last = performance.now();
+      cleanup = loop((t) => {
+        const dt = Math.min(0.1, (t - last) / 1000);
+        last = t;
+        if (paused) return;
+        p += dir * speed * dt;
+        if (p > 100) { p = 100; dir = -1; }
+        if (p < 0) { p = 0; dir = 1; }
+        needle.style.left = `${p}%`;
+      });
+      stage.querySelector('[data-act="stop"]').addEventListener('click', () => {
+        if (paused) return;
+        paused = true;
+        const d = Math.abs(p - center);
+        diffs.push(d);
+        tries++;
+        sfx(d <= 5 ? 'ok' : 'bad');
+        if (tries >= 3) {
+          const avg = diffs.reduce((a, b) => a + b, 0) / 3;
+          setTimeout(() => done(avg, `가운데서 평균 <b>${avg.toFixed(1)}칸</b> (${diffs.map((x) => x.toFixed(1)).join(' · ')})`), 500);
+          return;
+        }
+        triesEl.textContent = `가운데서 ${d.toFixed(1)}칸 → ${tries + 1} / 3번째`;
+        setTimeout(setup, 700);
+      });
+    } else if (g.id === 'combo') {
+      const KEYS = ['Q', 'W', 'E', 'R'];
+      const seq = Array.from({ length: 8 }, () => KEYS[Math.floor(Math.random() * 4)]);
+      let idx = 0;
+      let penalty = 0;
+      stage.innerHTML = `<div class="mini-combo"><div class="mini-seq">${seq.map((k, i) => `<span data-i="${i}">${k}</span>`).join('')}</div><div class="mini-keys">${KEYS.map((k) => `<button data-k="${k}">${k}</button>`).join('')}</div><p class="lol-hint">키보드 Q·W·E·R 도 돼요</p></div>`;
+      const spans = [...stage.querySelectorAll('.mini-seq span')];
+      spans[0].classList.add('now');
+      const t0 = performance.now();
+      const press = (k) => {
+        if (idx >= seq.length) return;
+        if (k !== seq[idx]) {
+          penalty += 1;
+          sfx('bad');
+          buzz(30);
+          const s = spans[idx];
+          s.classList.remove('miss');
+          void s.offsetWidth;
+          s.classList.add('miss');
+          return;
+        }
+        spans[idx].className = 'ok';
+        idx++;
+        sfx('tick');
+        if (idx >= seq.length) {
+          const sec = (performance.now() - t0) / 1000 + penalty;
+          done(sec, `<b>${sec.toFixed(2)}초</b>${penalty ? ` (틀림 +${penalty}초 포함)` : ''}`);
+        } else spans[idx].classList.add('now');
+      };
+      stage.querySelector('.mini-keys').addEventListener('pointerdown', (e) => {
+        const b = e.target.closest('[data-k]');
+        if (!b) return;
+        e.preventDefault();
+        press(b.dataset.k);
+      });
+      const onKey = (e) => { const k = e.key.toUpperCase(); if (KEYS.includes(k)) press(k); };
+      window.addEventListener('keydown', onKey);
+      cleanup = () => window.removeEventListener('keydown', onKey);
+    } else if (g.id === 'stroop') {
+      const COLORS = [['빨강', '#e5383b'], ['파랑', '#3a86ff'], ['초록', '#2bb24c'], ['노랑', '#f4b400']];
+      let q = 0;
+      let penalty = 0;
+      let ink = 0;
+      stage.innerHTML = `<div class="mini-stroop"><p class="sub" data-role="q">1 / 10</p><p class="mini-word"></p><div class="mini-colors">${COLORS.map(([n], i) => `<button data-c="${i}">${n}</button>`).join('')}</div></div>`;
+      const word = stage.querySelector('.mini-word');
+      const qEl = stage.querySelector('[data-role="q"]');
+      const next = () => {
+        const w = Math.floor(Math.random() * 4);
+        do ink = Math.floor(Math.random() * 4); while (ink === w); // 글자와 색이 항상 다르게
+        word.textContent = COLORS[w][0];
+        word.style.color = COLORS[ink][1];
+        qEl.textContent = `${q + 1} / 10`;
+      };
+      next();
+      const t0 = performance.now();
+      stage.querySelector('.mini-colors').addEventListener('pointerdown', (e) => {
+        const b = e.target.closest('[data-c]');
+        if (!b) return;
+        e.preventDefault();
+        if (+b.dataset.c !== ink) {
+          penalty += 1;
+          sfx('bad');
+          buzz(30);
+          word.classList.remove('miss');
+          void word.offsetWidth;
+          word.classList.add('miss');
+        } else sfx('tick');
+        q++;
+        if (q >= 10) {
+          const sec = (performance.now() - t0) / 1000 + penalty;
+          done(sec, `<b>${sec.toFixed(2)}초</b>${penalty ? ` (틀림 ${penalty}개 +${penalty}초 포함)` : ' · 다 맞혔어요!'}`);
+        } else next();
+      });
+    } else if (g.id === 'simon') {
+      const PADS = ['#ff6b6b', '#4dabf7', '#51cf66', '#ffd43b'];
+      const seq = [];
+      let input = 0;
+      let showing = true;
+      let best = 0;
+      const timers = [];
+      stage.innerHTML = `<div class="mini-simon-wrap"><p class="game-result" data-role="msg">잘 보세요…</p><div class="mini-simon">${PADS.map((c, i) => `<button data-p="${i}" style="--c:${c}"></button>`).join('')}</div></div>`;
+      const pads = [...stage.querySelectorAll('.mini-simon button')];
+      const msg = stage.querySelector('[data-role="msg"]');
+      const light = (i, ms) => {
+        pads[i].classList.add('lit');
+        timers.push(setTimeout(() => pads[i].classList.remove('lit'), ms));
+      };
+      const show = () => {
+        showing = true;
+        input = 0;
+        while (seq.length < Math.max(3, best + 1)) seq.push(Math.floor(Math.random() * 4));
+        msg.textContent = `${seq.length}개 · 잘 보세요…`;
+        const gap = Math.max(320, 620 - seq.length * 25);
+        seq.forEach((p, k) => timers.push(setTimeout(() => { light(p, gap * 0.6); sfx('tick'); }, 500 + k * gap)));
+        timers.push(setTimeout(() => { showing = false; msg.textContent = '이제 똑같이 눌러요!'; }, 500 + seq.length * gap));
+      };
+      show();
+      stage.querySelector('.mini-simon').addEventListener('pointerdown', (e) => {
+        const b = e.target.closest('[data-p]');
+        if (!b || showing) return;
+        e.preventDefault();
+        const i = +b.dataset.p;
+        light(i, 180);
+        if (i !== seq[input]) {
+          sfx('bad');
+          buzz([60, 40, 60]);
+          showing = true;
+          setTimeout(() => done(best, best ? `<b>${best}개</b>까지 기억했어요!` : '<b>0개</b>… 다음엔 할 수 있어요!'), 400);
+          return;
+        }
+        input++;
+        if (input >= seq.length) {
+          best = seq.length;
+          sfx('ok');
+          showing = true;
+          if (best >= 15) { setTimeout(() => done(best, '<b>15개</b> 전부 기억! 천재예요 🧠'), 400); return; }
+          msg.textContent = '좋아요! 하나 더…';
+          timers.push(setTimeout(show, 700));
+        }
+      });
+      cleanup = () => timers.forEach(clearTimeout);
+    } else if (g.id === 'dodge') {
+      // 우주선을 끌어서 별똥별을 피함. 시간이 갈수록 더 많이·빨리 떨어짐 (최대 30초)
+      const { arena: box, info } = arena('우주선을 끌어서 피하세요 · <b>0.0</b>초');
+      const W = box.clientWidth;
+      const H = box.clientHeight;
+      const ship = document.createElement('div');
+      ship.className = 'mini-ship';
+      ship.textContent = '🚀';
+      box.appendChild(ship);
+      let sx = W / 2;
+      let sy = H - 40;
+      let dragging = false;
+      const rocks = [];
+      const move = (e) => {
+        const r = box.getBoundingClientRect();
+        sx = Math.max(18, Math.min(W - 18, e.clientX - r.left));
+        sy = Math.max(18, Math.min(H - 18, e.clientY - r.top));
+      };
+      box.addEventListener('pointerdown', (e) => { e.preventDefault(); box.setPointerCapture?.(e.pointerId); dragging = true; move(e); });
+      box.addEventListener('pointermove', (e) => { if (dragging) move(e); });
+      box.addEventListener('pointerup', () => { dragging = false; });
+      box.addEventListener('pointercancel', () => { dragging = false; });
+      let last = performance.now();
+      let el = 0; // 게임 시간 (화면이 느려져도 공정하게)
+      let nextRock = 0.4;
+      cleanup = loop((t) => {
+        const dt = Math.min(0.1, (t - last) / 1000);
+        last = t;
+        el += dt;
+        ship.style.transform = `translate(${sx - 18}px, ${sy - 18}px)`;
+        if (el >= nextRock) {
+          const r = document.createElement('div');
+          r.className = 'mini-rock';
+          r.textContent = '☄️';
+          box.appendChild(r);
+          rocks.push({ x: 14 + Math.random() * (W - 28), y: -20, v: 160 + el * 14 + Math.random() * 90, el: r });
+          nextRock = el + Math.max(0.14, 0.65 - el * 0.022);
+        }
+        for (let i = rocks.length - 1; i >= 0; i--) {
+          const k = rocks[i];
+          k.y += k.v * dt;
+          k.el.style.transform = `translate(${k.x - 14}px, ${k.y - 14}px)`;
+          if (Math.hypot(k.x - sx, k.y - sy) < 26) {
+            ship.textContent = '💥';
+            sfx('lose');
+            buzz([100, 50, 100]);
+            setTimeout(() => done(el, `<b>${el.toFixed(1)}초</b> 버텼어요!`), 500);
+            return false;
+          }
+          if (k.y > H + 30) { k.el.remove(); rocks.splice(i, 1); }
+        }
+        info.innerHTML = `우주선을 끌어서 피하세요 · <b>${el.toFixed(1)}</b>초`;
+        if (el >= 30) {
+          sfx('ok');
+          setTimeout(() => done(30, '<b>30초</b> 끝까지 버텼어요! 🏆'), 300);
+          return false;
+        }
+      });
     }
   }
 
+  const isFail = (g, s) => (g.better === 'high' ? s === FAIL_HIGH : s >= FAIL_LOW);
+  const fmt = (g, s) => (isFail(g, s) ? '실격' : g.fmt(s));
+  const better = (g, a, b) => (g.better === 'high' ? a > b : a < b);
+
   function result() {
     const g = mg();
-    const rank = names.map((nm, i) => ({ nm, s: scores[i] })).sort((a, b) => (g.better === 'high' ? b.s - a.s : a.s - b.s));
-    const fmt = (s) => (s >= 99999 ? '실격' : g.id === 'tap' ? `${s}번` : g.id === 'react' ? `${s}ms` : `${s.toFixed(2)}초${g.id === 'ten' ? ' 차이' : ''}`);
-    const last = rank[rank.length - 1];
-    stage.innerHTML = `
-      <div class="liar-card">
-        <p class="liar-who">라운드 ${round + 1} 결과 · ${esc(g.title)}</p>
-        <ol class="mini-rank">${rank.map((r, i) => `<li class="${i === rank.length - 1 ? 'last' : ''}"><span>${i + 1}</span><b>${esc(r.nm)}</b><em>${fmt(r.s)}</em></li>`).join('')}</ol>
-        <p class="game-result">😈 꼴찌 <b>${esc(last.nm)}</b> 벌칙 당첨!</p>
-        <div class="game-actions"><button class="btn block" data-act="next">다음 라운드</button><button class="btn ghost block" data-act="end">그만하기</button></div>
-      </div>`;
-    buzz([120, 60, 120]);
-    sfx('lose');
+    const again = `<div class="game-actions"><button class="btn block" data-act="next">${solo() ? (order.length > 1 ? '다음 게임' : '한 번 더') : '다음 라운드'}</button><button class="btn ghost block" data-act="end">그만하기</button></div>`;
+    if (solo()) {
+      const s = scores[0];
+      const key = 'mini-best-' + g.id;
+      const prev = gameStore.get(key);
+      const record = !isFail(g, s) && (prev == null || better(g, s, prev));
+      if (record) gameStore.save(key, s);
+      stage.innerHTML = `
+        <div class="liar-card">
+          <p class="liar-who">${g.icon} ${esc(g.title)}</p>
+          <p class="liar-word"><b>${fmt(g, s)}</b></p>
+          <p class="sub">${record ? (prev == null ? '첫 기록이에요!' : `🎉 최고 기록 경신! (전에는 ${fmt(g, prev)})`) : prev != null ? `내 최고 기록: ${fmt(g, prev)}` : ''}</p>
+          ${again}
+        </div>`;
+      sfx(record ? 'ok' : 'tick');
+    } else {
+      const rank = names.map((nm, i) => ({ nm, s: scores[i] })).sort((a, b) => {
+        const fa = isFail(g, a.s);
+        const fb = isFail(g, b.s);
+        if (fa !== fb) return fa ? 1 : -1;
+        return g.better === 'high' ? b.s - a.s : a.s - b.s;
+      });
+      const last = rank[rank.length - 1];
+      stage.innerHTML = `
+        <div class="liar-card">
+          <p class="liar-who">라운드 ${round + 1} 결과 · ${g.icon} ${esc(g.title)}</p>
+          <ol class="mini-rank">${rank.map((r, i) => `<li class="${i === rank.length - 1 ? 'last' : ''}"><span>${i + 1}</span><b>${esc(r.nm)}</b><em>${fmt(g, r.s)}</em></li>`).join('')}</ol>
+          <p class="game-result">😈 꼴찌 <b>${esc(last.nm)}</b> 벌칙 당첨!</p>
+          ${again}
+        </div>`;
+      buzz([120, 60, 120]);
+      sfx('lose');
+    }
     stage.querySelector('[data-act="next"]').addEventListener('click', () => {
       round++;
       nextRound();
