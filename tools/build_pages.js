@@ -169,15 +169,21 @@ write(
   })
 );
 urls.push('/rankings/');
+// 검색어가 '치킨 판매량 순위'·'롤드컵 우승 횟수'처럼 들어와서 제목에 '순위 TOP n'을 넣고, 설명에 값까지 보여 줌
+const rankTitle = (b) => {
+  const m = b.title.match(/^(.*?)\s*\(([^)]*)\)$/);
+  const [base, when] = m ? [m[1], m[2]] : [b.title, ''];
+  return `${base}${/순위/.test(base) ? '' : ' 순위'} TOP ${b.items.length}${when ? ` (${when})` : ''}`;
+};
 for (const b of RANKINGS) {
   write(
     `ranking/${b.id}/index.html`,
     page({
-      title: `${b.title} 1위는? - 맞혀봐 랭킹`,
-      desc: `${b.items.slice(1, 4).map((it, k) => `${k + 2}위 ${it[0]}`).join(', ')}… 그럼 1위는? ${b.q}`,
+      title: `${rankTitle(b)} - 1위는? | 맞혀봐`,
+      desc: `${b.items.slice(1, 5).map((it, k) => `${k + 2}위 ${it[0]}${it[1] ? `(${it[1]})` : ''}`).join(' · ')}… 그럼 1위는? ${b.q}`,
       url: `${SITE}/ranking/${b.id}/`,
       image: ogFile('rank-' + b.group),
-      body: `<h1>${esc(b.title)}</h1><p>${esc(b.q)}</p><ol>${b.items.map((it) => `<li><a href="${esc(it[2] || rankLink(it[0], b))}" rel="noopener">${esc(it[0])}</a>${it[1] ? ` (${esc(it[1])})` : ''}</li>`).join('')}</ol><p><a href="/rankings/">다른 랭킹 보기</a></p>`,
+      body: `<h1>${esc(rankTitle(b))}</h1><p>${esc(b.q)}</p><ol>${b.items.map((it) => `<li><a href="${esc(it[2] || rankLink(it[0], b))}" rel="noopener">${esc(it[0])}</a>${it[1] ? ` (${esc(it[1])})` : ''}</li>`).join('')}</ol><p><a href="/rankings/">다른 랭킹 보기</a></p>`,
     })
   );
   urls.push(`/ranking/${b.id}/`);

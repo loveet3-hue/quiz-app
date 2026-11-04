@@ -191,7 +191,10 @@ function renderRanking(id) {
     return;
   }
   const g = groupOf(b.group);
-  document.title = `${b.title} 1위는? · 맞혀봐 랭킹`;
+  // 정적 페이지(tools/build_pages.js rankTitle)와 같은 제목 — 검색어 '○○ 순위'에 맞춤
+  const tm = b.title.match(/^(.*?)\s*\(([^)]*)\)$/);
+  const [tBase, tWhen] = tm ? [tm[1], tm[2]] : [b.title, ''];
+  document.title = `${tBase}${/순위/.test(tBase) ? '' : ' 순위'} TOP ${b.items.length}${tWhen ? ` (${tWhen})` : ''} - 1위는? | 맞혀봐`;
   reportPlay('rank-' + b.id);
   const row = (it, i, reveal) => {
     const [name, val, url] = it;
