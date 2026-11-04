@@ -2328,7 +2328,7 @@ const MINI_GAMES = [
 const SOLO_GAMES = [
   { id: 'aim', icon: '🎯', title: '풍선 터뜨리기', desc: '이리저리 떠다니는 풍선 10개를 빨리 터뜨려요! 헛손질은 0.5초 추가', better: 'low', fmt: (s) => `${s.toFixed(2)}초` },
   { id: 'track', icon: '🐝', title: '꿀벌 따라가기', desc: '6초 동안 손가락(마우스)을 꿀벌 위에 꾹 대고 따라다니세요!', better: 'high', fmt: (s) => `${s}% 붙어 있음` },
-  { id: 'rhythm', icon: '🥁', title: '박자 맞추기', desc: '내려오는 북이 선에 닿을 때 그 칸을 눌러요! (키보드 D·F·J·K)', better: 'high', fmt: (s) => `${s}점` },
+  { id: 'rhythm', icon: '🥁', title: '박자 맞추기', desc: '내려오는 노트가 빛나는 선에 닿을 때 그 칸을 눌러요! 콤보가 이어질수록 점수가 커져요 (키보드 D·F·J·K)', better: 'high', fmt: (s) => `${s}점` },
   { id: 'last', icon: '🐉', title: '마지막 한 방', desc: '용 체력이 900 이하일 때만 한 방에 쓰러져요. 너무 일찍 치면 헛방, 0이 되면 놓침!', better: 'high', fmt: (s) => `체력 ${s}에서 처치` },
   { id: 'gauge', icon: '🎚️', title: '초록 칸에 멈춰', desc: '왔다 갔다 하는 막대를 초록 칸 한가운데서 멈춰요 (3번)', better: 'low', fmt: (s) => `가운데서 평균 ${s.toFixed(1)}칸` },
   { id: 'combo', icon: '🔤', title: '글자 콤보', desc: '위에 나온 글자 8개를 순서대로 빨리 눌러요! 틀리면 1초 추가', better: 'low', fmt: (s) => `${s.toFixed(2)}초` },
@@ -2407,9 +2407,11 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
     });
   }
 
+  let lastLabel = '';
   function done(score, label) {
     stop();
     scores[turn] = score;
+    lastLabel = label;
     if (solo()) {
       result();
       return;
@@ -2427,6 +2429,39 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
     stage.innerHTML = `<p class="game-result mini-info">${info}</p><div class="mini-arena">${extra}</div>`;
     return { arena: stage.querySelector('.mini-arena'), info: stage.querySelector('.mini-info') };
   }
+  // 쉬지 않고 올라가는 큰 시계. add(초)는 벌칙: 숫자가 바로 뛰고 '+1초'가 튀어나옴
+  function stopwatch(host) {
+    const el = document.createElement('div');
+    el.className = 'mini-timer';
+    el.innerHTML = '<b>0.00</b><small>초</small>';
+    host.prepend(el);
+    const num = el.querySelector('b');
+    const t0 = performance.now();
+    let pen = 0;
+    const sec = () => (performance.now() - t0) / 1000 + pen;
+    const iv = setInterval(() => { num.textContent = sec().toFixed(2); }, 31);
+    return {
+      sec,
+      pen: () => pen,
+      add(s) {
+        pen += s;
+        num.textContent = sec().toFixed(2);
+        const pop = document.createElement('span');
+        pop.className = 'mini-pen';
+        pop.textContent = `+${s}초`;
+        el.appendChild(pop);
+        setTimeout(() => pop.remove(), 800);
+        el.classList.remove('hurt');
+        void el.offsetWidth;
+        el.classList.add('hurt');
+      },
+      stop() {
+        clearInterval(iv);
+        num.textContent = sec().toFixed(2);
+      },
+    };
+  }
+
   // 반복 그리기 (cleanup 때 멈춤)
   function loop(fn) {
     let raf = 0;
@@ -2502,7 +2537,8 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
       const nums = shuffle(Array.from({ length: 16 }, (_, i) => i + 1));
       stage.innerHTML = `<p class="game-result">다음: <b data-role="want">1</b></p><div class="mini-grid">${nums.map((v) => `<button data-v="${v}">${v}</button>`).join('')}</div>`;
       let want = 1;
-      const t0 = performance.now();
+      const sw = stopwatch(stage);
+      cleanup = () => sw.stop();
       stage.querySelector('.mini-grid').addEventListener('pointerdown', (e) => {
         const b = e.target.closest('[data-v]');
         if (!b) return;
@@ -2518,7 +2554,8 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
         b.classList.add('hit');
         want++;
         if (want > 16) {
-          const sec = (performance.now() - t0) / 1000;
+          sw.stop();
+          const sec = sw.sec();
           done(sec, `<b>${sec.toFixed(2)}초</b> 걸렸어요!`);
         } else stage.querySelector('[data-role="want"]').textContent = want;
       });
@@ -2529,8 +2566,7 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
       const H = box.clientHeight;
       const R = 30;
       let left = 10;
-      let penalty = 0;
-      const t0 = performance.now();
+      const sw = stopwatch(stage);
       const ball = document.createElement('button');
       ball.className = 'mini-balloon';
       ball.textContent = '🎈';
@@ -2546,7 +2582,7 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
       };
       spawn();
       let last = performance.now();
-      cleanup = loop((t) => {
+      const stopLoop = loop((t) => {
         const dt = Math.min(0.1, (t - last) / 1000);
         last = t;
         x += vx * dt;
@@ -2555,6 +2591,7 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
         if (y < R || y > H - R) { vy = -vy; y = Math.max(R, Math.min(H - R, y)); }
         ball.style.transform = `translate(${x - R}px, ${y - R}px)`;
       });
+      cleanup = () => { stopLoop(); sw.stop(); };
       box.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         if (e.target === ball) {
@@ -2562,14 +2599,15 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
           sfx('ok');
           buzz(15);
           if (!left) {
-            const sec = (performance.now() - t0) / 1000 + penalty;
-            done(sec, `<b>${sec.toFixed(2)}초</b>${penalty ? ` (헛손질 +${penalty.toFixed(1)}초 포함)` : ''}`);
+            sw.stop();
+            const sec = sw.sec();
+            done(sec, `<b>${sec.toFixed(2)}초</b>${sw.pen() ? ` (헛손질 +${sw.pen().toFixed(1)}초 포함)` : ''}`);
             return;
           }
           info.innerHTML = `남은 풍선 <b>${left}</b>개`;
           spawn();
         } else {
-          penalty += 0.5;
+          sw.add(0.5);
           sfx('bad');
         }
       });
@@ -2629,57 +2667,97 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
         }
       });
     } else if (g.id === 'rhythm') {
-      // 4칸으로 북이 내려옴. 선에 닿는 순간 그 칸을 누름 (정확 100 · 좋아 50)
+      // 리듬 게임: 4칸(색 다름)으로 노트가 내려오고, 판정선에 닿을 때 그 칸을 누름. 완벽 100 · 좋아 50 + 콤보 보너스
       const KEYS = ['d', 'f', 'j', 'k'];
-      const { arena: box, info } = arena('점수 <b>0</b>', `${[0, 1, 2, 3].map((i) => `<div class="mini-lane" data-lane="${i}"></div>`).join('')}<div class="mini-hitline"></div><div class="mini-lane-btns">${KEYS.map((k, i) => `<button data-lane="${i}">${k.toUpperCase()}</button>`).join('')}</div>`);
-      const H = box.clientHeight - 64; // 아래 버튼 높이 빼고
-      const lineY = H - 24;
-      const SPEED = 260; // px/초
+      const COLORS = ['#ff6b9a', '#4dabf7', '#51cf66', '#ffd43b'];
+      stage.innerHTML = `
+        <div class="rg-top"><span>점수 <b data-role="score">0</b></span><span><b data-role="combo">0</b> 콤보</span></div>
+        <div class="rg">
+          <div class="rg-field">
+            ${KEYS.map((k, i) => `<div class="rg-lane" data-lane="${i}" style="--c:${COLORS[i]}"></div>`).join('')}
+            <div class="rg-line">${KEYS.map((k, i) => `<i style="--c:${COLORS[i]}"></i>`).join('')}</div>
+            <div class="rg-judge" data-role="judge"></div>
+          </div>
+          <div class="rg-btns">${KEYS.map((k, i) => `<button data-lane="${i}" style="--c:${COLORS[i]}">${k.toUpperCase()}</button>`).join('')}</div>
+        </div>`;
+      const field = stage.querySelector('.rg-field');
+      const lanes = [...stage.querySelectorAll('.rg-lane')];
+      const btns = [...stage.querySelectorAll('.rg-btns button')];
+      const rings = [...stage.querySelectorAll('.rg-line i')];
+      const scoreEl = stage.querySelector('[data-role="score"]');
+      const comboEl = stage.querySelector('[data-role="combo"]');
+      const judgeEl = stage.querySelector('[data-role="judge"]');
+      const FH = field.clientHeight;
+      const lineY = FH - 46; // 판정선 높이 (rg-line 과 맞춤)
+      const SPEED = 320; // px/초
+      // 박자: 0.35~0.7초 간격, 가끔 빠른 연타(0.2초)
       const notes = [];
-      let at = 1200;
-      for (let i = 0; i < 18; i++) {
+      let at = 1400;
+      for (let i = 0; i < 26; i++) {
         notes.push({ lane: Math.floor(Math.random() * 4), time: at, el: null, done: false });
-        at += 380 + Math.random() * 420;
+        at += Math.random() < 0.18 ? 200 : 350 + Math.floor(Math.random() * 3) * 175;
       }
-      const lanes = [...box.querySelectorAll('.mini-lane')];
-      notes.forEach((n) => { n.el = document.createElement('div'); n.el.className = 'mini-note'; n.el.textContent = '🥁'; lanes[n.lane].appendChild(n.el); });
+      notes.forEach((n) => {
+        n.el = document.createElement('div');
+        n.el.className = 'rg-note';
+        n.el.style.setProperty('--c', COLORS[n.lane]);
+        n.el.style.transform = 'translateY(-40px)';
+        lanes[n.lane].appendChild(n.el);
+      });
       const end = notes[notes.length - 1].time + 900;
       let score = 0;
-      let hits = 0;
+      let combo = 0;
+      let maxCombo = 0;
+      let perfect = 0;
+      let good = 0;
       const t0 = performance.now();
       const now = () => performance.now() - t0;
-      const flash = (lane, cls) => { const l = lanes[lane]; l.classList.remove('good', 'bad'); void l.offsetWidth; l.classList.add(cls); };
+      const judge = (text, cls) => {
+        judgeEl.className = 'rg-judge ' + cls;
+        judgeEl.innerHTML = `${text}${combo > 1 ? `<small>${combo} 콤보</small>` : ''}`;
+        void judgeEl.offsetWidth;
+        judgeEl.classList.add('show');
+      };
+      const setCombo = () => { comboEl.textContent = combo; comboEl.parentElement.classList.toggle('hot', combo >= 10); };
+      const miss = () => { combo = 0; setCombo(); judge('놓침', 'miss'); };
+      const flash = (lane) => {
+        for (const el of [lanes[lane], btns[lane], rings[lane]]) { el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); }
+      };
       const hit = (lane) => {
+        flash(lane);
         const t = now();
         const n = notes.filter((x) => !x.done && x.lane === lane).sort((a, b) => Math.abs(a.time - t) - Math.abs(b.time - t))[0];
-        if (!n || Math.abs(n.time - t) > 160) { flash(lane, 'bad'); return; }
+        if (!n || Math.abs(n.time - t) > 150) return; // 아무것도 없을 때 누른 건 그냥 넘어감
         const d = Math.abs(n.time - t);
         n.done = true;
-        n.el.remove();
-        score += d <= 70 ? 100 : 50;
-        hits++;
-        flash(lane, 'good');
+        n.el.classList.add('pop');
+        setTimeout(() => n.el.remove(), 180);
+        combo++;
+        maxCombo = Math.max(maxCombo, combo);
+        if (d <= 55) { perfect++; score += 100 + Math.min(combo, 30) * 5; judge('완벽!', 'perfect'); }
+        else { good++; score += 50 + Math.min(combo, 30) * 2; judge('좋아', 'good'); }
+        scoreEl.textContent = score;
+        setCombo();
         sfx('tick');
-        info.innerHTML = `점수 <b>${score}</b> · ${d <= 70 ? '정확!' : '좋아'}`;
       };
-      box.querySelector('.mini-lane-btns').addEventListener('pointerdown', (e) => {
+      stage.querySelector('.rg-btns').addEventListener('pointerdown', (e) => {
         const b = e.target.closest('[data-lane]');
         if (!b) return;
         e.preventDefault();
         hit(+b.dataset.lane);
       });
-      const onKey = (e) => { const i = KEYS.indexOf(e.key.toLowerCase()); if (i >= 0) hit(i); };
+      const onKey = (e) => { if (e.repeat) return; const i = KEYS.indexOf(e.key.toLowerCase()); if (i >= 0) hit(i); };
       window.addEventListener('keydown', onKey);
       const stopLoop = loop(() => {
         const t = now();
         for (const n of notes) {
           if (n.done) continue;
+          if (t - n.time > 150) { n.done = true; n.el.classList.add('gone'); setTimeout(() => n.el.remove(), 200); miss(); continue; }
           const y = lineY - ((n.time - t) / 1000) * SPEED;
-          if (t - n.time > 160) { n.done = true; n.el.remove(); continue; }
-          n.el.style.transform = `translateY(${y - 18}px)`;
+          if (y > -40) n.el.style.transform = `translateY(${y - 9}px)`;
         }
         if (t > end) {
-          setTimeout(() => done(score, `<b>${score}점</b> (${hits} / ${notes.length}개 맞힘)`), 50);
+          setTimeout(() => done(score, `<b>${score}점</b> · 완벽 ${perfect} · 좋아 ${good} · 놓침 ${notes.length - perfect - good} · 최대 ${maxCombo}콤보`), 300);
           return false;
         }
       });
@@ -2764,15 +2842,14 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
       const KEYS = ['Q', 'W', 'E', 'R'];
       const seq = Array.from({ length: 8 }, () => KEYS[Math.floor(Math.random() * 4)]);
       let idx = 0;
-      let penalty = 0;
       stage.innerHTML = `<div class="mini-combo"><div class="mini-seq">${seq.map((k, i) => `<span data-i="${i}">${k}</span>`).join('')}</div><div class="mini-keys">${KEYS.map((k) => `<button data-k="${k}">${k}</button>`).join('')}</div><p class="lol-hint">키보드 Q·W·E·R 도 돼요</p></div>`;
       const spans = [...stage.querySelectorAll('.mini-seq span')];
       spans[0].classList.add('now');
-      const t0 = performance.now();
+      const sw = stopwatch(stage.querySelector('.mini-combo'));
       const press = (k) => {
         if (idx >= seq.length) return;
         if (k !== seq[idx]) {
-          penalty += 1;
+          sw.add(1);
           sfx('bad');
           buzz(30);
           const s = spans[idx];
@@ -2785,8 +2862,9 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
         idx++;
         sfx('tick');
         if (idx >= seq.length) {
-          const sec = (performance.now() - t0) / 1000 + penalty;
-          done(sec, `<b>${sec.toFixed(2)}초</b>${penalty ? ` (틀림 +${penalty}초 포함)` : ''}`);
+          sw.stop();
+          const sec = sw.sec();
+          done(sec, `<b>${sec.toFixed(2)}초</b>${sw.pen() ? ` (틀림 +${sw.pen()}초 포함)` : ''}`);
         } else spans[idx].classList.add('now');
       };
       stage.querySelector('.mini-keys').addEventListener('pointerdown', (e) => {
@@ -2797,11 +2875,10 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
       });
       const onKey = (e) => { const k = e.key.toUpperCase(); if (KEYS.includes(k)) press(k); };
       window.addEventListener('keydown', onKey);
-      cleanup = () => window.removeEventListener('keydown', onKey);
+      cleanup = () => { window.removeEventListener('keydown', onKey); sw.stop(); };
     } else if (g.id === 'stroop') {
       const COLORS = [['빨강', '#e5383b'], ['파랑', '#3a86ff'], ['초록', '#2bb24c'], ['노랑', '#f4b400']];
       let q = 0;
-      let penalty = 0;
       let ink = 0;
       stage.innerHTML = `<div class="mini-stroop"><p class="sub" data-role="q">1 / 10</p><p class="mini-word"></p><div class="mini-colors">${COLORS.map(([n], i) => `<button data-c="${i}">${n}</button>`).join('')}</div></div>`;
       const word = stage.querySelector('.mini-word');
@@ -2814,13 +2891,14 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
         qEl.textContent = `${q + 1} / 10`;
       };
       next();
-      const t0 = performance.now();
+      const sw = stopwatch(stage.querySelector('.mini-stroop'));
+      cleanup = () => sw.stop();
       stage.querySelector('.mini-colors').addEventListener('pointerdown', (e) => {
         const b = e.target.closest('[data-c]');
         if (!b) return;
         e.preventDefault();
         if (+b.dataset.c !== ink) {
-          penalty += 1;
+          sw.add(1);
           sfx('bad');
           buzz(30);
           word.classList.remove('miss');
@@ -2829,8 +2907,9 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
         } else sfx('tick');
         q++;
         if (q >= 10) {
-          const sec = (performance.now() - t0) / 1000 + penalty;
-          done(sec, `<b>${sec.toFixed(2)}초</b>${penalty ? ` (틀림 ${penalty}개 +${penalty}초 포함)` : ' · 다 맞혔어요!'}`);
+          sw.stop();
+          const sec = sw.sec();
+          done(sec, `<b>${sec.toFixed(2)}초</b>${sw.pen() ? ` (틀림 ${sw.pen()}개 +${sw.pen()}초 포함)` : ' · 다 맞혔어요!'}`);
         } else next();
       });
     } else if (g.id === 'simon') {
@@ -2883,7 +2962,12 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
       cleanup = () => timers.forEach(clearTimeout);
     } else if (g.id === 'dodge') {
       // 우주선을 끌어서 별똥별을 피함. 시간이 갈수록 더 많이·빨리 떨어짐 (최대 30초)
-      const { arena: box, info } = arena('우주선을 끌어서 피하세요 · <b>0.0</b>초');
+      const { arena: box, info } = arena('우주선을 끌어서 피하세요');
+      const tEl = document.createElement('div');
+      tEl.className = 'mini-timer';
+      tEl.innerHTML = '<b>0.0</b><small>초</small>';
+      stage.prepend(tEl);
+      const tNum = tEl.querySelector('b');
       const W = box.clientWidth;
       const H = box.clientHeight;
       const ship = document.createElement('div');
@@ -2932,7 +3016,7 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
           }
           if (k.y > H + 30) { k.el.remove(); rocks.splice(i, 1); }
         }
-        info.innerHTML = `우주선을 끌어서 피하세요 · <b>${el.toFixed(1)}</b>초`;
+        tNum.textContent = el.toFixed(1);
         if (el >= 30) {
           sfx('ok');
           setTimeout(() => done(30, '<b>30초</b> 끝까지 버텼어요! 🏆'), 300);
@@ -2958,7 +3042,7 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
       stage.innerHTML = `
         <div class="liar-card">
           <p class="liar-who">${g.icon} ${esc(g.title)}</p>
-          <p class="liar-word"><b>${fmt(g, s)}</b></p>
+          <p class="liar-word">${lastLabel || `<b>${fmt(g, s)}</b>`}</p>
           <p class="sub">${record ? (prev == null ? '첫 기록이에요!' : `🎉 최고 기록 경신! (전에는 ${fmt(g, prev)})`) : prev != null ? `내 최고 기록: ${fmt(g, prev)}` : ''}</p>
           ${again}
         </div>`;

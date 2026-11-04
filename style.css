@@ -1455,6 +1455,43 @@ a.rank-name:hover { color: var(--primary); }
 .mini-rank li.last { background: rgba(224, 49, 43, .12); }
 
 /* 미니게임 13종: 넓은 판 */
+.rg-top { display: flex; justify-content: space-between; margin: 0 0 8px; padding: 0 4px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.rg-top b { font-size: 24px; }
+.rg-top .hot b { color: #ff922b; }
+.rg { overflow: hidden; border-radius: var(--radius); background: #12101f; border: 1px solid #2a2547; touch-action: none; user-select: none; -webkit-user-select: none; }
+.rg-field { position: relative; height: min(58svh, 420px); min-height: 300px; overflow: hidden; display: grid; grid-template-columns: repeat(4, 1fr); }
+.rg-lane { position: relative; border-right: 1px solid rgba(255, 255, 255, .06); background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--c) 10%, transparent) 100%); }
+.rg-lane:last-of-type { border-right: 0; }
+.rg-lane.hit { animation: rgLane .22s ease-out; }
+@keyframes rgLane { from { background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--c) 55%, transparent) 100%); } }
+.rg-note { position: absolute; left: 10%; right: 10%; top: 0; height: 18px; border-radius: 9px; background: var(--c); box-shadow: 0 0 14px var(--c), inset 0 2px 0 rgba(255, 255, 255, .55); }
+.rg-note.pop { animation: rgPop .18s ease-out forwards; }
+.rg-note.gone { opacity: .25; transition: opacity .2s; }
+@keyframes rgPop { to { scale: 1.6; opacity: 0; } }
+.rg-line { position: absolute; left: 0; right: 0; bottom: 37px; height: 4px; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(255, 255, 255, .85); box-shadow: 0 0 12px #b48cff, 0 0 2px #fff; pointer-events: none; }
+.rg-line i { position: relative; }
+.rg-line i::after { content: ''; position: absolute; left: 50%; top: 50%; width: 46px; height: 22px; margin: -11px 0 0 -23px; border: 3px solid var(--c); border-radius: 12px; opacity: .55; }
+.rg-line i.hit::after { animation: rgRing .25s ease-out; }
+@keyframes rgRing { from { opacity: 1; transform: scale(1.35); box-shadow: 0 0 18px var(--c); } }
+.rg-judge { position: absolute; left: 0; right: 0; top: 32%; text-align: center; font-size: 40px; font-weight: 900; opacity: 0; pointer-events: none; }
+.rg-judge small { display: block; margin-top: 4px; font-size: 18px; color: #fff; opacity: .85; }
+.rg-judge.perfect { color: #ffd43b; text-shadow: 0 0 16px rgba(255, 212, 59, .7); }
+.rg-judge.good { color: #74c0fc; }
+.rg-judge.miss { color: #ff6b6b; }
+.rg-judge.show { animation: rgJudge .55s ease-out; }
+@keyframes rgJudge { 0% { opacity: 1; transform: scale(1.35); } 60% { opacity: 1; transform: scale(1); } 100% { opacity: 0; } }
+.rg-btns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 8px; background: #1a1730; }
+.rg-btns button { height: 64px; border: 0; border-radius: 14px; background: color-mix(in srgb, var(--c) 30%, #2a2547); color: #fff; font: inherit; font-size: 22px; font-weight: 900; border-bottom: 4px solid var(--c); touch-action: manipulation; }
+.rg-btns button.hit { animation: rgBtn .18s ease-out; }
+@keyframes rgBtn { from { background: var(--c); transform: translateY(2px); } }
+.mini-timer { position: relative; margin: 0 0 8px; text-align: center; font-variant-numeric: tabular-nums; line-height: 1; }
+.mini-timer b { font-size: 46px; font-weight: 900; letter-spacing: -1px; }
+.mini-timer small { margin-left: 4px; font-size: 18px; font-weight: 700; color: var(--text-3); }
+.mini-timer.hurt b { animation: timerHurt .45s ease; }
+@keyframes timerHurt { 0% { color: #e0312b; transform: scale(1.18); } 100% { color: inherit; transform: scale(1); } }
+.mini-timer b { display: inline-block; }
+.mini-pen { position: absolute; left: 50%; top: -4px; margin-left: 70px; color: #e0312b; font-size: 22px; font-weight: 900; pointer-events: none; animation: penPop .8s ease forwards; }
+@keyframes penPop { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-26px); } }
 .mini-lead { margin: 0; padding: 14px 16px; border-radius: var(--radius); background: var(--primary-soft); font-weight: 700; line-height: 1.6; }
 .mini-info { margin: 0 0 8px; }
 .mini-arena { position: relative; height: min(62svh, 440px); min-height: 300px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: radial-gradient(120% 90% at 50% 0%, var(--primary-soft), var(--surface) 70%); touch-action: none; user-select: none; -webkit-user-select: none; }
