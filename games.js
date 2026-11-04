@@ -15,7 +15,16 @@ const GAMES = [
   { id: 'apple', title: '사과 게임', desc: '숫자 합이 10이 되게 묶어서 사과 지우기', cover: () => COVERS['game-apple'] },
   { id: 'balance', title: '균형 잡기', desc: '황새가 외나무다리를 오래 걷게 균형을 잡아요', cover: () => COVERS['game-balance'] },
   { id: 'liar', title: '라이어 게임', desc: '한 명만 제시어를 몰라요. 라이어를 찾아라!', cover: () => COVERS['game-liar'] },
-  { id: 'mini', title: '미니게임 13종 대결', desc: '반응속도·에임·리듬·기억력, 혼자 연습도 돼요', cover: () => COVERS['game-mini'] },
+  { id: 'mini', title: '10초 미니게임 대결', desc: '연타·반응속도·10초 맞히기, 꼴찌는 벌칙', cover: () => COVERS['game-mini'] },
+  { id: 'aim', title: '풍선 터뜨리기', desc: '떠다니는 풍선 10개를 누가 더 빨리 터뜨릴까', cover: () => COVERS['game-aim'] },
+  { id: 'track', title: '꿀벌 따라가기', desc: '6초 동안 꿀벌에서 손가락을 떼지 마세요', cover: () => COVERS['game-track'] },
+  { id: 'rhythm', title: '박자 맞추기', desc: '내려오는 북을 선에 맞춰 톡톡, 리듬 게임', cover: () => COVERS['game-rhythm'] },
+  { id: 'last', title: '마지막 한 방', desc: '용 체력 900 이하에서 딱 한 번에 처치', cover: () => COVERS['game-last'] },
+  { id: 'gauge', title: '초록 칸에 멈춰', desc: '왔다 갔다 하는 막대를 초록 칸 한가운데에', cover: () => COVERS['game-gauge'] },
+  { id: 'combo', title: '글자 콤보', desc: '나오는 글자 8개를 순서대로 빠르게', cover: () => COVERS['game-combo'] },
+  { id: 'stroop', title: '색깔 헷갈림', desc: '글자 말고 글자 색을 골라요, 은근 어려움', cover: () => COVERS['game-stroop'] },
+  { id: 'simon', title: '순서 기억하기', desc: '깜빡이는 순서를 기억해서 그대로 누르기', cover: () => COVERS['game-simon'] },
+  { id: 'dodge', title: '별똥별 피하기', desc: '우주선을 끌어서 별똥별을 피해 오래 버티기', cover: () => COVERS['game-dodge'] },
   { id: 'croc', title: '악어 룰렛', desc: '이빨을 번갈아 누르다 물리면 당첨!', cover: () => COVERS['game-croc'] },
   { id: 'lol', title: '롤 내전 팀 짜기', desc: '블루·레드 팀을 라인별로 섞기', cover: () => COVERS['game-lol'] },
   { id: 'dice', title: '주사위·동전', desc: '주사위 굴리기와 동전 던지기', cover: () => COVERS['game-dice'] },
@@ -95,7 +104,7 @@ function countdown(overlay, done) {
 }
 
 // 새로 나온 게임 (홈 '새로 나온 게임' 줄과 NEW 표시)
-const NEW_GAMES = ['memory', 'apple', 'balance', 'liar', 'mini', 'croc'];
+const NEW_GAMES = ['aim', 'track', 'rhythm', 'last', 'gauge', 'combo', 'stroop', 'simon', 'dodge'];
 
 // 게임 참여 수는 퀴즈와 같은 집계 서버에 'game-<id>'로 셈 (하루 한 번, 익명)
 const gamePlays = (plays, g) => plays['game-' + g.id] || 0;
@@ -134,7 +143,7 @@ function renderGamesHome() {
       <div class="games-grid"></div>
       <section class="about">
         <h2>모임을 더 재밌게 만드는 무료 게임</h2>
-        <p>순서·당번·벌칙을 공정하게 정하는 구슬 추첨, 경주마, 사다리 타기, 돌림판, 제비뽑기와, 여럿이 휴대폰 하나로 즐기는 라이어 게임, 폭탄 돌리기, 미니게임 13종 대결(반응속도·에임·리듬·기억력), 악어 룰렛이 있어요. 혼자 기록에 도전하는 사과 게임, 카드 짝 맞추기, 균형 잡기도 있어요.</p>
+        <p>순서·당번·벌칙을 공정하게 정하는 구슬 추첨, 경주마, 사다리 타기, 돌림판, 제비뽑기와, 여럿이 휴대폰 하나로 즐기는 라이어 게임, 폭탄 돌리기, 10초 미니게임 대결, 악어 룰렛이 있어요. 풍선 터뜨리기·꿀벌 따라가기·박자 맞추기·마지막 한 방·초록 칸에 멈춰·글자 콤보·색깔 헷갈림·순서 기억하기·별똥별 피하기는 혼자 기록에 도전해도 되고, 여럿이 돌아가며 꼴찌 벌칙을 정해도 돼요. 혼자 기록에 도전하는 사과 게임, 카드 짝 맞추기, 균형 잡기도 있어요.</p>
         <p>설치나 회원가입 없이 바로 쓸 수 있고, 입력한 이름과 설정은 다음에 다시 쓸 수 있게 내 기기에만 저장돼요. 게임마다 하는 방법과 활용 팁을 아래에 적어 두었어요.</p>
       </section>
     </div>
@@ -161,7 +170,7 @@ function renderGame(id) {
     ${gameAboutHtml(game)}`;
   app.querySelector('[data-act="home"]').addEventListener('click', () => nav('/games/'));
   const body = app.querySelector('.game-body');
-  ({ wheel: renderWheel, ladder: renderLadder, marble: renderMarble, horse: renderHorse, lots: renderLots, bomb: renderBomb, teams: renderTeams, lol: renderLol, dice: renderDice, liar: renderLiar, croc: renderCroc, mini: renderMini, memory: renderMemory, apple: renderApple, balance: renderBalance })[id](body);
+  ({ wheel: renderWheel, ladder: renderLadder, marble: renderMarble, horse: renderHorse, lots: renderLots, bomb: renderBomb, teams: renderTeams, lol: renderLol, dice: renderDice, liar: renderLiar, croc: renderCroc, mini: renderMini, memory: renderMemory, apple: renderApple, balance: renderBalance, ...SOLO_RENDER })[id](body);
 }
 
 /* ═════════════════════ 돌림판 ═════════════════════ */
@@ -2314,6 +2323,9 @@ const MINI_GAMES = [
   { id: 'ten', icon: '⏱️', title: '10초 맞히기', desc: '정확히 10.00초에 멈추세요! (3초 뒤 시계가 사라져요)', better: 'low', fmt: (s) => `${s.toFixed(2)}초 차이` },
   { id: 'react', icon: '🚦', title: '반응 속도', desc: '화면이 초록색으로 바뀌는 순간 누르세요! (먼저 누르면 실격)', better: 'low', fmt: (s) => `${s}ms` },
   { id: 'order', icon: '🔢', title: '1→16 순서대로', desc: '숫자를 1부터 16까지 순서대로 빠르게 누르세요!', better: 'low', fmt: (s) => `${s.toFixed(2)}초` },
+];
+// 따로 하나씩 있는 게임 (게임 목록에 각각 카드로 나옴). 플레이 방식은 미니게임 대결과 같음: 혼자면 기록 도전, 여럿이면 꼴찌 벌칙
+const SOLO_GAMES = [
   { id: 'aim', icon: '🎯', title: '풍선 터뜨리기', desc: '이리저리 떠다니는 풍선 10개를 빨리 터뜨려요! 헛손질은 0.5초 추가', better: 'low', fmt: (s) => `${s.toFixed(2)}초` },
   { id: 'track', icon: '🐝', title: '꿀벌 따라가기', desc: '6초 동안 손가락(마우스)을 꿀벌 위에 꾹 대고 따라다니세요!', better: 'high', fmt: (s) => `${s}% 붙어 있음` },
   { id: 'rhythm', icon: '🥁', title: '박자 맞추기', desc: '내려오는 북이 선에 닿을 때 그 칸을 눌러요! (키보드 D·F·J·K)', better: 'high', fmt: (s) => `${s}점` },
@@ -2325,27 +2337,33 @@ const MINI_GAMES = [
   { id: 'dodge', icon: '☄️', title: '별똥별 피하기', desc: '내 우주선을 끌어서 떨어지는 별똥별을 피해요. 오래 버틸수록 1등!', better: 'high', fmt: (s) => `${s.toFixed(1)}초 버팀` },
 ];
 
-function renderMini(root) {
-  const saved = gameStore.get('mini') || { names: '철수\n영희\n민수\n지은', pick: 'all' };
+// 따로 있는 게임: 게임 id → 화면
+const SOLO_RENDER = Object.fromEntries(SOLO_GAMES.map((g) => [g.id, (root) => renderMini(root, { key: g.id, list: [g] })]));
+
+function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
+  const single = cfg.list.length === 1;
+  const saved = gameStore.get(cfg.key) || { names: single ? '나' : '철수\n영희\n민수\n지은', pick: 'all' };
   root.innerHTML = `
     <div class="mini-stage"></div>
     <div class="mini-setup">
-      <label class="field"><span>참가자 (1~8명 · 혼자면 연습 모드)</span><textarea class="names" rows="4">${esc(saved.names)}</textarea></label>
-      <label class="field"><span>미니게임</span><select class="mini-pick">
-        <option value="all">🎲 13종 돌아가며 (무작위 순서)</option>
-        ${MINI_GAMES.map((g) => `<option value="${g.id}"${saved.pick === g.id ? ' selected' : ''}>${g.icon} ${esc(g.title)}</option>`).join('')}
-      </select></label>
-      <button class="btn block" data-act="start">대결 시작</button>
-      <p class="lol-hint">라운드마다 미니게임이 하나씩 나와요. 폰을 돌려 가며 한 명씩 도전하고, 꼴찌는 벌칙!</p>
+      ${single ? `<p class="mini-lead">${cfg.list[0].icon} ${esc(cfg.list[0].desc)}</p>` : ''}
+      <label class="field"><span>참가자 (1~8명 · 혼자면 기록 도전)</span><textarea class="names" rows="${single ? 2 : 4}">${esc(saved.names)}</textarea></label>
+      ${single ? '' : `<label class="field"><span>미니게임</span><select class="mini-pick">
+        <option value="all">🎲 돌아가며 (무작위 순서)</option>
+        ${cfg.list.map((g) => `<option value="${g.id}"${saved.pick === g.id ? ' selected' : ''}>${g.icon} ${esc(g.title)}</option>`).join('')}
+      </select></label>`}
+      <button class="btn block" data-act="start">${single ? '시작' : '대결 시작'}</button>
+      <p class="lol-hint">${single ? '혼자 하면 내 최고 기록에 도전하고, 이름을 여러 명 넣으면 폰을 돌려 가며 겨뤄서 꼴찌가 벌칙!' : '라운드마다 미니게임이 하나씩 나와요. 폰을 돌려 가며 한 명씩 도전하고, 꼴찌는 벌칙!'}</p>
     </div>`;
   const stage = root.querySelector('.mini-stage');
   const setupEl = root.querySelector('.mini-setup');
   const ta = root.querySelector('.names');
   const pickEl = root.querySelector('.mini-pick');
-  if (saved.pick === 'all') pickEl.value = 'all';
+  if (pickEl && saved.pick === 'all') pickEl.value = 'all';
+  const pick = () => (pickEl ? pickEl.value : cfg.list[0].id);
   let names = [];
   let round = 0;
-  let order = shuffle(MINI_GAMES);
+  let order = shuffle(cfg.list);
   let scores = [];
   let turn = 0;
   let cleanup = () => {};
@@ -2358,10 +2376,10 @@ function renderMini(root) {
       stage.innerHTML = '<p class="game-result">참가자 이름을 1명 이상 넣어 주세요.</p>';
       return;
     }
-    gameStore.save('mini', { names: ta.value, pick: pickEl.value });
+    gameStore.save(cfg.key, { names: ta.value, pick: pick() });
     setupEl.hidden = true;
     round = 0;
-    order = pickEl.value === 'all' ? shuffle(MINI_GAMES) : [MINI_GAMES.find((g) => g.id === pickEl.value)];
+    order = pick() === 'all' ? shuffle(cfg.list) : [cfg.list.find((g) => g.id === pick())];
     nextRound();
   }
   const mg = () => order[round % order.length];

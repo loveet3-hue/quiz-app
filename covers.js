@@ -361,6 +361,90 @@ const COVERS = (() => {
       <text x="200" y="222" font-family="${NUM}" font-size="26" font-weight="700" fill="#7c5cff" text-anchor="middle">10.00</text>
       <path d="M306 70l-20 34h14l-10 28 28-38h-14l12-24z" fill="#ffd93d" stroke="#e8a900" stroke-width="3"/>`),
 
+    // 풍선 터뜨리기: 떠다니는 풍선 + 과녁 + 터진 조각
+    'game-aim': make('#ffe3ec', '#d6c8ff', `
+      ${shadow(200, 256, 110)}
+      ${[[130, 120, '#ff6b81', 34], [262, 96, '#4dabf7', 30], [228, 190, '#ffd43b', 28]].map(([x, y, c, r]) => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r * 1.18}" fill="${c}"/><ellipse cx="${x - r * 0.35}" cy="${y - r * 0.45}" rx="${r * 0.22}" ry="${r * 0.32}" fill="#fff" opacity=".55"/><path d="M${x} ${y + r * 1.18} l-6 10 h12z" fill="${c}"/><path d="M${x} ${y + r * 1.18 + 10} q8 18 -2 36" stroke="#8a8fa3" stroke-width="2.5" fill="none"/>`).join('')}
+      <circle cx="130" cy="120" r="52" fill="none" stroke="#2d3142" stroke-width="5"/><circle cx="130" cy="120" r="8" fill="#2d3142"/>
+      <line x1="130" y1="58" x2="130" y2="78" stroke="#2d3142" stroke-width="5" stroke-linecap="round"/><line x1="130" y1="162" x2="130" y2="182" stroke="#2d3142" stroke-width="5" stroke-linecap="round"/>
+      <line x1="68" y1="120" x2="88" y2="120" stroke="#2d3142" stroke-width="5" stroke-linecap="round"/><line x1="172" y1="120" x2="192" y2="120" stroke="#2d3142" stroke-width="5" stroke-linecap="round"/>
+      ${[[306, 170], [318, 194], [292, 204], [324, 166]].map(([x, y], i) => `<path d="M${x} ${y} l${i % 2 ? 10 : -8} ${i % 2 ? -6 : 8}" stroke="#ff922b" stroke-width="5" stroke-linecap="round"/>`).join('')}`),
+
+    // 꿀벌 따라가기: 날아간 길(점선) + 꿀벌 + 손가락 원
+    'game-track': make('#fff6cf', '#c9f2d9', `
+      ${shadow(200, 256, 110)}
+      <path d="M70 210 C110 120 170 230 220 150 S300 80 330 120" fill="none" stroke="#2d3142" stroke-width="5" stroke-dasharray="4 12" stroke-linecap="round" opacity=".55"/>
+      <circle cx="252" cy="118" r="46" fill="#2bb24c" opacity=".22"/><circle cx="252" cy="118" r="46" fill="none" stroke="#2bb24c" stroke-width="5"/>
+      <ellipse cx="236" cy="96" rx="20" ry="13" fill="#fff" opacity=".85" transform="rotate(-25 236 96)"/><ellipse cx="262" cy="92" rx="20" ry="13" fill="#fff" opacity=".85" transform="rotate(20 262 92)"/>
+      <ellipse cx="252" cy="122" rx="32" ry="24" fill="#ffd43b" stroke="#2d3142" stroke-width="4"/>
+      <path d="M240 100 v44 M256 99 v46" stroke="#2d3142" stroke-width="7"/>
+      <circle cx="278" cy="116" r="5" fill="#2d3142"/><path d="M220 124 l-12 4 12 4z" fill="#2d3142"/>`),
+
+    // 박자 맞추기: 네 칸 + 내려오는 북 + 판정선
+    'game-rhythm': make('#e6e0ff', '#ffd6f0', `
+      ${shadow(200, 262, 120)}
+      <rect x="92" y="44" width="216" height="200" rx="16" fill="#fff" opacity=".7"/>
+      ${[146, 200, 254].map((x) => `<line x1="${x}" y1="52" x2="${x}" y2="236" stroke="#c9c3e6" stroke-width="2" stroke-dasharray="6 6"/>`).join('')}
+      <rect x="92" y="196" width="216" height="8" fill="#7c5cff"/>
+      ${[[119, 72, '#ff6b6b'], [173, 128, '#4dabf7'], [227, 186, '#ffd43b'], [281, 100, '#51cf66']].map(([x, y, c]) => `<ellipse cx="${x}" cy="${y}" rx="20" ry="9" fill="${c}"/><rect x="${x - 20}" y="${y}" width="40" height="18" fill="${c}"/><ellipse cx="${x}" cy="${y + 18}" rx="20" ry="9" fill="#2d3142" opacity=".25"/><ellipse cx="${x}" cy="${y}" rx="14" ry="5" fill="#fff" opacity=".6"/>`).join('')}
+      <text x="316" y="80" font-family="${NUM}" font-size="34" font-weight="700" fill="#7c5cff">♪</text>`),
+
+    // 마지막 한 방: 용 머리 + 체력 막대 + 번개
+    'game-last': make('#ffe0d6', '#ffcf8f', `
+      ${shadow(200, 258, 110)}
+      <path d="M118 176 Q118 92 200 86 Q266 84 290 128 L322 134 Q326 160 296 166 L262 196 Q200 212 150 200 Z" fill="#4fbf6a" stroke="#2e8a44" stroke-width="5"/>
+      <path d="M150 94 l-18 -34 34 22z M192 86 l4 -38 18 36z" fill="#2e8a44"/>
+      <circle cx="232" cy="122" r="12" fill="#fff"/><circle cx="236" cy="122" r="6" fill="#1d1b26"/>
+      <path d="M266 170 l8 12 8 -10 8 10" stroke="#fff" stroke-width="4" fill="none"/>
+      <rect x="96" y="222" width="208" height="20" rx="10" fill="#fff" stroke="#2d3142" stroke-width="3"/>
+      <rect x="99" y="225" width="58" height="14" rx="7" fill="#e0312b"/>
+      <line x1="158" y1="216" x2="158" y2="248" stroke="#e0312b" stroke-width="4"/>
+      <path d="M316 44 l-26 46 h18 l-12 38 38 -52 h-18 l16 -32z" fill="#ffd93d" stroke="#e8a900" stroke-width="3"/>`),
+
+    // 초록 칸에 멈춰: 막대 게이지 + 초록 칸 + 바늘
+    'game-gauge': make('#dff6ff', '#c8f0d8', `
+      ${shadow(200, 252, 120)}
+      <rect x="72" y="118" width="256" height="64" rx="18" fill="#fff" stroke="#2d3142" stroke-width="5"/>
+      <rect x="214" y="123" width="40" height="54" fill="#51cf66" opacity=".6"/>
+      <line x1="214" y1="123" x2="214" y2="177" stroke="#2bb24c" stroke-width="4"/><line x1="254" y1="123" x2="254" y2="177" stroke="#2bb24c" stroke-width="4"/>
+      <rect x="226" y="104" width="12" height="92" rx="6" fill="#7c5cff"/>
+      <path d="M150 214 h-40 m0 0 l12 -10 m-12 10 l12 10 M250 214 h40 m0 0 l-12 -10 m12 10 l-12 10" stroke="#2d3142" stroke-width="5" stroke-linecap="round" fill="none"/>
+      <text x="200" y="88" font-family="${KO}" font-size="24" font-weight="800" fill="#2d3142" text-anchor="middle">멈춰!</text>`),
+
+    // 글자 콤보: Q W E R 키캡
+    'game-combo': make('#e8e4ff', '#cde7ff', `
+      ${shadow(200, 252, 130)}
+      ${['Q', 'W', 'E', 'R'].map((k, i) => { const x = 62 + i * 72, y = i === 2 ? 134 : 120; return `<rect x="${x}" y="${y + 10}" width="64" height="64" rx="14" fill="#5a3fd6"/><rect x="${x}" y="${y}" width="64" height="64" rx="14" fill="${i === 2 ? '#ffd43b' : '#7c5cff'}"/><text x="${x + 32}" y="${y + 44}" font-family="${NUM}" font-size="34" font-weight="700" fill="${i === 2 ? '#2d3142' : '#fff'}" text-anchor="middle">${k}</text>`; }).join('')}
+      <g font-family="${NUM}" font-size="20" font-weight="700" fill="#2d3142" opacity=".55" text-anchor="middle"><text x="200" y="94">W · E · R · Q · E</text></g>`),
+
+    // 색깔 헷갈림: 다른 색으로 쓴 색 이름
+    'game-stroop': make('#fff0e0', '#e3dcff', `
+      ${shadow(200, 252, 120)}
+      <rect x="96" y="70" width="208" height="160" rx="20" fill="#fff" opacity=".85"/>
+      <g font-family="${KO}" font-size="34" font-weight="900" text-anchor="middle">
+        <text x="200" y="118" fill="#3a86ff">빨강</text>
+        <text x="200" y="164" fill="#e5383b">초록</text>
+        <text x="200" y="210" fill="#2bb24c">노랑</text>
+      </g>
+      <circle cx="312" cy="76" r="22" fill="#2d3142"/><text x="312" y="86" font-family="${NUM}" font-size="28" font-weight="700" fill="#ffd93d" text-anchor="middle">?</text>`),
+
+    // 순서 기억하기: 네 색 칸 (하나 깜빡) + 숫자
+    'game-simon': make('#e6f4ff', '#f3d9ff', `
+      ${shadow(200, 256, 100)}
+      ${[[124, 68, '#ff6b6b', 0.45, '2'], [208, 68, '#4dabf7', 1, '1'], [124, 152, '#51cf66', 0.45, '4'], [208, 152, '#ffd43b', 0.45, '3']].map(([x, y, c, o, n]) => `<rect x="${x}" y="${y}" width="72" height="72" rx="16" fill="${c}" opacity="${o}"/><text x="${x + 36}" y="${y + 47}" font-family="${NUM}" font-size="30" font-weight="700" fill="#fff" text-anchor="middle">${n}</text>`).join('')}
+      <circle cx="244" cy="104" r="44" fill="none" stroke="#fff" stroke-width="6" opacity=".8"/>`),
+
+    // 별똥별 피하기: 우주 + 로켓 + 떨어지는 별똥별
+    'game-dodge': make('#2b2d6e', '#6c4bd6', `
+      ${[[60, 60], [110, 230], [330, 210], [300, 60], [180, 40], [250, 250], [80, 150]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.5" fill="#fff" opacity=".8"/>`).join('')}
+      ${[[132, 70], [262, 100], [196, 140]].map(([x, y]) => `<path d="M${x - 40} ${y - 40} L${x} ${y}" stroke="#ffd43b" stroke-width="8" stroke-linecap="round" opacity=".5"/><circle cx="${x}" cy="${y}" r="15" fill="#ff922b"/><circle cx="${x - 4}" cy="${y - 4}" r="6" fill="#ffd43b"/>`).join('')}
+      <g transform="translate(200 214)">
+        <path d="M0 -44 C16 -30 18 -6 14 14 H-14 C-18 -6 -16 -30 0 -44Z" fill="#fff" stroke="#cfd5e2" stroke-width="3"/>
+        <circle cx="0" cy="-16" r="7" fill="#4dabf7"/>
+        <path d="M-14 4 L-26 20 L-12 16Z M14 4 L26 20 L12 16Z" fill="#ff5a5a"/>
+        <path d="M-8 16 Q0 36 8 16Z" fill="#ffd43b"/>
+      </g>`),
+
     // 악어 룰렛: 입 벌린 악어 + 이빨
     'game-croc': make('#e3f7ec', '#fff1c4', `
       ${shadow(200, 258, 130)}

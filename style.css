@@ -1455,6 +1455,7 @@ a.rank-name:hover { color: var(--primary); }
 .mini-rank li.last { background: rgba(224, 49, 43, .12); }
 
 /* 미니게임 13종: 넓은 판 */
+.mini-lead { margin: 0; padding: 14px 16px; border-radius: var(--radius); background: var(--primary-soft); font-weight: 700; line-height: 1.6; }
 .mini-info { margin: 0 0 8px; }
 .mini-arena { position: relative; height: min(62svh, 440px); min-height: 300px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: radial-gradient(120% 90% at 50% 0%, var(--primary-soft), var(--surface) 70%); touch-action: none; user-select: none; -webkit-user-select: none; }
 .mini-balloon { position: absolute; left: 0; top: 0; width: 60px; height: 60px; padding: 0; border: 0; background: none; font-size: 46px; line-height: 60px; cursor: pointer; touch-action: none; }
