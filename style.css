@@ -1749,3 +1749,27 @@ a.icon-btn { display: inline-grid; place-items: center; }
 .about-names p { margin-top: 6px; }
 .about-note { font-size: 12px; color: var(--text-3); }
 .about-links li { list-style: '· '; }
+
+/* 반응속도 테스트 */
+.rx { display: flex; flex-direction: column; gap: 12px; }
+.rx-dots { display: flex; justify-content: center; gap: 10px; }
+.rx-dots i { width: 14px; height: 14px; border-radius: 50%; background: var(--line); transition: background .2s, transform .2s; }
+.rx-dots i.on { background: #2bb24c; transform: scale(1.15); }
+.rx-pad {
+  width: 100%; min-height: 340px; border: 0; border-radius: 24px; color: #fff; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  font: inherit; touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.rx-pad b { font-size: 44px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.rx-pad b em { font-size: 26px; font-style: normal; margin-left: 4px; opacity: .85; }
+.rx-pad small { font-size: 16px; opacity: .9; padding: 0 16px; }
+.rx-pad.wait { background: #e0312b; }
+.rx-pad.go { background: #2bb24c; }
+.rx-pad.go b { font-size: 64px; }
+.rx-pad.early { background: #f08c00; }
+.rx-pad.shown, .rx-pad.done { background: #4c6ef5; }
+.rx-pad.shown b, .rx-pad.done b { font-size: 60px; }
+.rx-log { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; min-height: 22px; margin: 0; font-size: 14px; color: var(--text-2); }
+.rx-log b { color: var(--text); }
+.rx-grade { display: block; font-size: 52px; line-height: 1.2; }
+.rx-sub { display: block; margin-top: 8px; font-size: 14px; line-height: 1.6; color: var(--text-2); }

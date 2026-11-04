@@ -4,6 +4,7 @@
 'use strict';
 
 const GAMES = [
+  { id: 'reaction', title: '반응속도 테스트', desc: '초록색으로 바뀌는 순간 톡! 5번 평균으로 내 반응속도 등급 확인', cover: () => COVERS['game-reaction'] },
   { id: 'marble', title: '구슬 추첨', desc: '구슬이 굴러 내려가는 순서로 뽑기', cover: () => COVERS['game-marble'] },
   { id: 'horse', title: '경주마', desc: '1등할 말을 골라 맞혀 보세요', cover: () => COVERS['game-horse'] },
   { id: 'ladder', title: '사다리 타기', desc: '누가 당첨일까? 길을 따라가 보세요', cover: () => COVERS['game-ladder'] },
@@ -104,17 +105,19 @@ function countdown(overlay, done) {
 }
 
 // 새로 나온 게임 (홈 '새로 나온 게임' 줄과 NEW 표시)
-const NEW_GAMES = ['aim', 'track', 'rhythm', 'last', 'gauge', 'combo', 'stroop', 'simon', 'dodge'];
+const NEW_GAMES = ['reaction', 'aim', 'track', 'rhythm', 'last', 'gauge', 'combo', 'stroop', 'simon', 'dodge'];
 
-// 게임 참여 수는 퀴즈와 같은 집계 서버에 'game-<id>'로 셈 (하루 한 번, 익명)
+// 게임 참여 수는 퀴즈와 같은 집계 서버에 'game-<id>'로 셈 (하루 한 번, 익명) — 순서 정할 때만 쓰고 화면엔 안 보여 줌
 const gamePlays = (plays, g) => plays['game-' + g.id] || 0;
+// 참여 수와 상관없이 목록 맨 앞에 두는 게임
+const PINNED_GAMES = ['reaction'];
 function popularGames(plays, n) {
   const order = new Map(GAMES.map((g, i) => [g.id, i]));
-  return [...GAMES].sort((a, b) => gamePlays(plays, b) - gamePlays(plays, a) || order.get(a.id) - order.get(b.id)).slice(0, n);
+  const pin = (g) => (PINNED_GAMES.includes(g.id) ? PINNED_GAMES.length - PINNED_GAMES.indexOf(g.id) : 0);
+  return [...GAMES].sort((a, b) => pin(b) - pin(a) || gamePlays(plays, b) - gamePlays(plays, a) || order.get(a.id) - order.get(b.id)).slice(0, n);
 }
 
-function gameCardHtml(g, { rank, plays = {} } = {}) {
-  const n = gamePlays(plays, g);
+function gameCardHtml(g, { rank } = {}) {
   return `
     <a class="card" href="/game/${g.id}/">
       <div class="cover"><img class="full" src="${g.cover()}" alt="">${NEW_GAMES.includes(g.id) ? '<span class="new-tag">NEW</span>' : ''}${
@@ -122,7 +125,7 @@ function gameCardHtml(g, { rank, plays = {} } = {}) {
       }</div>
       <div class="card-body">
         <h2 class="card-title">${esc(g.title)}</h2>
-        <div class="card-meta">${esc(g.desc)}${n ? ` · 참여 ${fmtCount(n)}` : ''}</div>
+        <div class="card-meta">${esc(g.desc)}</div>
       </div>
     </a>`;
 }
@@ -132,7 +135,7 @@ function renderGamesHome() {
   const draw = () => {
     const grid = app.querySelector('.games-grid');
     const plays = counts.get();
-    if (grid) grid.innerHTML = popularGames(plays, GAMES.length).map((g) => gameCardHtml(g, { plays })).join('');
+    if (grid) grid.innerHTML = popularGames(plays, GAMES.length).map((g) => gameCardHtml(g)).join('');
   };
   app.innerHTML = `
     <div class="games-home">
@@ -143,7 +146,7 @@ function renderGamesHome() {
       <div class="games-grid"></div>
       <section class="about">
         <h2>모임을 더 재밌게 만드는 무료 게임</h2>
-        <p>순서·당번·벌칙을 공정하게 정하는 구슬 추첨, 경주마, 사다리 타기, 돌림판, 제비뽑기와, 여럿이 휴대폰 하나로 즐기는 라이어 게임, 폭탄 돌리기, 10초 미니게임 대결, 악어 룰렛이 있어요. 풍선 터뜨리기·꿀벌 따라가기·박자 맞추기·마지막 한 방·초록 칸에 멈춰·글자 콤보·색깔 헷갈림·순서 기억하기·별똥별 피하기는 혼자 기록에 도전해도 되고, 여럿이 돌아가며 꼴찌 벌칙을 정해도 돼요. 혼자 기록에 도전하는 사과 게임, 카드 짝 맞추기, 균형 잡기도 있어요.</p>
+        <p>내 손이 얼마나 빠른지 재 보는 반응속도 테스트와, 순서·당번·벌칙을 공정하게 정하는 구슬 추첨, 경주마, 사다리 타기, 돌림판, 제비뽑기와, 여럿이 휴대폰 하나로 즐기는 라이어 게임, 폭탄 돌리기, 10초 미니게임 대결, 악어 룰렛이 있어요. 풍선 터뜨리기·꿀벌 따라가기·박자 맞추기·마지막 한 방·초록 칸에 멈춰·글자 콤보·색깔 헷갈림·순서 기억하기·별똥별 피하기는 혼자 기록에 도전해도 되고, 여럿이 돌아가며 꼴찌 벌칙을 정해도 돼요. 혼자 기록에 도전하는 사과 게임, 카드 짝 맞추기, 균형 잡기도 있어요.</p>
         <p>설치나 회원가입 없이 바로 쓸 수 있고, 입력한 이름과 설정은 다음에 다시 쓸 수 있게 내 기기에만 저장돼요. 게임마다 하는 방법과 활용 팁을 아래에 적어 두었어요.</p>
       </section>
     </div>
@@ -2317,6 +2320,17 @@ function renderCroc(root) {
 // 폰 하나를 돌려 가며 한 명씩 도전 → 라운드마다 꼴찌가 벌칙. 혼자 넣으면 연습 모드(내 최고 기록과 비교)
 // better: 'high' = 클수록 잘함, 'low' = 작을수록 잘함. 실격은 high → -1, low → 99999
 const FAIL_HIGH = -1;
+// 반응속도 테스트 등급 (5번 평균 ms 기준, 사람 평균은 보통 250ms 안팎)
+const RX_GRADES = [
+  [180, '⚡', '번개 손 · 프로게이머급'],
+  [220, '🔥', '아주 빨라요 · 상위권'],
+  [260, '😎', '평균보다 빨라요'],
+  [310, '🙂', '딱 보통 사람 평균'],
+  [380, '🐢', '조금 느긋한 편'],
+  [Infinity, '😴', '혹시 졸려요?'],
+];
+const rxGrade = (ms) => RX_GRADES.find(([max]) => ms < max);
+const rxWord = (ms) => (ms < 200 ? '번개!' : ms < 250 ? '빨라요' : ms < 300 ? '좋아요' : ms < 400 ? '보통' : '느긋~');
 const FAIL_LOW = 99999;
 const MINI_GAMES = [
   { id: 'tap', icon: '👆', title: '5초 연타', desc: '5초 동안 화면을 최대한 많이 누르세요!', better: 'high', fmt: (s) => `${s}번` },
@@ -2326,6 +2340,7 @@ const MINI_GAMES = [
 ];
 // 따로 하나씩 있는 게임 (게임 목록에 각각 카드로 나옴). 플레이 방식은 미니게임 대결과 같음: 혼자면 기록 도전, 여럿이면 꼴찌 벌칙
 const SOLO_GAMES = [
+  { id: 'reaction', icon: '⚡', title: '반응속도 테스트', desc: '빨간 화면이 초록색으로 바뀌는 순간 눌러요! 5번 재서 평균으로 등급이 나와요 (키보드 스페이스바도 돼요)', better: 'low', fmt: (s) => `평균 ${s}ms` },
   { id: 'aim', icon: '🎯', title: '풍선 터뜨리기', desc: '이리저리 떠다니는 풍선 10개를 빨리 터뜨려요! 헛손질은 0.5초 추가', better: 'low', fmt: (s) => `${s.toFixed(2)}초` },
   { id: 'track', icon: '🐝', title: '꿀벌 따라가기', desc: '6초 동안 손가락(마우스)을 꿀벌 위에 꾹 대고 따라다니세요!', better: 'high', fmt: (s) => `${s}% 붙어 있음` },
   { id: 'rhythm', icon: '🥁', title: '박자 맞추기', desc: '내려오는 노트가 빛나는 선에 닿을 때 그 칸을 눌러요! 콤보가 이어질수록 점수가 커져요 (키보드 D·F·J·K)', better: 'high', fmt: (s) => `${s}점` },
@@ -2513,6 +2528,75 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
         done(diff, `<b>${t.toFixed(2)}초</b>에 멈췄어요 (차이 ${diff.toFixed(2)}초)`);
       });
       cleanup = () => clearInterval(iv);
+    } else if (g.id === 'reaction') {
+      // 5번 재서 평균. 초록색 전에 누르면 그 회차만 다시 (성급하게 누른 횟수는 결과에 표시)
+      const TRIES = 5;
+      const times = [];
+      let early = 0;
+      let state = '';
+      let goAt = 0;
+      let to = 0;
+      let iv = 0;
+      stage.innerHTML = `<div class="rx"><div class="rx-dots">${'<i></i>'.repeat(TRIES)}</div><button type="button" class="rx-pad"></button><p class="rx-log"></p></div>`;
+      const pad = stage.querySelector('.rx-pad');
+      const dots = stage.querySelectorAll('.rx-dots i');
+      const logEl = stage.querySelector('.rx-log');
+      const show = (cls, html) => {
+        state = cls;
+        pad.className = 'rx-pad ' + cls;
+        pad.innerHTML = html;
+      };
+      const arm = () => {
+        show('wait', '<b>기다리세요…</b><small>초록색이 되면 바로 누르기</small>');
+        to = setTimeout(() => {
+          goAt = performance.now();
+          show('go', '<b class="rx-ms">0</b><small>ms · 지금 눌러요!</small>');
+          const num = pad.querySelector('.rx-ms');
+          iv = setInterval(() => { num.textContent = Math.round(performance.now() - goAt); }, 16);
+        }, 1200 + Math.random() * 3300);
+      };
+      const finish = () => {
+        const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+        const [, icon, name] = rxGrade(avg);
+        setTimeout(() => done(avg, `<span class="rx-grade">${icon}</span><b>평균 ${avg}ms</b><br>${name}<small class="rx-sub">가장 빠름 ${Math.min(...times)}ms${early ? ` · 성급하게 누름 ${early}번` : ''}<br>${times.map((t) => `${t}ms`).join(' · ')}</small>`), 400);
+      };
+      const hit = () => {
+        if (state === 'wait') {
+          clearTimeout(to);
+          early++;
+          buzz(60);
+          sfx('bad');
+          show('early', '<b>너무 빨라요!</b><small>초록색을 기다렸다 눌러요 · 눌러서 다시</small>');
+        } else if (state === 'go') {
+          const ms = Math.round(performance.now() - goAt);
+          clearInterval(iv);
+          times.push(ms);
+          dots[times.length - 1].classList.add('on');
+          buzz(20);
+          sfx('pop');
+          logEl.innerHTML = times.map((t, i) => `<span>${i + 1}회 <b>${t}ms</b></span>`).join('');
+          if (times.length >= TRIES) {
+            show('done', `<b>${ms}<em>ms</em></b><small>${rxWord(ms)} · 결과 계산 중…</small>`);
+            finish();
+          } else show('shown', `<b>${ms}<em>ms</em></b><small>${rxWord(ms)} · 눌러서 다음 (${times.length}/${TRIES})</small>`);
+        } else if (state === 'early' || state === 'shown') arm();
+      };
+      pad.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        hit();
+      });
+      const onKey = (e) => {
+        if (e.code !== 'Space' && e.key !== 'Enter') return;
+        e.preventDefault();
+        if (!e.repeat) hit();
+      };
+      document.addEventListener('keydown', onKey);
+      cleanup = () => {
+        clearTimeout(to);
+        clearInterval(iv);
+        document.removeEventListener('keydown', onKey);
+      };
+      arm();
     } else if (g.id === 'react') {
       stage.innerHTML = `<button class="mini-pad wait">기다리세요…<br><small>초록색이 되면 누르기</small></button>`;
       const pad = stage.querySelector('.mini-pad');

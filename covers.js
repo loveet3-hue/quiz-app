@@ -350,6 +350,17 @@ const COVERS = (() => {
       <rect x="168" y="104" width="64" height="20" rx="10" fill="#2d3142"/><circle cx="186" cy="114" r="5" fill="#fff"/><circle cx="214" cy="114" r="5" fill="#fff"/>
       <circle cx="292" cy="70" r="24" fill="#2d3142"/><text x="292" y="81" font-family="${NUM}" font-size="30" font-weight="700" fill="#ffd93d" text-anchor="middle">?</text>`),
 
+    // 반응속도 테스트: 빨강→초록 신호 + 누르는 손가락 + ms 숫자
+    'game-reaction': make('#ffe9e3', '#c9f7d6', `
+      ${shadow(200, 258, 120)}
+      <rect x="92" y="54" width="216" height="150" rx="30" fill="#2d3142"/>
+      <circle cx="152" cy="129" r="44" fill="#ff5a5a" opacity=".35"/>
+      <circle cx="248" cy="129" r="48" fill="#2bd46a"/><circle cx="234" cy="114" r="14" fill="#fff" opacity=".5"/>
+      <path d="M206 178 v-36 a12 12 0 0 1 24 0 v30 l8 -4 a10 10 0 0 1 12 4 l6 10 v34 q0 22 -24 26 h-20 q-16 0 -24 -14 l-18 -30 a10 10 0 0 1 16 -12z" fill="#ffd2b3" stroke="#2d3142" stroke-width="6" stroke-linejoin="round"/>
+      ${[[184, 150, 166, 140], [180, 172, 160, 172], [196, 132, 186, 116]].map(([x1, y1, x2, y2]) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#ffd43b" stroke-width="7" stroke-linecap="round"/>`).join('')}
+      <rect x="102" y="214" width="96" height="40" rx="20" fill="#7c5cff"/>
+      <text x="150" y="242" font-family="${NUM}" font-size="24" font-weight="700" fill="#fff" text-anchor="middle">213ms</text>`),
+
     // 10초 미니게임: 스톱워치 + 번개
     'game-mini': make('#e0f2ff', '#c8b4ff', `
       ${shadow(200, 256, 100)}

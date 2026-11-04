@@ -230,11 +230,10 @@ function coverHtml(quiz) {
   return `<div class="framed" style="${catBg(quiz.category)}">${thumbImg(`/thumbs/${quiz.id}.webp`, src, 'inset')}</div>`;
 }
 
-function cardHtml(quiz, { rank, stats, plays } = {}) {
+function cardHtml(quiz, { rank, stats } = {}) {
   const s = stats?.[quiz.id];
   const n = quiz.generate ? quiz.perPlay : Math.min(quiz.perPlay, quiz.questions.length);
   const pool = quiz.generate ? '매번 새 문제' : `전체 ${quiz.questions.length}문제`;
-  const played = plays?.[quiz.id];
   return `
     <a class="card" href="/q/${esc(quiz.id)}/">
       <div class="cover">${coverHtml(quiz)}<span class="badge">${esc(quiz.category)}</span>${
@@ -242,7 +241,7 @@ function cardHtml(quiz, { rank, stats, plays } = {}) {
       }${rank ? `<span class="rank-no">${rank}</span>` : ''}</div>
       <div class="card-body">
         <h2 class="card-title">${esc(quiz.title)}</h2>
-        <div class="card-meta">${pool}${played ? ` · 참여 ${fmtCount(played)}` : ` · 한 판 ${n}문제`}${
+        <div class="card-meta">${pool} · 한 판 ${n}문제${
           s?.bestTime ? ` · 만점 <b>${formatTime(s.bestTime)}</b>` : s ? ` · 최고 <b>${s.best}/${s.total}</b>` : ''
         }</div>
       </div>
