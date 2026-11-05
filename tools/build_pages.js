@@ -15,7 +15,7 @@ const tpl = read('index.html');
 const scripts = [...tpl.matchAll(/<script src="\/([^"?]+\.js)/g)].map((m) => m[1]).filter((f) => f !== 'app.js');
 const ctx = { localStorage: { getItem: () => null, setItem() {} }, console };
 vm.createContext(ctx);
-vm.runInContext(scripts.map((f) => read(f)).join('\n;\n') + '\n;this.Q = QUIZZES; this.QF = QUIZ_FORMATS; this.G = GAMES; this.R = RANKINGS; this.RG = RANK_GROUPS; this.RL = rankLink; this.QA = quizAboutHtml; this.GA = gameAboutHtml; this.QS = QUESTIONS; this.SP = STUDY_PAGES;', ctx);
+vm.runInContext(scripts.map((f) => read(f)).join('\n;\n') + '\n;this.Q = QUIZZES; this.QF = QUIZ_FORMATS; this.G = GAMES; this.R = RANKINGS; this.RG = RANK_GROUPS; this.RL = rankLink; this.RT = rankSeoTitle; this.QA = quizAboutHtml; this.GA = gameAboutHtml; this.QS = QUESTIONS; this.SP = STUDY_PAGES;', ctx);
 const QUIZZES = ctx.Q;
 const GAMES = ctx.G;
 const QUIZ_FORMATS = ctx.QF;
@@ -170,11 +170,7 @@ write(
 );
 urls.push('/rankings/');
 // 검색어가 '치킨 판매량 순위'·'롤드컵 우승 횟수'처럼 들어와서 제목에 '순위 TOP n'을 넣고, 설명에 값까지 보여 줌
-const rankTitle = (b) => {
-  const m = b.title.match(/^(.*?)\s*\(([^)]*)\)$/);
-  const [base, when] = m ? [m[1], m[2]] : [b.title, ''];
-  return `${base}${/순위/.test(base) ? '' : ' 순위'} TOP ${b.items.length}${when ? ` (${when})` : ''}`;
-};
+const rankTitle = ctx.RT; // ranking.js rankSeoTitle (화면 제목과 같은 규칙)
 for (const b of RANKINGS) {
   write(
     `ranking/${b.id}/index.html`,

@@ -35,6 +35,19 @@ function rankLink(name, board) {
 }
 
 // 내가 맞힌/못 맞힌 랭킹 (이 기기에만 저장)
+// 검색용 제목: 검색어가 '○○ 우승 횟수 순위'·'○○ 순위' 꼴로 들어와서 거기에 맞춤 (정적 페이지 build_pages.js 도 이걸 씀)
+//   '롤드컵 최다 우승 팀 (2025)' → '롤드컵 팀별 우승 횟수 순위 TOP 9 (2025)'
+function rankSeoTitle(b) {
+  const m = b.title.match(/^(.*?)\s*\(([^)]*)\)$/);
+  let [base, when] = m ? [m[1], m[2]] : [b.title, ''];
+  base = base
+    .replace(/ 최다 우승 (팀|선수|국가|감독|리그)$/, (_, who) => ` ${who}별 우승 횟수`)
+    .replace(/ 최다 우승국?$/, ' 우승 횟수')
+    .replace(/네이션스컵 최다$/, '네이션스컵 우승 횟수')
+    .replace(/^남아메리카/, '남미(남아메리카)'); // 검색어는 대부분 '남미'
+  return `${base}${/순위/.test(base) ? '' : ' 순위'} TOP ${b.items.length}${when ? ` (${when})` : ''}`;
+}
+
 const rankStore = {
   get() {
     try { return JSON.parse(localStorage.getItem('rank-solved') || '{}'); } catch { return {}; }
@@ -191,10 +204,7 @@ function renderRanking(id) {
     return;
   }
   const g = groupOf(b.group);
-  // 정적 페이지(tools/build_pages.js rankTitle)와 같은 제목 — 검색어 '○○ 순위'에 맞춤
-  const tm = b.title.match(/^(.*?)\s*\(([^)]*)\)$/);
-  const [tBase, tWhen] = tm ? [tm[1], tm[2]] : [b.title, ''];
-  document.title = `${tBase}${/순위/.test(tBase) ? '' : ' 순위'} TOP ${b.items.length}${tWhen ? ` (${tWhen})` : ''} - 1위는? | 맞혀봐`;
+  document.title = `${rankSeoTitle(b)} - 1위는? | 맞혀봐`;
   reportPlay('rank-' + b.id);
   const row = (it, i, reveal) => {
     const [name, val, url] = it;
