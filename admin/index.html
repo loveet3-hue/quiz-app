@@ -291,7 +291,7 @@ function render(d) {
         <div class="kpis">
           <div class="kpi"><span>발행한 글</span><b>${num(bl.live)}</b></div>
           <div class="kpi"><span>예약된 글</span><b>${num(bl.scheduled)}</b></div>
-          <div class="kpi"><span>블로그 조회 7일</span><b>${num(bl.pageviews?.d7)}</b><em>30일 ${num(bl.pageviews?.d30)} · 전체 ${num(bl.pageviews?.all)}</em></div>
+          ${bl.pageviews?.d7 != null ? `<div class="kpi"><span>블로그 조회 7일</span><b>${num(bl.pageviews.d7)}</b><em>30일 ${num(bl.pageviews.d30)} · 전체 ${num(bl.pageviews.all)}</em></div>` : ''}
         </div>
         <h2 style="margin-top:14px">다음 예약 글</h2>
         ${table([{ h: '올라갈 때' }, { h: '제목' }], (bl.next || []).map((p) => `<tr><td class="n">${new Date(p.published).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', weekday: 'short', hour: '2-digit' })}</td><td class="t">${esc(p.title)}</td></tr>`))}
