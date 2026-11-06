@@ -74,6 +74,25 @@ function focusBoard(el) {
   if (Math.abs(window.scrollY - y) > 24) window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
+// 게임 결과 공유 (휴대폰은 공유 창, 컴퓨터는 링크 복사) — 퀴즈 share() 와 같은 방식
+async function shareGame(g, text) {
+  const url = `${location.origin}/game/${g.id}/`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: '맞혀봐', text, url });
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return;
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(`${text}\n${url}`);
+    toast('자랑할 글과 링크를 복사했어요');
+  } catch {
+    prompt('아래 글을 복사해서 보내세요', `${text}\n${url}`);
+  }
+}
+
 let gameCleanup = null;
 function stopGame() {
   if (gameCleanup) gameCleanup();
@@ -3116,7 +3135,8 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
 
   function result() {
     const g = mg();
-    const again = `<div class="game-actions"><button class="btn block" data-act="next">${solo() ? (order.length > 1 ? '다음 게임' : '한 번 더') : '다음 라운드'}</button><button class="btn ghost block" data-act="end">그만하기</button></div>`;
+    const shareBtn = solo() && order.length === 1 && !isFail(g, scores[0]) ? '<button class="btn ghost block" data-act="share">📣 친구한테 자랑하기</button>' : '';
+    const again = `<div class="game-actions"><button class="btn block" data-act="next">${solo() ? (order.length > 1 ? '다음 게임' : '한 번 더') : '다음 라운드'}</button>${shareBtn}<button class="btn ghost block" data-act="end">그만하기</button></div>`;
     if (solo()) {
       const s = scores[0];
       const key = 'mini-best-' + g.id;
@@ -3156,6 +3176,11 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
     stage.querySelector('[data-act="end"]').addEventListener('click', () => {
       stage.innerHTML = '';
       setupEl.hidden = false;
+    });
+    stage.querySelector('[data-act="share"]')?.addEventListener('click', () => {
+      const s = scores[0];
+      const extra = g.id === 'reaction' ? ` (${rxGrade(s)[2]})` : '';
+      shareGame(g, `${g.icon} ${g.title} ${fmt(g, s)}${extra}! 너는 몇 나와? 해 보고 알려 줘`);
     });
   }
 

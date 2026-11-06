@@ -277,6 +277,10 @@ function renderHome() {
     </section>
     <section class="home-sec" data-sec="today"></section>
     <section class="home-sec">
+      <div class="sec-head"><h2 class="sec-title">🎲 인기 게임</h2><a class="sec-more" href="/games/">전체 보기 ›</a></div>
+      <div class="row" data-row="popular-games"></div>
+    </section>
+    <section class="home-sec">
       <div class="sec-head"><h2 class="sec-title">🔥 인기 퀴즈</h2><a class="sec-more" href="/quizzes/">전체 보기 ›</a></div>
       <div class="row" data-row="popular"></div>
     </section>
@@ -287,10 +291,6 @@ function renderHome() {
     <section class="home-sec">
       <div class="sec-head"><h2 class="sec-title">🏆 오늘의 랭킹 · 1위는?</h2><a class="sec-more" href="/rankings/">전체 보기 ›</a></div>
       <div class="rank-grid" data-row="rankings"></div>
-    </section>
-    <section class="home-sec">
-      <div class="sec-head"><h2 class="sec-title">🎲 인기 게임</h2><a class="sec-more" href="/games/">전체 보기 ›</a></div>
-      <div class="row" data-row="popular-games"></div>
     </section>
     <section class="home-sec">
       <div class="sec-head"><h2 class="sec-title">🆕 새로 나온 게임</h2><a class="sec-more" href="/games/">전체 보기 ›</a></div>
