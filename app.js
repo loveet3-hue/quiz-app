@@ -264,7 +264,7 @@ function popularQuizzes(plays, n) {
 
 const SITE_FOOT = `
     <footer class="site-foot">
-      <a href="/study/">공부하기</a> · <a href="/about.html">소개</a> · <a href="/terms.html">이용약관</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a> · <a href="mailto:tminews@naver.com">문의</a>
+      <a href="/fortune/">오늘의 운세</a> · <a href="/study/">공부하기</a> · <a href="/about.html">소개</a> · <a href="/terms.html">이용약관</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a> · <a href="mailto:tminews@naver.com">문의</a>
     </footer>`;
 
 // 홈: 오늘의 퀴즈 · 인기 퀴즈 · 새로 나온 퀴즈 · 인기 게임 · 새로 나온 게임
@@ -279,6 +279,15 @@ function renderHome() {
     <section class="home-sec">
       <div class="sec-head"><h2 class="sec-title">🎲 인기 게임</h2><a class="sec-more" href="/games/">전체 보기 ›</a></div>
       <div class="row" data-row="popular-games"></div>
+    </section>
+    <section class="home-sec">
+      <div class="sec-head"><h2 class="sec-title">🔮 오늘의 운세</h2><a class="sec-more" href="/fortune/">전체 보기 ›</a></div>
+      <div class="ft-big three">
+        <a class="ft-big-card" href="/fortune/"><b>🐾 띠별 운세</b><span>오늘 내 띠의 총운·금전·애정</span></a>
+        <a class="ft-big-card saju" href="/saju/"><b>🀄 사주팔자</b><span>생년월일시로 보는 내 사주</span></a>
+        <a class="ft-big-card tarot" href="/tarot/"><b>🃏 타로</b><span>카드 한 장으로 보는 오늘</span></a>
+        <a class="ft-big-card lotto" href="/lotto/"><b>🎱 로또 번호</b><span>번호 뽑고 당첨 확률 분석</span></a>
+      </div>
     </section>
     <section class="home-sec">
       <div class="sec-head"><h2 class="sec-title">🔥 인기 퀴즈</h2><a class="sec-more" href="/quizzes/">전체 보기 ›</a></div>
@@ -878,7 +887,7 @@ function route() {
   const q = path.match(/^\/q\/([\w-]+)$/);
   const g = path.match(/^\/game\/([\w-]+)$/);
   const r = path.match(/^\/ranking\/([\w-]+)$/);
-  const tab = g || path === '/games' ? 'games' : r || path === '/rankings' ? 'rank' : q || path.startsWith('/quizzes') ? 'quiz' : 'home';
+  const tab = g || path === '/games' ? 'games' : r || path === '/rankings' ? 'rank' : q || path.startsWith('/quizzes') ? 'quiz' : isFortunePath(path) ? 'fortune' : 'home';
   document.querySelectorAll('.top-tabs a').forEach((el) => {
     if (el.dataset.tab === tab) el.setAttribute('aria-current', 'page');
     else el.removeAttribute('aria-current');
@@ -903,6 +912,8 @@ function route() {
   } else if (path === '/games') {
     play = null;
     renderGamesHome();
+  } else if (isFortunePath(path)) {
+    renderFortuneRoute(path);
   } else if (path === '/quizzes' || /^\/quizzes\/[\w-]+$/.test(path)) {
     play = null;
     renderQuizList(path.split('/')[2]);

@@ -15,7 +15,7 @@ const tpl = read('index.html');
 const scripts = [...tpl.matchAll(/<script src="\/([^"?]+\.js)/g)].map((m) => m[1]).filter((f) => f !== 'app.js');
 const ctx = { localStorage: { getItem: () => null, setItem() {} }, console };
 vm.createContext(ctx);
-vm.runInContext(scripts.map((f) => read(f)).join('\n;\n') + '\n;this.Q = QUIZZES; this.QF = QUIZ_FORMATS; this.G = GAMES; this.R = RANKINGS; this.RG = RANK_GROUPS; this.RL = rankLink; this.RT = rankSeoTitle; this.QA = quizAboutHtml; this.GA = gameAboutHtml; this.QS = QUESTIONS; this.SP = STUDY_PAGES;', ctx);
+vm.runInContext(scripts.map((f) => read(f)).join('\n;\n') + '\n;this.Q = QUIZZES; this.QF = QUIZ_FORMATS; this.G = GAMES; this.R = RANKINGS; this.RG = RANK_GROUPS; this.RL = rankLink; this.RT = rankSeoTitle; this.QA = quizAboutHtml; this.GA = gameAboutHtml; this.QS = QUESTIONS; this.SP = STUDY_PAGES; this.FT = { ANIMALS, SIGNS, animalYears, signRange, TAROT, LOTTO_RANKS, LOTTO_TOTAL };', ctx);
 const QUIZZES = ctx.Q;
 const GAMES = ctx.G;
 const QUIZ_FORMATS = ctx.QF;
@@ -156,6 +156,80 @@ for (const g of GAMES) {
   );
   urls.push(`/game/${g.id}/`);
 }
+
+// 운세 탭 (/fortune/, 띠·별자리별 /fortune/<id>/, /saju/, /tarot/, /lotto/) — 운세 문장은 날마다 화면에서 만들고, 검색엔진용으론 설명을 글로 넣음
+const FT = ctx.FT;
+write(
+  'fortune/index.html',
+  page({
+    title: '오늘의 운세 - 띠별 운세·별자리 운세·사주·타로 무료 | 맞혀봐',
+    desc: '오늘의 띠별 운세와 별자리 운세를 총운·금전·애정·건강으로 확인하세요. 생년월일로 보는 무료 사주팔자, 타로 카드 뽑기, 로또 번호 생성기까지.',
+    url: `${SITE}/fortune/`,
+    image: ogFile('fortune'),
+    body: `<h1>오늘의 운세</h1><h2>띠별 오늘의 운세</h2><ul>${FT.ANIMALS.map((a) => `<li><a href="/fortune/${a.id}/">${a.name}띠 오늘의 운세</a> - ${esc(a.trait)}</li>`).join('')}</ul><h2>별자리 운세</h2><ul>${FT.SIGNS.map((s) => `<li><a href="/fortune/${s.id}/">${s.name} 오늘의 운세</a> (${FT.signRange(s)})</li>`).join('')}</ul><p><a href="/saju/">무료 사주팔자 보기</a> · <a href="/tarot/">타로 카드 뽑기</a> · <a href="/lotto/">로또 번호 생성기</a></p>`,
+  })
+);
+urls.push('/fortune/');
+for (const a of FT.ANIMALS) {
+  const years = FT.animalYears(a).filter((y) => y >= 1948 && y <= 2020);
+  write(
+    `fortune/${a.id}/index.html`,
+    page({
+      title: `${a.name}띠 오늘의 운세 - ${years.slice(-4).map((y) => String(y).slice(2) + '년생').join('·')} 무료 띠 운세 | 맞혀봐`,
+      desc: `${a.name}띠(${years.join('·')}년생) 오늘의 운세. 총운·금전운·애정운·일·건강운과 나이별 한 줄 운세, 행운의 색·숫자를 매일 확인하세요.`,
+      url: `${SITE}/fortune/${a.id}/`,
+      image: ogFile('fortune'),
+      body: `<h1>${a.name}띠 오늘의 운세</h1><p>${esc(a.trait)}</p><p>${a.name}띠 해: ${years.join(', ')}년생</p><p>총운·금전운·애정운·일·공부운·건강운을 별점과 함께 보여 주고, 나이별 한 줄 운세와 행운의 색·숫자·방향·물건도 알려 드려요. 운세는 매일 자정에 바뀌어요.</p><p><a href="/fortune/">다른 띠 운세 보기</a></p>`,
+    })
+  );
+  urls.push(`/fortune/${a.id}/`);
+}
+for (const s of FT.SIGNS) {
+  write(
+    `fortune/${s.id}/index.html`,
+    page({
+      title: `${s.name} 오늘의 운세 (${FT.signRange(s)}) - 무료 별자리 운세 | 맞혀봐`,
+      desc: `${s.name}(${FT.signRange(s)}) 오늘의 별자리 운세. 총운·금전·애정·일·건강운과 행운의 색·숫자를 매일 확인하세요.`,
+      url: `${SITE}/fortune/${s.id}/`,
+      image: ogFile('fortune'),
+      body: `<h1>${s.name} 오늘의 운세</h1><p>${s.name}: ${FT.signRange(s)}에 태어난 사람. ${esc(s.trait)}</p><p><a href="/fortune/">다른 별자리 운세 보기</a></p>`,
+    })
+  );
+  urls.push(`/fortune/${s.id}/`);
+}
+write(
+  'saju/index.html',
+  page({
+    title: '무료 사주팔자 보기 - 생년월일시로 보는 내 사주·오행 | 맞혀봐',
+    desc: '생년월일과 태어난 시간을 넣으면 사주팔자 여덟 글자와 오행 균형, 타고난 성향, 오늘의 기운을 무료로 알려 드려요. 입력한 정보는 저장·전송하지 않아요.',
+    url: `${SITE}/saju/`,
+    image: ogFile('fortune'),
+    body: `<h1>무료 사주팔자 보기</h1><p>사주(四柱)는 태어난 해·달·날·시간의 네 기둥이고, 기둥마다 천간과 지지 두 글자가 있어 모두 여덟 글자(팔자)가 돼요. 목·화·토·금·수 다섯 기운의 균형으로 타고난 성향을 보고, 태어난 날의 천간(일간)으로 오늘의 기운을 풀어 드려요.</p>`,
+  })
+);
+urls.push('/saju/');
+write(
+  'tarot/index.html',
+  page({
+    title: '무료 타로 카드 뽑기 - 오늘의 타로·과거 현재 미래 | 맞혀봐',
+    desc: '질문을 떠올리고 타로 카드를 뽑아 보세요. 오늘의 타로 한 장, 과거·현재·미래 세 장 뽑기로 메이저 아르카나 22장의 정방향·역방향 풀이를 무료로 알려 드려요.',
+    url: `${SITE}/tarot/`,
+    image: ogFile('fortune'),
+    body: `<h1>무료 타로 카드 뽑기</h1><ul>${FT.TAROT.map((c) => `<li>${c[0]} (${c[1]}) - 정방향: ${c[3]}. ${c[4]} 역방향: ${c[5]}. ${c[6]}</li>`).join('')}</ul>`,
+  })
+);
+urls.push('/tarot/');
+write(
+  'lotto/index.html',
+  page({
+    title: '로또 번호 생성기 - 무료 자동 번호 + 실제 당첨 확률 분석 | 맞혀봐',
+    desc: '로또 6/45 번호를 무작위로 뽑고, 1등 814만 5,060분의 1 등 등수별 실제 당첨 확률과 그 번호로 100년 동안 샀을 때 결과를 모의실험해 드려요.',
+    url: `${SITE}/lotto/`,
+    image: ogFile('fortune'),
+    body: `<h1>로또 번호 생성기와 당첨 확률</h1><ul>${FT.LOTTO_RANKS.map((r) => `<li>${r.label} (${r.rule}): ${Math.round(FT.LOTTO_TOTAL / r.ways).toLocaleString('ko-KR')}분의 1</li>`).join('')}</ul><p>전체 조합은 8,145,060가지이고, 어떤 번호 조합이든 1등 확률은 같아요.</p>`,
+  })
+);
+urls.push('/lotto/');
 
 // 랭킹 탭 (/rankings/) · 순위표마다 한 페이지 (/ranking/<id>/) — 검색엔진용으로 전체 순위와 링크를 글로 넣어 둠
 write(
