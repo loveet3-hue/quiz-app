@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>맞혀봐 관리자</title>
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<!--
+  맞혀봐 관리자 대시보드. 비밀번호 확인과 통계 조회는 개인 계정 Apps Script 웹 앱(blog-posts/quizbwa_admin_server)이 함.
+  이 파일엔 비밀번호도 해시도 없음 — 로그인하면 서버가 6시간짜리 토큰을 줌.
+-->
+<style>
+  :root {
+    --bg: #f6f5fb; --surface: #fff; --surface-2: #f0eef8; --text: #1d1b26; --text-2: #5f5b70; --text-3: #8f8aa3;
+    --line: #e4e1ee; --primary: #7c5cff; --primary-soft: #eee9ff; --good: #14a46c; --bad: #e5484d; --warn: #d9822b;
+    --shadow: 0 1px 2px rgba(30, 20, 60, .06), 0 6px 20px rgba(30, 20, 60, .06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121118; --surface: #1c1a24; --surface-2: #26232f; --text: #f2f0f8; --text-2: #b9b4ca; --text-3: #847f96; --line: #2f2c3a; --primary: #9a82ff; --primary-soft: #2b2541; --good: #3ccf91; --bad: #ff6b6f; --warn: #f0a050; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 "Pretendard Variable", Pretendard, system-ui, sans-serif; }
+  a { color: var(--primary); text-decoration: none; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 20px 16px 60px; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+  header img { width: 36px; height: 36px; border-radius: 10px; }
+  header h1 { font-size: 20px; margin: 0; flex: 1; }
+  header small { display: block; color: var(--text-3); font-size: 13px; font-weight: 400; }
+  button { font: inherit; border: 0; border-radius: 10px; padding: 8px 14px; cursor: pointer; background: var(--surface-2); color: var(--text); }
+  button.primary { background: var(--primary); color: #fff; font-weight: 700; }
+  .login { max-width: 360px; margin: 14vh auto 0; background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 28px; text-align: center; }
+  .login img { width: 56px; height: 56px; border-radius: 14px; }
+  .login h1 { font-size: 20px; margin: 12px 0 18px; }
+  .login input { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; font: inherit; background: var(--surface-2); color: var(--text); margin-bottom: 10px; }
+  .login button { width: 100%; padding: 12px; }
+  .err { color: var(--bad); font-size: 14px; min-height: 20px; margin: 8px 0 0; }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(12, 1fr); }
+  .card { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); padding: 18px; grid-column: span 12; min-width: 0; }
+  .card h2 { font-size: 16px; margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+  .card h2 small { color: var(--text-3); font-weight: 400; font-size: 12px; margin-left: auto; }
+  .half { grid-column: span 6; }
+  .third { grid-column: span 4; }
+  @media (max-width: 860px) { .half, .third { grid-column: span 12; } }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px; }
+  .kpi { background: var(--surface-2); border-radius: 14px; padding: 12px 14px; }
+  .kpi span { color: var(--text-2); font-size: 13px; }
+  .kpi b { display: block; font-size: 26px; font-variant-numeric: tabular-nums; line-height: 1.25; }
+  .kpi em { font-style: normal; font-size: 12px; color: var(--text-3); }
+  .up { color: var(--good) !important; } .down { color: var(--bad) !important; }
+  .live b { color: var(--good); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--text-3); font-weight: 500; font-size: 12px; }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td.t { word-break: break-all; }
+  .bar { height: 6px; border-radius: 3px; background: var(--primary); opacity: .8; margin-top: 4px; }
+  .chart { display: flex; align-items: flex-end; gap: 3px; height: 160px; padding-top: 8px; }
+  .chart div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; min-width: 0; height: 100%; }
+  .chart i { display: block; width: 100%; background: var(--primary); border-radius: 4px 4px 0 0; min-height: 2px; }
+  .chart i.v { background: var(--primary-soft); }
+  .chart .pair { display: flex; gap: 1px; width: 100%; align-items: flex-end; height: 100%; }
+  .chart small { font-size: 10px; color: var(--text-3); margin-top: 4px; white-space: nowrap; }
+  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--text-2); margin-top: 8px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+  .pill.ok { background: rgba(20, 164, 108, .15); color: var(--good); }
+  .pill.wait { background: rgba(217, 130, 43, .15); color: var(--warn); }
+  .pill.no { background: rgba(229, 72, 77, .15); color: var(--bad); }
+  .muted { color: var(--text-3); font-size: 13px; }
+  .note { color: var(--text-2); font-size: 13px; background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
+  .links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .links a { background: var(--surface-2); padding: 8px 12px; border-radius: 10px; font-size: 14px; color: var(--text); }
+  .loading { text-align: center; color: var(--text-2); padding: 60px 0; }
+  .sec-err { color: var(--bad); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap" id="root"></div>
+<script>
+'use strict';
+const API = 'https://script.google.com/macros/s/AKfycbycjWW6gqukQYigmd74sQkq0gyK5Ap6uU7_B8plx-epVbTfqUYRv-g03eJLFtxtqki7/exec';
+const TOKEN_KEY = 'qadm-token';
+const root = document.getElementById('root');
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const num = (n) => (n == null ? '–' : Number(n).toLocaleString('ko-KR'));
+const won = (n) => (n == null ? '–' : '₩' + Math.round(n).toLocaleString('ko-KR'));
+const pct = (n) => (n == null ? '–' : (n * 100).toFixed(1) + '%');
+const getToken = () => { try { return localStorage.getItem(TOKEN_KEY); } catch { return null; } };
+const setToken = (t) => { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch { /* 무시 */ } };
+
+async function call(body) {
+  const res = await fetch(API, { method: 'POST', body: JSON.stringify(body) });
+  return res.json();
+}
+
+function loginView(msg = '') {
+  root.innerHTML = `
+    <form class="login">
+      <img src="/icons/icon-192.png" alt="">
+      <h1>맞혀봐 관리자</h1>
+      <input type="password" name="pw" placeholder="비밀번호" autocomplete="current-password" required>
+      <button class="primary">들어가기</button>
+      <p class="err">${esc(msg)}</p>
+    </form>`;
+  const form = root.querySelector('form');
+  form.pw.focus();
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = '확인 중…';
+    try {
+      const r = await call({ action: 'login', pw: form.pw.value });
+      if (!r.ok) throw new Error(r.error || '로그인 실패');
+      setToken(r.token);
+      load();
+    } catch (err) {
+      loginView(err.message);
+    }
+  });
+}
+
+async function load(fresh) {
+  const token = getToken();
+  if (!token) return loginView();
+  if (!root.querySelector('.grid')) root.innerHTML = '<p class="loading">통계 모으는 중… (처음엔 20초쯤 걸려요)</p>';
+  try {
+    const r = await call({ action: 'data', token, fresh: fresh ? 1 : 0 });
+    if (!r.ok) {
+      if (r.auth === false) { setToken(null); return loginView(r.error); }
+      throw new Error(r.error);
+    }
+    await names();
+    render(r.data);
+  } catch (err) {
+    root.innerHTML = `<p class="loading">불러오지 못했어요: ${esc(err.message)}<br><br><button onclick="load(true)">다시 시도</button></p>`;
+  }
+}
+
+// 퀴즈·게임·랭킹 id → 이름 (사이트의 정적 목록에서 읽음)
+const NAMES = {};
+async function names() {
+  if (Object.keys(NAMES).length) return;
+  const pick = async (url, re) => {
+    try {
+      const html = await (await fetch(url)).text();
+      for (const m of html.matchAll(re)) NAMES[m[1]] = m[2].replace(/&amp;/g, '&');
+    } catch { /* 이름 없으면 id 로 보여 줌 */ }
+  };
+  await Promise.all([
+    pick('/', /<a href="\/q\/([\w-]+)\/">([^<]+)<\/a>/g),
+    pick('/games/', /<a href="\/game\/([\w-]+)\/">([^<]+)<\/a>/g),
+    pick('/rankings/', /<a href="\/ranking\/([\w-]+)\/">([^<]+)<\/a>/g),
+  ]);
+}
+const playName = (id) => {
+  if (id.startsWith('game-')) return NAMES[id.slice(5)] || id;
+  if (id.startsWith('rank-')) return NAMES[id.slice(5)] || id;
+  return NAMES[id] || id;
+};
+const pageName = (path) => {
+  const m = path.match(/^\/(q|game|ranking)\/([\w-]+)\/?$/);
+  if (m && NAMES[m[2]]) return `${NAMES[m[2]]} <span class="muted">${esc(path)}</span>`;
+  const fixed = { '/': '홈', '/games/': '게임 목록', '/quizzes/': '퀴즈 목록', '/rankings/': '랭킹 목록', '/study/': '공부하기' };
+  return fixed[path] ? `${fixed[path]} <span class="muted">${esc(path)}</span>` : esc(path);
+};
+
+const change = (now, before) => {
+  if (!before) return '';
+  const d = Math.round(((now - before) / before) * 100);
+  return `<em class="${d >= 0 ? 'up' : 'down'}">전주 대비 ${d >= 0 ? '+' : ''}${d}%</em>`;
+};
+const secErr = (s) => (s && s.error ? `<p class="sec-err">불러오지 못함: ${esc(s.error)}</p>` : '');
+const table = (cols, rows) =>
+  `<table><thead><tr>${cols.map((c) => `<th class="${c.n ? 'n' : ''}">${esc(c.h)}</th>`).join('')}</tr></thead><tbody>${
+    rows.length ? rows.join('') : `<tr><td colspan="${cols.length}" class="muted">아직 데이터가 없어요</td></tr>`
+  }</tbody></table>`;
+const withBar = (v, max) => `${num(v)}<div class="bar" style="width:${max ? Math.max(4, (v / max) * 100) : 0}%"></div>`;
+
+const SITE_STATE = {
+  READY: ['ok', '승인됨'],
+  GETTING_READY: ['wait', '검토 중'],
+  REQUIRES_REVIEW: ['wait', '검토 요청 필요'],
+  NEEDS_ATTENTION: ['no', '조치 필요'],
+  STATE_UNSPECIFIED: ['wait', '확인 안 됨'],
+};
+const CHANNEL = { Direct: '직접 방문', 'Organic Search': '검색', 'Organic Social': 'SNS', Referral: '다른 사이트 링크', Unassigned: '분류 안 됨', 'AI Assistant': 'AI(챗GPT 등)', 'Paid Search': '검색 광고', Email: '이메일' };
+const DEVICE = { mobile: '휴대폰', desktop: '컴퓨터', tablet: '태블릿' };
+
+function render(d) {
+  const ga = d.ga || {};
+  const sc = d.search || {};
+  const ad = d.adsense || {};
+  const bl = d.blog || {};
+  const pl = d.plays || {};
+  const upd = new Date(d.updated);
+  const daily = ga.daily || [];
+  const maxDay = Math.max(1, ...daily.map((x) => x.views));
+  const chart = daily
+    .map((x, i) => {
+      const label = i % 5 === 0 || i === daily.length - 1 ? `${+x.date.slice(4, 6)}/${+x.date.slice(6)}` : '';
+      return `<div title="${x.date.slice(4, 6)}/${x.date.slice(6)} 방문자 ${x.users} · 조회 ${x.views}"><div class="pair"><i style="height:${(x.users / maxDay) * 100}%"></i><i class="v" style="height:${(x.views / maxDay) * 100}%"></i></div><small>${label}</small></div>`;
+    })
+    .join('');
+  const pages = ga.pages || [];
+  const maxPage = Math.max(1, ...pages.map((p) => p.views));
+  const chans = ga.channels || [];
+  const maxChan = Math.max(1, ...chans.map((c) => c.sessions));
+  const q = sc.queries || [];
+  const sites = (ad.sites || []).filter((s) => /quizbwa|blogspot|jjang/.test(s.domain)).concat((ad.sites || []).filter((s) => !/quizbwa|blogspot|jjang/.test(s.domain)));
+  const top = (list, max) => list.map((x, i) => `<tr><td class="n">${i + 1}</td><td class="t">${esc(playName(x.id))}</td><td class="n">${withBar(x.n, max)}</td></tr>`);
+
+  root.innerHTML = `
+    <header>
+      <img src="/icons/icon-192.png" alt="">
+      <h1>맞혀봐 관리자 <small>${upd.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 기준 (10분마다 새로 모음)</small></h1>
+      <button onclick="load(true)">새로고침</button>
+      <button onclick="setToken(null);loginView()">로그아웃</button>
+    </header>
+    <div class="grid">
+      <section class="card">
+        <h2>📈 방문 <small>구글 애널리틱스</small></h2>${secErr(ga)}
+        <div class="kpis">
+          <div class="kpi live"><span>지금 접속</span><b>${num(ga.realtime)}</b><em>최근 30분</em></div>
+          <div class="kpi"><span>오늘 방문자</span><b>${num(ga.today?.users)}</b><em>조회 ${num(ga.today?.views)}</em></div>
+          <div class="kpi"><span>어제 방문자</span><b>${num(ga.yesterday?.users)}</b><em>조회 ${num(ga.yesterday?.views)}</em></div>
+          <div class="kpi"><span>최근 7일 방문자</span><b>${num(ga.d7?.users)}</b>${change(ga.d7?.users, ga.prev7?.users)}</div>
+          <div class="kpi"><span>최근 7일 조회</span><b>${num(ga.d7?.views)}</b>${change(ga.d7?.views, ga.prev7?.views)}</div>
+          <div class="kpi"><span>최근 28일 방문자</span><b>${num(ga.d28?.users)}</b><em>조회 ${num(ga.d28?.views)} · 평균 ${Math.round((ga.d28?.avgSec || 0) / 60)}분 ${(ga.d28?.avgSec || 0) % 60}초</em></div>
+        </div>
+        <div class="chart">${chart}</div>
+        <div class="legend"><span><i style="background:var(--primary)"></i>방문자</span><span><i style="background:var(--primary-soft)"></i>페이지 조회</span><span class="muted">최근 30일</span></div>
+      </section>
+
+      <section class="card half">
+        <h2>💰 애드센스 <small>${esc(ad.account || '')}</small></h2>${secErr(ad)}
+        <div class="kpis">
+          <div class="kpi"><span>오늘 수익</span><b>${won(ad.today?.earnings)}</b><em>노출 ${num(ad.today?.impressions)} · 클릭 ${num(ad.today?.clicks)}</em></div>
+          <div class="kpi"><span>어제 수익</span><b>${won(ad.yesterday?.earnings)}</b></div>
+          <div class="kpi"><span>최근 7일</span><b>${won(ad.d7?.earnings)}</b></div>
+          <div class="kpi"><span>이번 달</span><b>${won(ad.month?.earnings)}</b><em>페이지 조회 ${num(ad.month?.pageViews)}</em></div>
+        </div>
+        <h2 style="margin-top:14px">사이트 승인 상태</h2>
+        ${table([{ h: '사이트' }, { h: '상태' }], sites.map((s) => { const [c, t] = SITE_STATE[s.state] || ['wait', s.state]; return `<tr><td>${esc(s.domain)}</td><td><span class="pill ${c}">${t}</span></td></tr>`; }))}
+        ${(ad.byDomain || []).length ? `<h2 style="margin-top:14px">사이트별 최근 30일</h2>${table([{ h: '사이트' }, { h: '수익', n: 1 }, { h: '조회', n: 1 }, { h: '클릭', n: 1 }], ad.byDomain.map((x) => `<tr><td>${esc(x.domain)}</td><td class="n">${won(x.earnings)}</td><td class="n">${num(x.pageViews)}</td><td class="n">${num(x.clicks)}</td></tr>`))}` : ''}
+        <p class="muted">유튜브 수익과 같은 애드센스 계정이라, 위 수익 합계에 유튜브 쪽이 섞일 수 있어요. 사이트별 표로 구분해 보세요.</p>
+      </section>
+
+      <section class="card half">
+        <h2>🔎 구글 검색 <small>최근 28일 · 2~3일 늦게 반영</small></h2>${secErr(sc)}
+        <div class="kpis">
+          <div class="kpi"><span>클릭</span><b>${num(sc.d28?.clicks)}</b></div>
+          <div class="kpi"><span>노출</span><b>${num(sc.d28?.impressions)}</b></div>
+          <div class="kpi"><span>클릭률</span><b>${pct(sc.d28?.ctr)}</b></div>
+          <div class="kpi"><span>평균 순위</span><b>${sc.d28?.position || '–'}</b></div>
+        </div>
+        <h2 style="margin-top:14px">많이 노출된 검색어</h2>
+        ${table([{ h: '검색어' }, { h: '노출', n: 1 }, { h: '클릭', n: 1 }, { h: '순위', n: 1 }], q.map((x) => `<tr><td class="t">${esc(x.key)}</td><td class="n">${num(x.impressions)}</td><td class="n">${num(x.clicks)}</td><td class="n">${x.position}</td></tr>`))}
+      </section>
+
+      <section class="card half">
+        <h2>📄 많이 본 페이지 <small>최근 7일</small></h2>${secErr(ga)}
+        ${table([{ h: '페이지' }, { h: '조회', n: 1 }, { h: '방문자', n: 1 }, { h: '1인 머문 시간', n: 1 }], pages.map((p) => `<tr><td class="t">${pageName(p.path)}</td><td class="n">${withBar(p.views, maxPage)}</td><td class="n">${num(p.users)}</td><td class="n">${p.secPerUser >= 60 ? Math.floor(p.secPerUser / 60) + '분 ' : ''}${p.secPerUser % 60}초</td></tr>`))}
+      </section>
+
+      <section class="card half">
+        <h2>🚪 어디서 들어왔나 <small>최근 28일 · 방문 횟수</small></h2>
+        ${table([{ h: '경로' }, { h: '방문', n: 1 }, { h: '방문자', n: 1 }], chans.map((c) => `<tr><td>${esc(CHANNEL[c.name] || c.name)}</td><td class="n">${withBar(c.sessions, maxChan)}</td><td class="n">${num(c.users)}</td></tr>`))}
+        <h2 style="margin-top:14px">자세한 출처</h2>
+        ${table([{ h: '출처 / 방식' }, { h: '방문', n: 1 }], (ga.sources || []).map((s) => `<tr><td class="t">${esc(s.name)}</td><td class="n">${num(s.sessions)}</td></tr>`))}
+      </section>
+
+      <section class="card third">
+        <h2>🎲 인기 게임 <small>누적 참여</small></h2>${secErr(pl)}
+        ${table([{ h: '#', n: 1 }, { h: '게임' }, { h: '참여', n: 1 }], top(pl.games || [], (pl.games || [])[0]?.n))}
+      </section>
+      <section class="card third">
+        <h2>🧩 인기 퀴즈 <small>누적 참여</small></h2>
+        ${table([{ h: '#', n: 1 }, { h: '퀴즈' }, { h: '참여', n: 1 }], top(pl.quizzes || [], (pl.quizzes || [])[0]?.n))}
+      </section>
+      <section class="card third">
+        <h2>🏆 인기 랭킹 <small>누적 참여</small></h2>
+        ${table([{ h: '#', n: 1 }, { h: '랭킹' }, { h: '참여', n: 1 }], top(pl.rankings || [], (pl.rankings || [])[0]?.n))}
+        <p class="muted">합계 ${num(pl.total)} (게임 ${num(pl.sum?.game)} · 퀴즈 ${num(pl.sum?.quiz)} · 랭킹 ${num(pl.sum?.rank)}) · 화면엔 안 보이는 익명 집계</p>
+      </section>
+
+      <section class="card half">
+        <h2>✍️ 구글 블로그 <small>퀴즈·게임 노트</small></h2>${secErr(bl)}
+        <div class="kpis">
+          <div class="kpi"><span>발행한 글</span><b>${num(bl.live)}</b></div>
+          <div class="kpi"><span>예약된 글</span><b>${num(bl.scheduled)}</b></div>
+          <div class="kpi"><span>블로그 조회 7일</span><b>${num(bl.pageviews?.d7)}</b><em>30일 ${num(bl.pageviews?.d30)} · 전체 ${num(bl.pageviews?.all)}</em></div>
+        </div>
+        <h2 style="margin-top:14px">다음 예약 글</h2>
+        ${table([{ h: '올라갈 때' }, { h: '제목' }], (bl.next || []).map((p) => `<tr><td class="n">${new Date(p.published).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', weekday: 'short', hour: '2-digit' })}</td><td class="t">${esc(p.title)}</td></tr>`))}
+        <h2 style="margin-top:14px">최근 발행 글</h2>
+        ${table([{ h: '날짜' }, { h: '제목' }], (bl.recent || []).map((p) => `<tr><td class="n">${new Date(p.published).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric' })}</td><td class="t"><a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a></td></tr>`))}
+      </section>
+
+      <section class="card half">
+        <h2>🌏 방문자 나라·기기 <small>최근 7일</small></h2>
+        ${table([{ h: '나라' }, { h: '방문자', n: 1 }], (ga.countries || []).map((c) => `<tr><td>${esc(c.name)}</td><td class="n">${num(c.users)}</td></tr>`))}
+        <div style="height:10px"></div>
+        ${table([{ h: '기기' }, { h: '방문자', n: 1 }], (ga.devices || []).map((c) => `<tr><td>${esc(DEVICE[c.name] || c.name)}</td><td class="n">${num(c.users)}</td></tr>`))}
+        <p class="muted">미국 Council Bluffs·Ashburn 등은 대부분 검색엔진 로봇이에요.</p>
+      </section>
+
+      <section class="card">
+        <h2>🔗 바로가기</h2>
+        <div class="links">
+          <a href="https://quizbwa.co.kr/" target="_blank" rel="noopener">맞혀봐</a>
+          <a href="https://analytics.google.com/analytics/web/?authuser=1#/a92421806p559894609/reports/intelligenthome" target="_blank" rel="noopener">구글 애널리틱스</a>
+          <a href="https://search.google.com/u/1/search-console?resource_id=https%3A%2F%2Fquizbwa.co.kr%2F" target="_blank" rel="noopener">서치 콘솔</a>
+          <a href="https://adsense.google.com/adsense/u/1/" target="_blank" rel="noopener">애드센스</a>
+          <a href="https://play.google.com/console/u/1/developers/8248559308070145849/app/4975035531827679695/app-dashboard" target="_blank" rel="noopener">플레이 콘솔(앱)</a>
+          <a href="https://www.blogger.com/blog/posts/7236012645221115574" target="_blank" rel="noopener">구글 블로그</a>
+          <a href="https://business.facebook.com/latest/insights/content?asset_id=987529797996246" target="_blank" rel="noopener">페이스북 통계</a>
+          <a href="https://searchadvisor.naver.com/" target="_blank" rel="noopener">네이버 서치어드바이저</a>
+          <a href="https://jjang.gg/admin" target="_blank" rel="noopener">JJANG.GG 관리자</a>
+        </div>
+      </section>
+    </div>`;
+}
+
+load();
+</script>
+</body>
+</html>

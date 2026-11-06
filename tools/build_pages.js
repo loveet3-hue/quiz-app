@@ -210,6 +210,6 @@ write(
     .map((it) => `<item><title>${xesc(it.t)}</title><link>${it.u}</link><guid>${it.u}</guid><description>${xesc(it.d)}</description></item>`)
     .join('\n')}\n</channel></rss>\n`
 );
-write('robots.txt', `User-agent: *\nAllow: /\nDisallow: /tools/\n\nSitemap: ${SITE}/sitemap.xml\n`);
+write('robots.txt', `User-agent: *\nAllow: /\nDisallow: /tools/\nDisallow: /admin/\n\nSitemap: ${SITE}/sitemap.xml\n`);
 
 console.log(`페이지 ${urls.length}개 만듦 (퀴즈 ${QUIZZES.length}, 게임 ${GAMES.length}, 랭킹 ${RANKINGS.length}) + 404.html, sitemap.xml, robots.txt`);
