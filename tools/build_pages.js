@@ -28,9 +28,9 @@ const { buildStudy } = require('./study');
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-function meta({ title, desc, url, image, ld }) {
+function meta({ title, desc, url, image, ld, noindex }) {
   return `<!--META-->
-  <title>${esc(title)}</title>
+  <title>${esc(title)}</title>${noindex ? '\n  <meta name="robots" content="noindex, follow">' : ''}
   <meta name="description" content="${esc(desc)}">
   <link rel="canonical" href="${url}">
   <meta property="og:type" content="website">
@@ -45,11 +45,12 @@ function meta({ title, desc, url, image, ld }) {
   <!--/META-->`;
 }
 
-function page({ title, desc, url, image, body, noAds, ld }) {
+// noindex: 글이 거의 없는 페이지(랭킹 문제·띠별 운세·로또·사주)는 검색·애드센스 심사에서 뺌 — 쓰는 데는 그대로 (2026-11 애드센스 '가치가 별로 없는 콘텐츠' 거절)
+function page({ title, desc, url, image, body, noAds, ld, noindex }) {
   // 광고 없는 퀴즈(실존 인물 사진)는 애드센스 스크립트를 빼고 계정 확인용 meta만 남김
   const t = noAds ? tpl.replace(/<script async id="adsense-js"[^>]*><\/script>\n\s*/, '') : tpl;
   return t
-    .replace(/<!--META-->[\s\S]*?<!--\/META-->/, meta({ title, desc, url, image, ld }))
+    .replace(/<!--META-->[\s\S]*?<!--\/META-->/, meta({ title, desc, url, image, ld, noindex }))
     .replace(/<!--STATIC-->[\s\S]*?<!--\/STATIC-->/, `<!--STATIC--><div class="seo-static">${body}</div><!--/STATIC-->`);
 }
 
@@ -179,10 +180,11 @@ for (const a of FT.ANIMALS) {
       desc: `${a.name}띠(${years.join('·')}년생) 오늘의 운세. 총운·금전운·애정운·일·건강운과 나이별 한 줄 운세, 행운의 색·숫자를 매일 확인하세요.`,
       url: `${SITE}/fortune/${a.id}/`,
       image: ogFile('fortune'),
+      noindex: true,
       body: `<h1>${a.name}띠 오늘의 운세</h1><p>${esc(a.trait)}</p><p>${a.name}띠 해: ${years.join(', ')}년생</p><p>총운·금전운·애정운·일·공부운·건강운을 별점과 함께 보여 주고, 나이별 한 줄 운세와 행운의 색·숫자·방향·물건도 알려 드려요. 운세는 매일 자정에 바뀌어요.</p><p><a href="/fortune/">다른 띠 운세 보기</a></p>`,
     })
   );
-  urls.push(`/fortune/${a.id}/`);
+
 }
 for (const s of FT.SIGNS) {
   write(
@@ -192,10 +194,11 @@ for (const s of FT.SIGNS) {
       desc: `${s.name}(${FT.signRange(s)}) 오늘의 별자리 운세. 총운·금전·애정·일·건강운과 행운의 색·숫자를 매일 확인하세요.`,
       url: `${SITE}/fortune/${s.id}/`,
       image: ogFile('fortune'),
+      noindex: true,
       body: `<h1>${s.name} 오늘의 운세</h1><p>${s.name}: ${FT.signRange(s)}에 태어난 사람. ${esc(s.trait)}</p><p><a href="/fortune/">다른 별자리 운세 보기</a></p>`,
     })
   );
-  urls.push(`/fortune/${s.id}/`);
+
 }
 write(
   'saju/index.html',
@@ -204,10 +207,10 @@ write(
     desc: '생년월일과 태어난 시간을 넣으면 사주팔자 여덟 글자와 오행 균형, 타고난 성향, 오늘의 기운을 무료로 알려 드려요. 입력한 정보는 저장·전송하지 않아요.',
     url: `${SITE}/saju/`,
     image: ogFile('fortune'),
+    noindex: true,
     body: `<h1>무료 사주팔자 보기</h1><p>사주(四柱)는 태어난 해·달·날·시간의 네 기둥이고, 기둥마다 천간과 지지 두 글자가 있어 모두 여덟 글자(팔자)가 돼요. 목·화·토·금·수 다섯 기운의 균형으로 타고난 성향을 보고, 태어난 날의 천간(일간)으로 오늘의 기운을 풀어 드려요.</p>`,
   })
 );
-urls.push('/saju/');
 write(
   'tarot/index.html',
   page({
@@ -226,10 +229,10 @@ write(
     desc: '로또 6/45 번호를 무작위로 뽑고, 1등 814만 5,060분의 1 등 등수별 실제 당첨 확률과 그 번호로 100년 동안 샀을 때 결과를 모의실험해 드려요.',
     url: `${SITE}/lotto/`,
     image: ogFile('fortune'),
+    noindex: true,
     body: `<h1>로또 번호 생성기와 당첨 확률</h1><ul>${FT.LOTTO_RANKS.map((r) => `<li>${r.label} (${r.rule}): ${Math.round(FT.LOTTO_TOTAL / r.ways).toLocaleString('ko-KR')}분의 1</li>`).join('')}</ul><p>전체 조합은 8,145,060가지이고, 어떤 번호 조합이든 1등 확률은 같아요.</p>`,
   })
 );
-urls.push('/lotto/');
 
 // 랭킹 탭 (/rankings/) · 순위표마다 한 페이지 (/ranking/<id>/) — 검색엔진용으로 전체 순위와 링크를 글로 넣어 둠
 write(
@@ -253,10 +256,11 @@ for (const b of RANKINGS) {
       desc: `${b.items.slice(1, 5).map((it, k) => `${k + 2}위 ${it[0]}${it[1] ? `(${it[1]})` : ''}`).join(' · ')}… 그럼 1위는? ${b.q}`,
       url: `${SITE}/ranking/${b.id}/`,
       image: ogFile('rank-' + b.group),
+      noindex: true,
       body: `<h1>${esc(rankTitle(b))}</h1><p>${esc(b.q)}</p><ol>${b.items.map((it) => `<li><a href="${esc(it[2] || rankLink(it[0], b))}" rel="noopener">${esc(it[0])}</a>${it[1] ? ` (${esc(it[1])})` : ''}</li>`).join('')}</ol><p><a href="/rankings/">다른 랭킹 보기</a></p>`,
     })
   );
-  urls.push(`/ranking/${b.id}/`);
+
 }
 
 // 사이트맵 · robots
@@ -275,7 +279,6 @@ write(
 const rssItems = [
   ...QUIZZES.map((q) => ({ t: `${q.title}`, d: q.desc, u: `${SITE}/q/${q.id}/` })),
   ...GAMES.map((g) => ({ t: `${g.title} - 뽑기 게임`, d: g.desc, u: `${SITE}/game/${g.id}/` })),
-  ...RANKINGS.map((b) => ({ t: `${b.title} 1위는?`, d: b.q, u: `${SITE}/ranking/${b.id}/` })),
 ];
 const xesc = (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 write(
