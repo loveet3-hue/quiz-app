@@ -344,6 +344,7 @@ function renderQuizList(fmt) {
       <h1 class="page-title">${format.emoji} ${esc(format.title)}</h1>
     </div>
     <p class="fmt-desc">${esc(format.desc)}</p>
+    <p class="fmt-about">${esc(format.about)}</p>
     <section class="home-sec" id="all">
       <div class="chips" role="group" aria-label="분류">
         ${cats.map((c) => `<button class="chip" data-cat="${esc(c)}" aria-pressed="${c === home.category}">${esc(c)}</button>`).join('')}

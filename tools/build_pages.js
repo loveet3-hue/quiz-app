@@ -128,10 +128,11 @@ for (const f of QUIZ_FORMATS) {
       desc: `${f.desc}. ${list.slice(0, 6).map((q) => q.title).join(', ')} 등`,
       url: `${SITE}/quizzes/${f.id}/`,
       image: ogFile('home'),
-      body: `<h1>${esc(f.title)}</h1><p>${esc(f.desc)}</p><ul>${list.map((q) => `<li><a href="/q/${q.id}/">${esc(q.title)}</a> - ${esc(q.desc)}</li>`).join('')}</ul>`,
+      noindex: list.length < 2, // 퀴즈가 하나뿐인 목록은 검색에서 뺌
+      body: `<h1>${esc(f.title)}</h1><p>${esc(f.desc)}</p><p>${esc(f.about)}</p><ul>${list.map((q) => `<li><a href="/q/${q.id}/">${esc(q.title)}</a> - ${esc(q.desc)}</li>`).join('')}</ul>`,
     })
   );
-  urls.push(`/quizzes/${f.id}/`);
+  if (list.length >= 2) urls.push(`/quizzes/${f.id}/`);
 }
 
 // 게임
@@ -230,6 +231,7 @@ write(
     title: '로또 번호 생성기 - 무료 자동 번호 + 실제 당첨 확률 분석 | 맞혀봐',
     desc: '로또 6/45 번호를 무작위로 뽑고, 1등 814만 5,060분의 1 등 등수별 실제 당첨 확률과 그 번호로 100년 동안 샀을 때 결과를 모의실험해 드려요.',
     url: `${SITE}/lotto/`,
+    noAds: true, // 복권 관련 페이지는 광고 정책상 애매하니 광고를 붙이지 않음
     image: ogFile('fortune'),
     body: `<h1>로또 번호 생성기와 당첨 확률</h1><ul>${FT.LOTTO_RANKS.map((r) => `<li>${r.label} (${r.rule}): ${Math.round(FT.LOTTO_TOTAL / r.ways).toLocaleString('ko-KR')}분의 1</li>`).join('')}</ul>${FT.LOTTO_ABOUT}`,
   })
@@ -271,7 +273,7 @@ for (const b of RANKINGS) {
 
 // 사이트맵 · robots
 const today = new Date().toISOString().slice(0, 10);
-urls.push('/about.html', '/terms.html', '/privacy.html', '/credits.html');
+urls.push('/about.html', '/terms.html', '/privacy.html'); // 사진 출처(credits)는 목록을 화면에서 불러오는 페이지라 검색에서 뺌
 
 // 공부용 정리 페이지 (/study/)
 buildStudy({ read, write, esc, SITE, QUIZZES, QUESTIONS: ctx.QS, STUDY_PAGES: ctx.SP, urls });

@@ -116,6 +116,8 @@ function buildStudy({ read, write, esc, SITE, QUIZZES, QUESTIONS, STUDY_PAGES, u
   const headTpl = pv.slice(0, pv.indexOf('<main class="container policy">'));
   const head = (title, desc, url) =>
     headTpl
+      .replace(/\s*<meta name="description"[^>]*>/, '')
+      .replace(/\s*<link rel="canonical"[^>]*>/, '')
       .replace(/<title>[^<]*<\/title>/, `<title>${esc(title)}</title>\n  <meta name="description" content="${esc(desc)}">\n  <link rel="canonical" href="${url}">`)
       .replace(/href="icons\//g, 'href="/icons/')
       .replace(/src="icons\//g, 'src="/icons/')

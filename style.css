@@ -1895,3 +1895,4 @@ a.icon-btn { display: inline-grid; place-items: center; }
 .lt-opts input:focus { border-color: var(--primary); outline: none; }
 .tr-card { display: block; }
 .rank-about details { margin: 10px 0; } .rank-about summary { cursor: pointer; font-weight: 700; color: var(--primary); } .rank-about h3 { font-size: 15px; margin: 14px 0 6px; }
+.fmt-about { margin: 0 0 14px; color: var(--text-2); font-size: 14px; line-height: 1.7; }
