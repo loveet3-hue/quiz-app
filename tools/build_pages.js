@@ -25,6 +25,7 @@ const rankLink = ctx.RL;
 const quizAboutHtml = ctx.QA; // 화면 아래 소개 글과 같은 내용 (guides.js)
 const gameAboutHtml = ctx.GA;
 const { buildStudy } = require('./study');
+const { buildArticles } = require('./articles');
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 ctx.esc = esc; // ranking.js·fortune.js 의 설명 글 함수가 씀 (화면에선 app.js 의 esc)
@@ -141,7 +142,7 @@ write(
     desc: '구슬 추첨, 경주마, 사다리 타기, 돌림판. 모일 때 공정하게 정하는 뽑기 게임',
     url: `${SITE}/games/`,
     image: ogFile('games'),
-    body: `<h1>뽑기 게임</h1><ul>${GAMES.map((g) => `<li><a href="/game/${g.id}/">${esc(g.title)}</a> - ${esc(g.desc)}</li>`).join('')}</ul>`,
+    body: `<h1>뽑기 게임</h1><p>순서·당번·벌칙을 공정하게 정하는 뽑기 게임과, 휴대폰 하나로 여럿이 즐기는 파티 게임, 혼자 기록에 도전하는 게임을 모았어요. 설치나 회원가입 없이 바로 쓸 수 있고, 입력한 이름과 설정은 내 기기에만 저장돼요. <a href="/guide/fair-picks/">사다리 타기는 정말 공평할까?</a> 같은 글도 함께 읽어 보세요.</p><ul>${GAMES.map((g) => `<li><a href="/game/${g.id}/">${esc(g.title)}</a> - ${esc(g.desc)}</li>`).join('')}</ul>`,
   })
 );
 urls.push('/games/');
@@ -274,6 +275,7 @@ urls.push('/about.html', '/terms.html', '/privacy.html', '/credits.html');
 
 // 공부용 정리 페이지 (/study/)
 buildStudy({ read, write, esc, SITE, QUIZZES, QUESTIONS: ctx.QS, STUDY_PAGES: ctx.SP, urls });
+buildArticles({ read, write, esc, SITE, urls });
 write(
   'sitemap.xml',
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls

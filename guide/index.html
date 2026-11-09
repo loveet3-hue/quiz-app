@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>읽을거리 - 공부법·맞춤법·상식·확률 이야기 | 맞혀봐</title>
+  <meta name="description" content="퀴즈와 게임에 얽힌 지식을 직접 정리한 글 모음이에요. 공부법, 맞춤법, 세계 수도, 확률, 반응속도, 사주와 타로 이야기.">
+  <link rel="canonical" href="https://quizbwa.co.kr/guide/">
+  <meta name="google-adsense-account" content="ca-pub-3499693117852626">
+  <!--GA-->
+  <script>
+    // 방문 통계 (구글 애널리틱스). 내 컴퓨터에서 시험하는 접속(localhost)은 세지 않음
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    if (!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+      const ga = document.createElement('script');
+      ga.async = true;
+      ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-DHQP8KQMZD';
+      document.head.appendChild(ga);
+      gtag('js', new Date());
+      // 앱(안드로이드)으로 연 사람과 웹으로 연 사람을 나눠 볼 수 있게
+      let via = 'web';
+      try { via = new URLSearchParams(location.search).get('app') || localStorage.getItem('in-app') || 'web'; } catch (e) { /* 무시 */ }
+      gtag('set', 'user_properties', { open_via: via });
+      gtag('config', 'G-DHQP8KQMZD');
+    }
+  </script>
+  <!--/GA-->
+  <meta name="theme-color" content="#f6f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121118" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .policy { padding-top: 8px; line-height: 1.75; }
+    .policy h1 { font-size: 24px; letter-spacing: -0.03em; margin: 12px 0 4px; }
+    .policy .meta { color: var(--text-3); font-size: 14px; margin: 0 0 20px; }
+    .policy section {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+    .policy h2 { font-size: 17px; margin: 0 0 8px; letter-spacing: -0.02em; }
+    .policy p, .policy li { font-size: 15px; color: var(--text-2); }
+    .policy p { margin: 0 0 8px; }
+    .policy ul { margin: 0; padding-left: 20px; }
+    .policy table { width: 100%; border-collapse: collapse; margin: 6px 0 4px; font-size: 14px; }
+    .policy th, .policy td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; color: var(--text-2); }
+    .policy th { background: var(--surface-2); color: var(--text); white-space: nowrap; }
+    .policy a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+    .table-wrap { overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="logo" href="/">
+        <img src="/icons/icon-192.png" alt="" width="28" height="28">
+        <span>맞혀봐</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container policy">
+    <h1>읽을거리</h1>
+    <p class="meta">퀴즈와 게임에 얽힌 지식을 맞혀봐가 직접 정리한 글이에요</p>
+    <section><h2><a href="/guide/why-write-answers/">보기를 고를 때보다 직접 쓸 때 더 오래 기억나는 이유</a></h2><p>객관식과 주관식은 머릿속에서 일어나는 일이 달라요. 인출 연습 효과로 알아보는 기억 잘 남는 공부법.</p></section>
+    <section><h2><a href="/guide/spelling-mistakes/">'맞추다'와 '맞히다'부터 '되'와 '돼'까지, 어른도 틀리는 맞춤법</a></h2><p>정답은 맞히는 걸까 맞추는 걸까? 자주 틀리는 맞춤법을 구별 요령과 함께 정리했어요.</p></section>
+    <section><h2><a href="/guide/confusing-capitals/">시드니도 이스탄불도 아니다, 사람들이 착각하는 세계의 수도</a></h2><p>가장 큰 도시가 수도가 아닌 나라들. 왜 그렇게 정해졌는지 역사와 함께 알아봐요.</p></section>
+    <section><h2><a href="/guide/fair-picks/">사다리 타기는 정말 공평할까? 모임에서 순서 정하는 방법 비교</a></h2><p>사다리, 제비뽑기, 돌림판, 주사위의 공평함을 확률로 따져 봤어요.</p></section>
+    <section><h2><a href="/guide/reaction-time/">내 반응속도는 빠른 편일까? ms로 보는 사람의 반응 시간</a></h2><p>사람의 평균 반응 시간과 측정값에 영향을 주는 것들, 반응속도를 끌어올리는 방법을 정리했어요.</p></section>
+    <section><h2><a href="/guide/lotto-math/">로또 1등 확률은 왜 814만 분의 1일까? 직접 계산해 보기</a></h2><p>조합으로 계산하는 로또 6/45 등수별 확률과, 번호를 잘 고르면 확률이 올라간다는 말의 진실.</p></section>
+    <section><h2><a href="/guide/saju-basics/">사주팔자의 여덟 글자는 어떻게 정해질까? 천간·지지·오행 입문</a></h2><p>갑자, 을축은 무슨 뜻일까요? 60갑자가 만들어지는 원리와 사주 읽는 기초를 정리했어요.</p></section>
+    <section><h2><a href="/guide/tarot-basics/">타로 카드 78장은 무엇일까? 처음 보는 사람을 위한 안내</a></h2><p>카드놀이에서 시작된 타로의 역사와 메이저 아르카나의 흐름, 역방향의 뜻을 쉽게 설명해요.</p></section>
+    <p class="meta" style="text-align:center"><a href="/">← 맞혀봐 홈</a> · <a href="/guide/">읽을거리</a> · <a href="/study/">공부하기</a> · <a href="/about.html">소개</a> · <a href="/terms.html">이용약관</a> · <a href="/privacy.html">개인정보 처리방침</a></p>
+  </main>
+  <script src="/holiday.js"></script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>사다리 타기는 정말 공평할까? 모임에서 순서 정하는 방법 비교 - 맞혀봐 읽을거리</title>
+  <meta name="description" content="사다리, 제비뽑기, 돌림판, 주사위의 공평함을 확률로 따져 봤어요.">
+  <link rel="canonical" href="https://quizbwa.co.kr/guide/fair-picks/">
+  <meta name="google-adsense-account" content="ca-pub-3499693117852626">
+  <!--GA-->
+  <script>
+    // 방문 통계 (구글 애널리틱스). 내 컴퓨터에서 시험하는 접속(localhost)은 세지 않음
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    if (!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+      const ga = document.createElement('script');
+      ga.async = true;
+      ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-DHQP8KQMZD';
+      document.head.appendChild(ga);
+      gtag('js', new Date());
+      // 앱(안드로이드)으로 연 사람과 웹으로 연 사람을 나눠 볼 수 있게
+      let via = 'web';
+      try { via = new URLSearchParams(location.search).get('app') || localStorage.getItem('in-app') || 'web'; } catch (e) { /* 무시 */ }
+      gtag('set', 'user_properties', { open_via: via });
+      gtag('config', 'G-DHQP8KQMZD');
+    }
+  </script>
+  <!--/GA-->
+  <meta name="theme-color" content="#f6f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121118" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .policy { padding-top: 8px; line-height: 1.75; }
+    .policy h1 { font-size: 24px; letter-spacing: -0.03em; margin: 12px 0 4px; }
+    .policy .meta { color: var(--text-3); font-size: 14px; margin: 0 0 20px; }
+    .policy section {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+    .policy h2 { font-size: 17px; margin: 0 0 8px; letter-spacing: -0.02em; }
+    .policy p, .policy li { font-size: 15px; color: var(--text-2); }
+    .policy p { margin: 0 0 8px; }
+    .policy ul { margin: 0; padding-left: 20px; }
+    .policy table { width: 100%; border-collapse: collapse; margin: 6px 0 4px; font-size: 14px; }
+    .policy th, .policy td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; color: var(--text-2); }
+    .policy th { background: var(--surface-2); color: var(--text); white-space: nowrap; }
+    .policy a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+    .table-wrap { overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="logo" href="/">
+        <img src="/icons/icon-192.png" alt="" width="28" height="28">
+        <span>맞혀봐</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container policy">
+    <h1>사다리 타기는 정말 공평할까? 모임에서 순서 정하는 방법 비교</h1>
+    <p class="meta">맞혀봐 읽을거리</p>
+    <section><p>누가 커피를 살지, 누가 먼저 발표할지 정할 때 우리는 사다리를 타거나 제비를 뽑아요. 다 똑같이 공평해 보이지만, 방법에 따라 차이가 있어요.</p></section>
+    <section><h2>제비뽑기는 먼저 뽑으면 유리할까</h2><p>10장 중 당첨이 1장일 때 첫 번째 사람의 확률은 10분의 1이에요. 두 번째 사람은 첫 사람이 꽝을 뽑아야 기회가 오는데, 10분의 9에 9분의 1을 곱하면 역시 10분의 1이에요. 앞사람의 결과를 모르는 상태라면 몇 번째로 뽑든 확률은 같아요. 순서를 두고 다툴 필요가 없는 셈이죠.</p></section>
+    <section><h2>사다리는 가로줄이 적으면 치우친다</h2><p>사다리는 가로줄을 만날 때마다 옆으로 한 칸씩 움직여요. 그래서 가로줄이 적으면 출발한 자리 근처에 도착할 가능성이 높아요. 맨 왼쪽에서 출발해 맨 오른쪽 끝까지 가려면 가로줄을 여러 번 알맞게 만나야 하니까요. 공평하게 하려면 세로줄 수에 비해 가로줄을 충분히 많이 넣어야 하고, 사람이 눈으로 보고 그으면 무의식적으로 치우칠 수 있어요.</p></section>
+    <section><h2>돌림판과 주사위</h2><p>돌림판은 칸의 크기가 같고 멈추는 위치가 무작위라면 칸마다 확률이 같아요. 다만 메뉴를 칸에 여러 번 넣으면 그만큼 확률이 올라가요. 주사위는 한 면이 나올 확률이 6분의 1이지만 두 개를 굴려 합을 보면 달라요. 합이 7이 될 확률은 6분의 1인데, 합이 2가 될 확률은 36분의 1이에요.</p></section>
+    <section><h2>무엇을 고르면 좋을까</h2><p>결과를 한 번에 정하고 싶다면 제비뽑기나 돌림판, 모두가 보며 즐기고 싶다면 구슬 추첨이나 경주마가 좋아요. 무엇을 쓰든 시작 전에 규칙을 정하는 게 제일 중요해요. 결과를 보고 한 판 더 하자고 하면 어떤 방법도 공평할 수 없으니까요.</p></section>
+    <section><h2>직접 해 보기</h2><ul><li><a href="/game/ladder/">사다리 타기</a></li><li><a href="/game/lots/">제비뽑기</a></li><li><a href="/game/wheel/">돌림판</a></li><li><a href="/game/marble/">구슬 추첨</a></li></ul></section>
+    <section><h2>다른 글</h2><ul><li><a href="/guide/why-write-answers/">보기를 고를 때보다 직접 쓸 때 더 오래 기억나는 이유</a></li><li><a href="/guide/spelling-mistakes/">'맞추다'와 '맞히다'부터 '되'와 '돼'까지, 어른도 틀리는 맞춤법</a></li><li><a href="/guide/confusing-capitals/">시드니도 이스탄불도 아니다, 사람들이 착각하는 세계의 수도</a></li><li><a href="/guide/reaction-time/">내 반응속도는 빠른 편일까? ms로 보는 사람의 반응 시간</a></li><li><a href="/guide/lotto-math/">로또 1등 확률은 왜 814만 분의 1일까? 직접 계산해 보기</a></li></ul></section>
+    <p class="meta" style="text-align:center"><a href="/">← 맞혀봐 홈</a> · <a href="/guide/">읽을거리</a> · <a href="/study/">공부하기</a> · <a href="/about.html">소개</a> · <a href="/terms.html">이용약관</a> · <a href="/privacy.html">개인정보 처리방침</a></p>
+  </main>
+  <script src="/holiday.js"></script>
+</body>
+</html>

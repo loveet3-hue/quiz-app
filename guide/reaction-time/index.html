@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>내 반응속도는 빠른 편일까? ms로 보는 사람의 반응 시간 - 맞혀봐 읽을거리</title>
+  <meta name="description" content="사람의 평균 반응 시간과 측정값에 영향을 주는 것들, 반응속도를 끌어올리는 방법을 정리했어요.">
+  <link rel="canonical" href="https://quizbwa.co.kr/guide/reaction-time/">
+  <meta name="google-adsense-account" content="ca-pub-3499693117852626">
+  <!--GA-->
+  <script>
+    // 방문 통계 (구글 애널리틱스). 내 컴퓨터에서 시험하는 접속(localhost)은 세지 않음
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    if (!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+      const ga = document.createElement('script');
+      ga.async = true;
+      ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-DHQP8KQMZD';
+      document.head.appendChild(ga);
+      gtag('js', new Date());
+      // 앱(안드로이드)으로 연 사람과 웹으로 연 사람을 나눠 볼 수 있게
+      let via = 'web';
+      try { via = new URLSearchParams(location.search).get('app') || localStorage.getItem('in-app') || 'web'; } catch (e) { /* 무시 */ }
+      gtag('set', 'user_properties', { open_via: via });
+      gtag('config', 'G-DHQP8KQMZD');
+    }
+  </script>
+  <!--/GA-->
+  <meta name="theme-color" content="#f6f5fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121118" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="/icons/icon-192.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    .policy { padding-top: 8px; line-height: 1.75; }
+    .policy h1 { font-size: 24px; letter-spacing: -0.03em; margin: 12px 0 4px; }
+    .policy .meta { color: var(--text-3); font-size: 14px; margin: 0 0 20px; }
+    .policy section {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+    .policy h2 { font-size: 17px; margin: 0 0 8px; letter-spacing: -0.02em; }
+    .policy p, .policy li { font-size: 15px; color: var(--text-2); }
+    .policy p { margin: 0 0 8px; }
+    .policy ul { margin: 0; padding-left: 20px; }
+    .policy table { width: 100%; border-collapse: collapse; margin: 6px 0 4px; font-size: 14px; }
+    .policy th, .policy td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; color: var(--text-2); }
+    .policy th { background: var(--surface-2); color: var(--text); white-space: nowrap; }
+    .policy a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+    .table-wrap { overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="logo" href="/">
+        <img src="/icons/icon-192.png" alt="" width="28" height="28">
+        <span>맞혀봐</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="container policy">
+    <h1>내 반응속도는 빠른 편일까? ms로 보는 사람의 반응 시간</h1>
+    <p class="meta">맞혀봐 읽을거리</p>
+    <section><p>화면이 초록색으로 바뀌는 순간 버튼을 누르기까지 걸리는 시간은 눈 깜짝할 사이보다 조금 짧아요. 건강한 성인이 빛을 보고 단순히 반응하는 데는 보통 0.2초에서 0.25초 정도가 걸려요. ms(밀리초)로 쓰면 200~250ms예요.</p></section>
+    <section><h2>0.2초 동안 몸에서 일어나는 일</h2><p>눈의 망막이 빛을 받아 신호를 만들면 시신경을 따라 뇌로 전달돼요. 뇌는 무엇이 바뀌었는지 판단하고 움직이라는 명령을 내려요. 명령은 척수와 신경을 거쳐 손가락 근육까지 내려가고, 근육이 수축해야 비로소 버튼이 눌려요. 이 과정이 눈 깜짝할 사이에 벌어지는 거예요.</p></section>
+    <section><h2>측정값이 달라지는 이유</h2><p>같은 사람도 기기에 따라 숫자가 달라져요. 1초에 60번 그리는 화면은 한 장을 그리는 데 약 17ms가 걸려서 그만큼 늦게 보일 수 있고, 터치스크린과 무선 마우스도 입력이 전달되는 데 시간이 걸려요. 그래서 다른 기기로 잰 기록을 그대로 비교하는 건 큰 의미가 없고, 같은 기기로 잰 내 기록끼리 비교하는 게 정확해요.</p></section>
+    <section><h2>컨디션의 영향</h2><p>잠이 부족하거나 피곤하면 반응은 눈에 띄게 느려져요. 나이가 들수록 조금씩 느려지는 것도 자연스러운 일이에요. 반대로 충분히 자고, 몸을 풀고, 집중한 상태에서는 빨라져요. 소리에 대한 반응은 빛에 대한 반응보다 대체로 조금 더 빨라요.</p></section>
+    <section><h2>왜 여러 번 재서 평균을 낼까</h2><p>한 번의 기록은 운이 크게 작용해요. 언제 바뀔지 우연히 맞아떨어지면 아주 빠른 숫자가 나오고, 잠깐 딴생각을 하면 느린 숫자가 나와요. 그래서 맞혀봐의 반응속도 테스트는 다섯 번을 재서 평균을 내요. 100ms 아래의 기록은 거의 대부분 미리 눌러서 생긴 우연이에요.</p></section>
+    <section><h2>직접 해 보기</h2><ul><li><a href="/game/reaction/">반응속도 테스트</a></li><li><a href="/game/stroop/">색깔 헷갈림</a></li></ul></section>
+    <section><h2>다른 글</h2><ul><li><a href="/guide/why-write-answers/">보기를 고를 때보다 직접 쓸 때 더 오래 기억나는 이유</a></li><li><a href="/guide/spelling-mistakes/">'맞추다'와 '맞히다'부터 '되'와 '돼'까지, 어른도 틀리는 맞춤법</a></li><li><a href="/guide/confusing-capitals/">시드니도 이스탄불도 아니다, 사람들이 착각하는 세계의 수도</a></li><li><a href="/guide/fair-picks/">사다리 타기는 정말 공평할까? 모임에서 순서 정하는 방법 비교</a></li><li><a href="/guide/lotto-math/">로또 1등 확률은 왜 814만 분의 1일까? 직접 계산해 보기</a></li></ul></section>
+    <p class="meta" style="text-align:center"><a href="/">← 맞혀봐 홈</a> · <a href="/guide/">읽을거리</a> · <a href="/study/">공부하기</a> · <a href="/about.html">소개</a> · <a href="/terms.html">이용약관</a> · <a href="/privacy.html">개인정보 처리방침</a></p>
+  </main>
+  <script src="/holiday.js"></script>
+</body>
+</html>
