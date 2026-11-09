@@ -229,6 +229,64 @@ const TAROT = [
 ];
 const ROMAN = ['0', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX', 'XXI'];
 
+// 띠·별자리 설명 (화면과 정적 페이지 공용)
+const ANIMAL_MORE = {
+  rat: ['위기에 강하고 돈 관리를 잘해요', '걱정이 많아지면 기회 앞에서 망설일 수 있어요'],
+  ox: ['맡은 일을 끝까지 책임져요', '한번 정하면 잘 바꾸지 않아 고집스러워 보일 수 있어요'],
+  tiger: ['앞장서서 분위기를 이끌어요', '성급하게 결정하면 뒷수습이 길어져요'],
+  rabbit: ['갈등을 부드럽게 풀어요', '싫은 소리를 못 해 혼자 끙끙 앓기 쉬워요'],
+  dragon: ['큰 그림을 그리고 사람을 모아요', '자신감이 지나치면 주변 조언을 놓쳐요'],
+  snake: ['상황을 읽고 때를 기다릴 줄 알아요', '속마음을 숨기다 오해를 살 수 있어요'],
+  horse: ['어디서든 빨리 적응하고 활기를 줘요', '금방 싫증 내면 마무리가 약해져요'],
+  sheep: ['사람을 편하게 하고 감각이 좋아요', '남의 눈치를 보느라 내 결정을 미루기 쉬워요'],
+  monkey: ['어려운 문제도 재치로 풀어요', '여러 일을 벌이면 집중이 흩어져요'],
+  rooster: ['계획을 세우고 꼼꼼히 챙겨요', '작은 흠까지 지적하면 사람이 지칠 수 있어요'],
+  dog: ['약속을 지키고 내 사람을 챙겨요', '걱정과 의심이 많아지면 스스로 힘들어져요'],
+  pig: ['너그럽고 함께 있으면 편안해요', '사람을 쉽게 믿고 씀씀이가 커질 수 있어요'],
+};
+const SIGN_MORE = {
+  aries: ['화성', '시작이 빠르고 결단력이 있어요', '끝까지 기다리는 인내심을 기르면 좋아요'],
+  taurus: ['금성', '꾸준하고 믿음직해요', '변화를 너무 늦게 받아들일 수 있어요'],
+  gemini: ['수성', '말과 글로 사람을 잘 이어요', '관심이 자주 옮겨 가 마무리가 약할 수 있어요'],
+  cancer: ['달', '사람을 살뜰히 챙겨요', '서운함을 오래 담아 두기 쉬워요'],
+  leo: ['태양', '자신감으로 주변을 밝혀요', '인정받지 못하면 쉽게 상처받아요'],
+  virgo: ['수성', '세심하고 실수를 잘 잡아내요', '완벽을 바라다 스스로를 몰아붙여요'],
+  libra: ['금성', '공정하고 대화로 잘 풀어요', '결정을 오래 망설이는 편이에요'],
+  scorpio: ['명왕성(전통적으로 화성)', '깊이 파고드는 집중력이 있어요', '한번 생긴 의심을 잘 놓지 못해요'],
+  sagittarius: ['목성', '긍정적이고 시야가 넓어요', '솔직한 말이 상처가 될 때가 있어요'],
+  capricorn: ['토성', '목표를 세우고 꾸준히 올라가요', '일에 몰두하다 쉬는 법을 잊어요'],
+  aquarius: ['천왕성(전통적으로 토성)', '새로운 생각을 잘 떠올려요', '감정 표현이 차갑게 보일 수 있어요'],
+  pisces: ['해왕성(전통적으로 목성)', '남의 마음을 잘 헤아려요', '현실을 피하고 싶을 때가 많아져요'],
+};
+function animalAboutHtml(a) {
+  const nameOf = (b) => ANIMALS.find((x) => x.b === b).name + '띠';
+  const six = SIX_HARMONY.find((p) => p.includes(a.b)).find((x) => x !== a.b);
+  const three = THREE_HARMONY.find((g) => g.includes(a.b)).filter((x) => x !== a.b);
+  const [good, care] = ANIMAL_MORE[a.id];
+  return `<section class="about">
+    <h2>${a.name}띠는 어떤 사람?</h2>
+    <p>${esc(a.trait)}</p><p><b>강점</b> ${good}. <b>조심할 점</b> ${care}.</p>
+    <h3>${a.name}띠와 잘 맞는 띠</h3>
+    <p>전통적으로 ${nameOf(six)}와는 서로 끌어 주는 육합, ${three.map(nameOf).join('·')}와는 힘을 모으는 삼합이라고 봐요. 반대로 ${nameOf((a.b + 6) % 12)}와는 기운이 부딪히는 충으로 봐요. 그래서 그날의 일진이 ${nameOf((a.b + 6) % 12).replace('띠', '')}에 해당하는 날에는 ${a.name}띠의 운세가 조심하는 쪽으로 나와요.</p>
+    <h3>${a.name}띠는 몇 년생?</h3>
+    <p>${animalYears(a).filter((y) => y >= 1936 && y <= 2031).join('·')}년에 태어난 사람이에요. 띠는 보통 설날이나 입춘을 기준으로 바뀌어서, 1월이나 2월 초에 태어났다면 앞 해의 띠일 수 있어요.</p>
+    <p>이 페이지의 오늘의 운세는 ${a.name}띠와 그날 일진의 관계를 바탕으로 맞혀봐가 정리한 재미용 콘텐츠예요.</p>
+  </section>`;
+}
+function signAboutHtml(s) {
+  const [ruler, good, care] = SIGN_MORE[s.id];
+  const mates = SIGNS.filter((x) => x.el === s.el && x.id !== s.id).map((x) => x.name);
+  return `<section class="about">
+    <h2>${s.name}는 어떤 사람?</h2>
+    <p>${esc(s.trait)}</p><p><b>강점</b> ${good}. <b>조심할 점</b> ${care}.</p>
+    <h3>${s.name}의 수호성과 원소</h3>
+    <p>${s.name}는 ${signRange(s)}에 태어난 사람의 별자리예요. 서양 점성술에서 수호성은 ${ruler}이고 네 원소 가운데 ${s.el}에 속해요. 같은 ${s.el}의 별자리인 ${mates.join('·')}와는 성향이 잘 통한다고 봐요.</p>
+    <p>별자리 경계일은 해마다 하루쯤 달라질 수 있어요. 이 페이지의 오늘의 운세는 맞혀봐가 정리한 재미용 콘텐츠예요.</p>
+  </section>`;
+}
+const SAJU_ABOUT = `<section class="about"><h2>사주팔자란?</h2><p>사주(四柱)는 태어난 해·달·날·시간의 네 기둥이고, 기둥마다 천간과 지지 두 글자가 있어 모두 여덟 글자(팔자)가 돼요. 여덟 글자에 담긴 나무(목)·불(화)·흙(토)·쇠(금)·물(수) 다섯 기운의 균형으로 타고난 성향을 보고, 태어난 날의 천간(일간)을 '나'로 삼아 오늘의 일진과 어떤 관계인지 풀어 줘요.</p><h3>오행은 서로 어떻게 작용할까?</h3><p>나무는 불을 살리고, 불은 재가 되어 흙을 만들고, 흙에서 쇠가 나고, 쇠에 물방울이 맺히고, 물은 나무를 키워요. 이렇게 서로 돕는 관계가 상생이에요. 반대로 나무는 흙의 양분을 빼앗고, 흙은 물을 막고, 물은 불을 끄고, 불은 쇠를 녹이고, 쇠는 나무를 베어요. 이 관계가 상극이에요.</p><h3>이 계산의 한계</h3><p>월주는 절기(입춘·경칩 등) 날짜로 나누는데, 절기가 시작되는 시각까지는 따지지 않아 경계일에 태어났다면 하루 차이가 날 수 있어요. 음력 생일은 양력으로 바꿔서 넣어 주세요. 입력한 생년월일은 이 기기에만 저장되고 어디로도 보내지 않아요. 사주는 재미로만 봐 주세요.</p></section>`;
+const LOTTO_ABOUT = `<section class="about"><h2>로또 번호 생성기 사용법</h2><p>게임 수를 고르고 '번호 뽑기'를 누르면 1~45 중 겹치지 않는 6개 번호를 무작위로 뽑아 줘요. 꼭 넣고 싶은 번호나 빼고 싶은 번호도 정할 수 있어요. 뽑은 번호마다 합계·홀짝·연속 번호를 분석하고, 그 번호로 매주 샀다고 치고 실제로 추첨을 돌려 보는 모의실험도 할 수 있어요.</p><h3>당첨 확률은 어떻게 계산할까?</h3><p>45개에서 6개를 고르는 조합은 8,145,060가지이고, 1등은 그중 하나예요. 2등은 맞힌 5개와 보너스 번호가 필요해서 6가지, 3등은 5개를 맞히는 경우 234가지에서 2등 6가지를 뺀 228가지예요. 4등은 내 번호 6개 중 4개와 나머지 39개 중 2개를 고르는 11,115가지, 5등은 182,780가지예요. 다섯 등수를 모두 더하면 194,130가지라서 뭐라도 당첨될 확률은 약 2.38%예요.</p><h3>번호를 잘 고르면 확률이 올라갈까?</h3><p>아니에요. 추첨은 매번 독립이라 지난 당첨 번호나 자주 나온 번호는 다음 추첨에 영향을 주지 않아요. 생성기가 보여 주는 합계·홀짝 분석도 그 조합이 어떤 모양인지 알려 줄 뿐 확률을 바꾸지 않아요. 로또는 만 19세 이상만 살 수 있고, 이 생성기는 재미로만 써 주세요.</p></section>`;
+
 /* ───────── 화면 ───────── */
 
 const isFortunePath = (path) => /^\/(fortune|saju|tarot|lotto)(\/|$)/.test(path);
@@ -359,7 +417,7 @@ function renderAnimal(a) {
       <h2 class="ft-sub">나이별 한 줄 운세</h2>
       <ul class="ft-years">${yearLines}</ul>
     </div>
-    <section class="about"><h2>${a.name}띠는 어떤 사람?</h2><p>${esc(a.trait)}</p><p>${a.name}띠 해: ${animalYears(a).filter((y) => y >= 1936 && y <= 2031).join('·')}년. 띠는 보통 그해 설날이나 입춘을 기준으로 바뀌어서, 1~2월 초에 태어났다면 앞 해의 띠일 수 있어요.</p></section>
+    ${animalAboutHtml(a)}
     ${SITE_FOOT}`;
   bindBack('/fortune/');
   app.querySelector('[data-act="share"]').addEventListener('click', () =>
@@ -373,7 +431,7 @@ function renderSign(s) {
   const top = `<div class="ft-hero"><span class="ft-emoji big">${s.emoji}</span><div><b>${s.name}</b><span>${signRange(s)} · ${s.el}의 별자리</span></div></div>`;
   app.innerHTML = `${fortuneHead(`${s.name} 오늘의 운세`)}
     <div class="ft-page">${fortuneBody(f, top)}</div>
-    <section class="about"><h2>${s.name}는 어떤 사람?</h2><p>${esc(s.trait)}</p><p>${s.name}: ${signRange(s)}에 태어난 사람. 별자리 경계일은 해마다 하루쯤 달라질 수 있어요.</p></section>
+    ${signAboutHtml(s)}
     ${SITE_FOOT}`;
   bindBack('/fortune/');
   app.querySelector('[data-act="share"]').addEventListener('click', () =>
@@ -415,7 +473,7 @@ function renderSaju() {
       <p class="ft-note">입력한 생년월일은 이 기기에만 저장되고 어디로도 보내지 않아요. 음력 생일은 양력으로 바꿔서 넣어 주세요.</p>
     </form>
     <div class="ft-result"></div>
-    <section class="about"><h2>사주팔자란?</h2><p>사주(四柱)는 태어난 해·달·날·시간의 네 기둥이고, 기둥마다 천간과 지지 두 글자가 있어 모두 여덟 글자(팔자)가 돼요. 여덟 글자에 담긴 나무(목)·불(화)·흙(토)·쇠(금)·물(수) 다섯 기운의 균형으로 타고난 성향을 보고, 태어난 날의 천간(일간)을 '나'로 삼아 오늘의 일진과 어떤 관계인지 풀어 줘요.</p><p>월주는 절기(입춘·경칩 등) 날짜로 나누는데, 절기 시작 시각까지는 따지지 않아 경계일에 태어났다면 하루 차이가 날 수 있어요. 재미로 봐 주세요.</p></section>
+    ${SAJU_ABOUT}
     ${SITE_FOOT}`;
   bindBack('/fortune/');
   const form = app.querySelector('form');
@@ -657,7 +715,7 @@ function renderLotto() {
       </ul>
       <p class="ft-note">로또는 만 19세 이상만 살 수 있어요. 이 생성기는 재미로만 써 주세요.</p>
     </section>
-    <section class="about"><h2>로또 번호 생성기 사용법</h2><p>게임 수를 고르고 '번호 뽑기'를 누르면 1~45 중 겹치지 않는 6개 번호를 무작위로 뽑아 줘요. 꼭 넣고 싶은 번호나 빼고 싶은 번호도 정할 수 있어요. 뽑은 번호마다 합계·홀짝·연속 번호를 분석하고, 그 번호로 매주 샀다고 치고 실제로 추첨을 수만 번 돌려 보는 모의실험도 할 수 있어요.</p></section>
+    ${LOTTO_ABOUT}
     ${SITE_FOOT}`;
   bindBack('/fortune/');
   let count = [1, 3, 5].includes(saved.count) ? saved.count : 5;

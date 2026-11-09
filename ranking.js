@@ -48,6 +48,69 @@ function rankSeoTitle(b) {
   return `${base}${/순위/.test(base) ? '' : ' 순위'} TOP ${b.items.length}${when ? ` (${when})` : ''}`;
 }
 
+// 검색 상위 랭킹의 배경 설명 (1위 이름은 쓰지 않음 — 맞히기 전에 보이는 글)
+const RANK_NOTES = {
+  'sports-46': '일본시리즈는 센트럴리그와 퍼시픽리그 우승팀이 맞붙는 일본 프로야구 결승전이에요. 1950년에 시작했고 7전 4선승제로 열려요. 1965년부터 1973년까지 9년 연속 우승한 팀도 있었어요.',
+  'web-4': '휴대폰에 기본으로 깔린 브라우저가 상위권에 많은 게 한국 시장의 특징이에요. 삼성 인터넷은 갤럭시의 기본 브라우저이고, 웨일은 네이버가 만든 브라우저예요.',
+  'world-41': '태어나면서 처음 배운 말(모국어) 기준 순위예요. 외국어로 쓰는 사람까지 더하면 순위가 크게 달라져서, 영어가 1위로 올라가요.',
+  'web-15': '서버를 직접 사지 않고 인터넷으로 빌려 쓰는 클라우드 시장의 점유율이에요. 아마존·마이크로소프트·구글 세 회사를 흔히 빅3라고 불러요.',
+  'speed-3': '200m는 곡선 주로를 달린 뒤 직선으로 들어오는 종목이라 코너를 도는 기술이 중요해요. 뒷바람이 초속 2m를 넘으면 공식 기록으로 인정되지 않아요.',
+  'speed-2': '1988년에 세워진 기록이 40년 가까이 깨지지 않고 있어요. 단거리 기록은 뒷바람이 초속 2m 이하일 때만 공식으로 인정돼요.',
+  'sports-2': '롤드컵은 매년 가을 열리는 리그 오브 레전드 세계 대회예요. 선수의 우승 횟수는 우승 팀 명단에 이름을 올린 횟수로 세요.',
+  'sports-1': '롤드컵은 2011년에 시작했어요. 표의 젠지 2회는 팀의 전신인 삼성 시절 우승(2014년 삼성 화이트, 2017년 삼성 갤럭시)을 합친 숫자예요.',
+  'sales-50': '본사(가맹본부)의 매출 기준이에요. 가맹점이 손님에게 판 금액 전체가 아니라 본사가 가맹점에 재료를 공급하고 받은 돈이 중심이에요. 마리 수 기준 판매량은 대부분의 브랜드가 공개하지 않아서 매출로 비교해요.',
+  'world-10': '남아메리카는 12개 독립국과 프랑스령 기아나로 이루어져 있어요. 1·2위 두 나라만 합쳐도 대륙 면적의 60%가 넘어요.',
+  'web-2': '웹사이트로 들어오는 검색 유입을 집계한 StatCounter 수치예요. 바이두·얀덱스·네이버처럼 자기 나라에서 강한 검색엔진은 세계 순위로 보면 낮게 나와요.',
+  'sports-35': 'K리그는 1983년 슈퍼리그로 시작했어요. 2위 성남 FC의 우승 7회는 성남 일화 천마 시절 기록이에요.',
+  'sports-38': '정규 시즌 전체에서 가장 뛰어난 선수에게 주는 상이에요. 챔피언 결정전에서 뽑는 파이널 MVP와는 다른 상이에요.',
+  'sales-16': '제조사가 밝힌 누적 출하 대수 기준이에요. 공장에서 나간 수량이라 소비자가 실제로 산 수와는 조금 달라요. 아직 팔리고 있는 기종은 순위가 바뀔 수 있어요.',
+  'world-14': '유럽에서 가장 넓은 러시아는 뺀 순위예요. 프랑스는 해외 영토를 뺀 본토 면적으로 계산했어요.',
+  'sports-49': 'KBO 리그는 1982년에 출범했고, 정규 시즌 MVP는 기자단 투표로 뽑아요.',
+  'world-11': '러시아는 국토 상당 부분이 아시아에 있지만 유럽 나라로 분류하는 경우가 많아 뺐어요.',
+  'world-4': '땅이 아주 작은 도시국가가 상위권에 몰려요. 인구를 면적으로 나눈 값이라 땅이 좁을수록 숫자가 크게 나와요.',
+  'sports-21': 'A매치는 FIFA가 인정한 국가대표 공식 경기예요. 친선 경기라도 양국 대표팀이 치르면 기록에 들어가요.',
+  'sports-50': '스탠리컵은 북미 프로 아이스하키 NHL의 우승 트로피예요. 1893년에 처음 수여됐고, 우승 팀 선수의 이름을 트로피에 새겨요.',
+};
+
+// 값 문자열 → 숫자와 단위 ('5,278억 원' → 527800000000, '원')
+function rankValue(v) {
+  const m = String(v || '').replace(/^약\s*/, '').match(/^([\d,.]+)\s*(억|만)?\s*(.*)$/);
+  if (!m) return null;
+  return { n: parseFloat(m[1].replace(/,/g, '')) * (m[2] === '억' ? 1e8 : m[2] === '만' ? 1e4 : 1), unit: m[3].trim() };
+}
+function rankNum(n, unit) {
+  const t = n >= 1e8 ? `${+(n / 1e8).toFixed(2)}억` : n >= 1e4 ? `${+(n / 1e4).toFixed(1)}만` : `${+n.toFixed(2)}`;
+  return `${t}${/[억만]$/.test(t) ? ' ' : ''}${unit}`;
+}
+
+// 순위표 아래 설명: 화면과 정적 페이지가 같은 글을 씀. 1위는 접어 둔 칸 안에만
+function rankInsightHtml(b) {
+  const m = b.title.match(/^(.*?)\s*\(([^)]*)\)$/);
+  const [base, when] = m ? [m[1], m[2]] : [b.title, ''];
+  const its = b.items;
+  const label = (it) => `${esc(it[0])}${it[1] ? `(${esc(it[1])})` : ''}`;
+  const lines = [`${esc(base)} 상위 ${its.length}개를 ${when ? `${esc(when)} 기준으로 ` : ''}정리했어요.`];
+  if (its[1]) lines.push(`2위 ${label(its[1])}${its[2] ? `, 3위 ${label(its[2])}` : ''}${its.length > 3 ? `, ${its.length}위 ${label(its[its.length - 1])}` : ''} 순이에요.`);
+  const a = its[1] && rankValue(its[1][1]);
+  const c = its[2] && rankValue(its[2][1]);
+  if (a && c && a.unit === c.unit) {
+    const d = Math.abs(a.n - c.n);
+    lines.push(d === 0 ? '2위와 3위는 기록이 같아요.' : `2위와 3위의 차이: ${esc(rankNum(d, a.unit))}.`);
+  }
+  const same = RANKINGS.filter((x) => x.group === b.group && x.id !== b.id);
+  const at = RANKINGS.filter((x) => x.group === b.group).findIndex((x) => x.id === b.id);
+  const rel = [0, 1, 2, 3].map((k) => same[(at + k) % same.length]);
+  return `<section class="about rank-about">
+    <h2>${esc(base)} 순위 알아보기</h2>
+    ${RANK_NOTES[b.id] ? `<p>${esc(RANK_NOTES[b.id])}</p>` : ''}
+    <p>${lines.join(' ')}</p>
+    <p>${esc(b.q)} (힌트: ${esc(b.hint)}) 순위는 제목에 적힌 시점의 공개 자료로 정리했고, 시간이 지나면 달라질 수 있어요.</p>
+    <details><summary>정답과 전체 순위 보기</summary><ol>${its.map((it) => `<li>${label(it)}</li>`).join('')}</ol></details>
+    <h3>함께 보면 좋은 랭킹</h3>
+    <ul>${rel.map((x) => `<li><a href="/ranking/${x.id}/">${esc(x.title)}</a></li>`).join('')}</ul>
+  </section>`;
+}
+
 const rankStore = {
   get() {
     try { return JSON.parse(localStorage.getItem('rank-solved') || '{}'); } catch { return {}; }
@@ -242,6 +305,7 @@ function renderRanking(id) {
       <button class="btn ghost block" data-act="back">랭킹 목록</button>
     </div>
     <p class="rank-src">이름을 누르면 해당 사이트·자료로 이동해요 · 순위는 제목에 적힌 시점 기준</p>
+    ${rankInsightHtml(b)}
     ${adHtml('result')}`;
   const input = app.querySelector('.answer-input');
   const resultEl = app.querySelector('.game-result');
