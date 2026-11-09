@@ -18,6 +18,18 @@ function guideQuestionText(q) {
   return q.text || q.big || '';
 }
 
+// 이 퀴즈에 나오는 문제·정답 전체 (접어 둠). 글 문제는 '문제 → 정답', 사진·소리 문제는 정답 이름만
+// 퀴즈 페이지마다 내용이 다르게 보이도록 넣음 (2026-11 애드센스 '가치가 별로 없는 콘텐츠' 거절 대응)
+function allAnswersHtml(qs, E) {
+  if (!qs || qs.length < 8) return '';
+  const rows = qs.map((q) => {
+    const t = !q.image && !q.melody ? guideQuestionText(q) : '';
+    const alias = q.alias && q.alias.length ? ` <span class="about-alias">(${q.alias.map(E).join(', ')})</span>` : '';
+    return t ? `<li><span>${E(t)}</span> → <b>${E(q.answer)}</b>${alias}</li>` : `<li><b>${E(q.answer)}</b>${alias}</li>`;
+  });
+  return `<h3>이 퀴즈에 나오는 문제와 정답 ${qs.length}개</h3><details class="about-all"><summary>전체 정답 보기 (스포일러 주의)</summary><ol class="about-all-list">${rows.join('')}</ol></details>`;
+}
+
 function quizAboutHtml(quiz, all) {
   const E = guideEsc;
   const qs = quiz.generate ? [] : quiz.questions.filter((q) => !q.appHidden);
@@ -58,6 +70,7 @@ function quizAboutHtml(quiz, all) {
     <h3>푸는 방법</h3>
     <ul>${how.map((h) => `<li>${h}</li>`).join('')}</ul>
     ${samples}
+    ${allAnswersHtml(qs, E)}
     ${quiz.credit ? `<p class="about-note">${E(quiz.credit)}</p>` : ''}
     ${typeof STUDY_PAGES !== 'undefined' && STUDY_PAGES[quiz.id] ? `<h3>미리 공부하기</h3><p><a href="/study/${quiz.id}/">${E(STUDY_PAGES[quiz.id])}</a>에서 이 퀴즈에 나오는 내용을 표로 한눈에 정리해 두었어요.</p>` : ''}
     ${related.length ? `<h3>함께 풀어 볼 퀴즈</h3><ul class="about-links">${related.map((x) => `<li><a href="/q/${x.id}/">${E(x.title)}</a> — ${E(x.desc)}</li>`).join('')}</ul>` : ''}

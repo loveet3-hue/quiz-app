@@ -15,7 +15,7 @@ const tpl = read('index.html');
 const scripts = [...tpl.matchAll(/<script src="\/([^"?]+\.js)/g)].map((m) => m[1]).filter((f) => f !== 'app.js');
 const ctx = { localStorage: { getItem: () => null, setItem() {} }, console };
 vm.createContext(ctx);
-vm.runInContext(scripts.map((f) => read(f)).join('\n;\n') + '\n;this.Q = QUIZZES; this.QF = QUIZ_FORMATS; this.G = GAMES; this.R = RANKINGS; this.RG = RANK_GROUPS; this.RL = rankLink; this.RT = rankSeoTitle; this.QA = quizAboutHtml; this.GA = gameAboutHtml; this.QS = QUESTIONS; this.SP = STUDY_PAGES; this.FT = { ANIMALS, SIGNS, animalYears, signRange, TAROT, LOTTO_RANKS, LOTTO_TOTAL, animalAboutHtml, signAboutHtml, SAJU_ABOUT, LOTTO_ABOUT }; this.RI = rankInsightHtml;', ctx);
+vm.runInContext(scripts.map((f) => read(f)).join('\n;\n') + '\n;this.Q = QUIZZES; this.QF = QUIZ_FORMATS; this.G = GAMES; this.R = RANKINGS; this.RG = RANK_GROUPS; this.RL = rankLink; this.RT = rankSeoTitle; this.QA = quizAboutHtml; this.GA = gameAboutHtml; this.QS = QUESTIONS; this.SP = STUDY_PAGES; this.FT = { ANIMALS, SIGNS, animalYears, signRange, TAROT, LOTTO_RANKS, LOTTO_TOTAL, animalAboutHtml, signAboutHtml, SAJU_ABOUT, LOTTO_ABOUT }; this.RI = rankInsightHtml; this.RN = RANK_NOTES;', ctx);
 const QUIZZES = ctx.Q;
 const GAMES = ctx.G;
 const QUIZ_FORMATS = ctx.QF;
@@ -46,6 +46,7 @@ function meta({ title, desc, url, image, ld, noindex }) {
   <!--/META-->`;
 }
 
+// noindex: 글이 거의 없는 페이지(랭킹 문제·띠별 운세·로또·사주)는 검색·애드센스 심사에서 뺌 — 쓰는 데는 그대로 (2026-11 애드센스 '가치가 별로 없는 콘텐츠' 거절)
 function page({ title, desc, url, image, body, noAds, ld, noindex }) {
   // 광고 없는 퀴즈(실존 인물 사진)는 애드센스 스크립트를 빼고 계정 확인용 meta만 남김
   const t = noAds ? tpl.replace(/<script async id="adsense-js"[^>]*><\/script>\n\s*/, '') : tpl;
@@ -180,10 +181,11 @@ for (const a of FT.ANIMALS) {
       desc: `${a.name}띠(${years.join('·')}년생) 오늘의 운세. 총운·금전운·애정운·일·건강운과 나이별 한 줄 운세, 행운의 색·숫자를 매일 확인하세요.`,
       url: `${SITE}/fortune/${a.id}/`,
       image: ogFile('fortune'),
+      noindex: true, // 설명은 보강했지만 운세 문장이 자동 생성이라 애드센스 승인 전까진 검색에서 뺌
       body: `<h1>${a.name}띠 오늘의 운세</h1><p>총운·금전운·애정운·일·공부운·건강운을 별점과 함께 보여 주고, 나이별 한 줄 운세와 행운의 색·숫자·방향·물건도 알려 드려요. 운세는 매일 자정에 바뀌어요.</p>${FT.animalAboutHtml(a)}<p><a href="/fortune/">다른 띠 운세 보기</a></p>`,
     })
   );
-  urls.push(`/fortune/${a.id}/`);
+
 }
 for (const s of FT.SIGNS) {
   write(
@@ -193,10 +195,11 @@ for (const s of FT.SIGNS) {
       desc: `${s.name}(${FT.signRange(s)}) 오늘의 별자리 운세. 총운·금전·애정·일·건강운과 행운의 색·숫자를 매일 확인하세요.`,
       url: `${SITE}/fortune/${s.id}/`,
       image: ogFile('fortune'),
+      noindex: true, // 설명은 보강했지만 운세 문장이 자동 생성이라 애드센스 승인 전까진 검색에서 뺌
       body: `<h1>${s.name} 오늘의 운세</h1>${FT.signAboutHtml(s)}<p><a href="/fortune/">다른 별자리 운세 보기</a></p>`,
     })
   );
-  urls.push(`/fortune/${s.id}/`);
+
 }
 write(
   'saju/index.html',
@@ -246,10 +249,10 @@ write(
 urls.push('/rankings/');
 // 검색어가 '치킨 판매량 순위'·'롤드컵 우승 횟수'처럼 들어와서 제목에 '순위 TOP n'을 넣고, 설명에 값까지 보여 줌
 const rankTitle = ctx.RT; // ranking.js rankSeoTitle (화면 제목과 같은 규칙)
-// 검색에 한 번이라도 나온 랭킹(tools/rank_keep.json)만 색인·광고 대상. 나머지는 화면엔 그대로 있고 검색·광고에서만 뺌 (애드센스 '가치 낮은 콘텐츠' 대응)
-const RANK_KEEP = new Set(JSON.parse(read('tools/rank_keep.json')));
+// 직접 쓴 배경 설명(ranking.js RANK_NOTES)이 있는 랭킹만 색인·광고 대상. 나머지는 화면엔 그대로 있고 검색·광고에서만 뺌
+// tools/rank_keep.json = 검색 노출이 있었던 랭킹 목록 (애드센스 승인 뒤 설명을 쓰고 다시 넣을 후보)
 for (const b of RANKINGS) {
-  const keep = RANK_KEEP.has(b.id);
+  const keep = !!ctx.RN[b.id];
   write(
     `ranking/${b.id}/index.html`,
     page({
@@ -281,7 +284,6 @@ write(
 const rssItems = [
   ...QUIZZES.map((q) => ({ t: `${q.title}`, d: q.desc, u: `${SITE}/q/${q.id}/` })),
   ...GAMES.map((g) => ({ t: `${g.title} - 뽑기 게임`, d: g.desc, u: `${SITE}/game/${g.id}/` })),
-  ...RANKINGS.map((b) => ({ t: `${b.title} 1위는?`, d: b.q, u: `${SITE}/ranking/${b.id}/` })),
 ];
 const xesc = (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 write(
