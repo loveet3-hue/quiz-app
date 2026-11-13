@@ -10,6 +10,7 @@
 | `app.js` | 화면 3개(목록·풀기·결과), 채점, 기록 저장 |
 | `quizzes.js` | **퀴즈 데이터** — 새 퀴즈는 여기에 추가 |
 | `style.css` | 디자인 (밝은 화면·어두운 화면 모두 지원) |
+| `translate.js` | 외국인용 번역 (구글 번역, 🌐 단추·바닥글 Language). 번역해서 볼 때는 구글이 번역한 정답(영어 등)도 정답 처리 |
 | `manifest.webmanifest`, `sw.js` | 휴대폰 홈 화면에 앱처럼 설치 + 오프라인 실행 |
 | `make_icons.py` | 앱 아이콘 생성 (`python3 make_icons.py`) |
 

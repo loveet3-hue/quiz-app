@@ -12,7 +12,7 @@ const read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 
 // 퀴즈·게임 목록 불러오기 (index.html이 불러오는 순서 그대로)
 const tpl = read('index.html');
-const scripts = [...tpl.matchAll(/<script src="\/([^"?]+\.js)/g)].map((m) => m[1]).filter((f) => f !== 'app.js');
+const scripts = [...tpl.matchAll(/<script src="\/([^"?]+\.js)/g)].map((m) => m[1]).filter((f) => f !== 'app.js' && f !== 'translate.js');
 const ctx = { localStorage: { getItem: () => null, setItem() {} }, console };
 vm.createContext(ctx);
 vm.runInContext(scripts.map((f) => read(f)).join('\n;\n') + '\n;this.Q = QUIZZES; this.QF = QUIZ_FORMATS; this.G = GAMES; this.R = RANKINGS; this.RG = RANK_GROUPS; this.RL = rankLink; this.RT = rankSeoTitle; this.QA = quizAboutHtml; this.GA = gameAboutHtml; this.QS = QUESTIONS; this.SP = STUDY_PAGES; this.FT = { ANIMALS, SIGNS, animalYears, signRange, TAROT, LOTTO_RANKS, LOTTO_TOTAL, animalAboutHtml, signAboutHtml, SAJU_ABOUT, LOTTO_ABOUT }; this.RI = rankInsightHtml; this.RN = RANK_NOTES;', ctx);

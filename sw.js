@@ -1,6 +1,6 @@
 // 오프라인에서도 열리도록 앱 파일을 저장해 두는 서비스 워커.
 // 파일을 고치면 VERSION 숫자를 올려야 사용자 기기에 새 버전이 반영된다.
-const VERSION = 'v109';
+const VERSION = 'v110';
 const SHELL = [
   './',
   'index.html',
@@ -9,6 +9,7 @@ const SHELL = [
   'games.js',
   'ranking.js',
   'data/rankings.js',
+  'translate.js',
   'app.js',
   'config.js',
   'holiday.js',

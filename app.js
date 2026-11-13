@@ -64,14 +64,35 @@ function editDistance(a, b) {
 // 채점 결과: 'exact'(정답) · 'close'(오타 인정: 5글자 이상은 1글자, 12글자 이상은 2글자) · null(오답)
 function judge(input, q) {
   const mine = normalize(input);
-  if (!mine) return null;
+  if (!mine) return judgeTranslated(input, q);
   const answers = [q.answer, ...(q.alias || [])].map(normalize);
   if (answers.includes(mine)) return 'exact';
-  if (q.exact) return null;
+  if (q.exact) return judgeTranslated(input, q);
   if (answers.some((a) => a.length >= 5 && editDistance(a, mine) <= (a.length >= 12 ? 2 : 1))) return 'close';
   // 4글자 이상 한글 답은 한 글자를 빼거나 더한 것도 인정 (예: 동명성왕 → 동명왕). 글자를 바꾼 건 인정 안 함
   if (answers.some((a) => a.length >= 4 && /[가-힣]/.test(a) && Math.abs(a.length - mine.length) === 1 && editDistance(a, mine) === 1)) return 'close';
+  return judgeTranslated(input, q);
+}
+
+// 번역해서 보는 외국인(translate.js): 구글이 번역해 둔 정답(화면에 안 보이는 .ans-tr 칸)과 같으면 정답
+const normalizeAny = (s) =>
+  String(s ?? '')
+    .normalize('NFKC')
+    .toLowerCase()
+    .trim()
+    .replace(/^(the|a|an)\s+/, '')
+    .replace(/[^\p{L}\p{N}]/gu, '');
+function judgeTranslated(input, q) {
+  const tr = [...app.querySelectorAll('.ans-tr > i')].map((el) => normalizeAny(el.textContent)).filter(Boolean);
+  const mine = normalizeAny(input);
+  if (!tr.length || !mine) return null;
+  if (tr.includes(mine)) return 'exact';
+  if (!q.exact && tr.some((a) => a.length >= 5 && editDistance(a, mine) <= (a.length >= 12 ? 2 : 1))) return 'close';
   return null;
+}
+function translatedAnswerHtml(q) {
+  if (!window.QuizLang || QuizLang.current() === 'ko' || q.numeric) return '';
+  return `<div class="ans-tr" aria-hidden="true">${[q.answer, ...(q.alias || [])].map((a) => `<i>${esc(a)}</i>`).join('')}</div>`;
 }
 
 function hintOf(q) {
@@ -264,7 +285,7 @@ function popularQuizzes(plays, n) {
 
 const SITE_FOOT = `
     <footer class="site-foot">
-      <a href="/guide/">읽을거리</a> · <a href="/fortune/">오늘의 운세</a> · <a href="/study/">공부하기</a> · <a href="/about.html">소개</a> · <a href="/terms.html">이용약관</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a> · <a href="mailto:tminews@naver.com">문의</a>
+      <a href="/guide/">읽을거리</a> · <a href="/fortune/">오늘의 운세</a> · <a href="/study/">공부하기</a> · <a href="/about.html">소개</a> · <a href="/terms.html">이용약관</a> · <a href="/privacy.html">개인정보 처리방침</a> · <a href="/credits.html">사진 출처</a> · <a href="mailto:tminews@naver.com">문의</a> · <a href="#" class="notranslate" translate="no" data-lang-open>🌐 Language</a>
     </footer>`;
 
 // 홈: 오늘의 퀴즈 · 인기 퀴즈 · 새로 나온 퀴즈 · 인기 게임 · 새로 나온 게임
@@ -584,7 +605,7 @@ function mediaHtml(q) {
     return `<div class="qmedia photo"><img${drawn} src="${esc(q.image)}" alt="문제 사진" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'사진을 불러오지 못했어요',className:'qhint'}))"></div>`;
   }
   const big = q.chosung ? chosung(q.answer) : q.big;
-  if (big) return `<div class="qmedia"><span class="qbig">${esc(big)}</span></div>`;
+  if (big) return `<div class="qmedia"><span class="qbig${q.chosung ? ' notranslate' : ''}">${esc(big)}</span></div>`;
   return '';
 }
 
@@ -623,6 +644,7 @@ function renderQuestion() {
         </div>
       </div>
       ${q.credit || quiz.credit ? `<p class="credit">${esc(q.credit || quiz.credit)}</p>` : ''}
+      ${translatedAnswerHtml(q)}
     </div>
     ${quizAboutHtml(quiz, QUIZZES)}
   `;
