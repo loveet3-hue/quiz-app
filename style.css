@@ -1896,3 +1896,12 @@ a.icon-btn { display: inline-grid; place-items: center; }
 .tr-card { display: block; }
 .rank-about details { margin: 10px 0; } .rank-about summary { cursor: pointer; font-weight: 700; color: var(--primary); } .rank-about h3 { font-size: 15px; margin: 14px 0 6px; }
 .fmt-about { margin: 0 0 14px; color: var(--text-2); font-size: 14px; line-height: 1.7; }
+
+/* 공유 상자 (링크 만들어 복사) · 친구 기록 도전 */
+.share-box { margin-top: 10px; padding: 14px; border-radius: var(--radius); background: var(--surface-2); display: grid; gap: 10px; }
+.share-msg { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-2); word-break: keep-all; }
+.share-url { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--text); font-size: 16px; }
+.share-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.share-btns .btn:only-child { grid-column: 1 / -1; }
+.vs-banner { margin: 0; padding: 12px 16px; border-radius: var(--radius); background: var(--good-soft); color: var(--good); font-weight: 700; line-height: 1.5; text-align: center; word-break: keep-all; }
+.vs-result { margin: 4px 0 0; font-weight: 700; word-break: keep-all; }

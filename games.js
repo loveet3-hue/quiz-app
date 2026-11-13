@@ -74,23 +74,17 @@ function focusBoard(el) {
   if (Math.abs(window.scrollY - y) > 24) window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
 }
 
-// 게임 결과 공유 (휴대폰은 공유 창, 컴퓨터는 링크 복사) — 퀴즈 share() 와 같은 방식
-async function shareGame(g, text) {
-  const url = `${location.origin}/game/${g.id}/`;
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: '맞혀봐', text, url });
-      return;
-    } catch (e) {
-      if (e.name === 'AbortError') return;
-    }
-  }
-  try {
-    await navigator.clipboard.writeText(`${text}\n${url}`);
-    toast('자랑할 글과 링크를 복사했어요');
-  } catch {
-    prompt('아래 글을 복사해서 보내세요', `${text}\n${url}`);
-  }
+// 게임 결과 자랑: 내 기록이 담긴 링크(/game/<id>/?vs=기록)를 만들어 준다 — 받은 친구는 그 기록에 도전
+function shareGame(g, text, score, host) {
+  const url = `${location.origin}/game/${g.id}/?vs=${Math.round(score * 100) / 100}`;
+  shareBox(host, text, url);
+}
+// 자랑 링크로 들어왔을 때 친구 기록 (없거나 이상한 값이면 null)
+function challengeScore(g) {
+  if (location.pathname.replace(/\/+$/, '') !== `/game/${g.id}`) return null;
+  const raw = new URLSearchParams(location.search).get('vs');
+  const v = Number(raw);
+  return raw && Number.isFinite(v) && v >= 0 && v < FAIL_LOW ? v : null;
 }
 
 let gameCleanup = null;
@@ -2377,9 +2371,12 @@ const SOLO_RENDER = Object.fromEntries(SOLO_GAMES.map((g) => [g.id, (root) => re
 function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
   const single = cfg.list.length === 1;
   const saved = gameStore.get(cfg.key) || { names: single ? '나' : '철수\n영희\n민수\n지은', pick: 'all' };
+  const vs = single ? challengeScore(cfg.list[0]) : null;
+  const vsText = (g, v) => g.fmt(v) + (g.id === 'reaction' ? ` (${rxGrade(v)[2]})` : '');
   root.innerHTML = `
     <div class="mini-stage"></div>
     <div class="mini-setup">
+      ${vs != null ? `<p class="vs-banner">📣 친구 기록 <b>${esc(vsText(cfg.list[0], vs))}</b> · 이겨 볼래요?</p>` : ''}
       ${single ? `<p class="mini-lead">${cfg.list[0].icon} ${esc(cfg.list[0].desc)}</p>` : ''}
       <label class="field"><span>참가자 (1~8명 · 혼자면 기록 도전)</span><textarea class="names" rows="${single ? 2 : 4}">${esc(saved.names)}</textarea></label>
       ${single ? '' : `<label class="field"><span>미니게임</span><select class="mini-pick">
@@ -3148,6 +3145,7 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
           <p class="liar-who">${g.icon} ${esc(g.title)}</p>
           <p class="liar-word">${lastLabel || `<b>${fmt(g, s)}</b>`}</p>
           <p class="sub">${record ? (prev == null ? '첫 기록이에요!' : `🎉 최고 기록 경신! (전에는 ${fmt(g, prev)})`) : prev != null ? `내 최고 기록: ${fmt(g, prev)}` : ''}</p>
+          ${vs == null || isFail(g, s) ? '' : `<p class="vs-result">${better(g, s, vs) ? `🏆 친구 기록(${g.fmt(vs)})을 이겼어요! 이번엔 내가 자랑할 차례` : s === vs ? `🤝 친구 기록(${g.fmt(vs)})이랑 똑같아요!` : `😅 친구 기록(${g.fmt(vs)})에 못 미쳤어요. 한 번 더!`}</p>`}
           ${again}
         </div>`;
       sfx(record ? 'ok' : 'tick');
@@ -3180,7 +3178,7 @@ function renderMini(root, cfg = { key: 'mini', list: MINI_GAMES }) {
     stage.querySelector('[data-act="share"]')?.addEventListener('click', () => {
       const s = scores[0];
       const extra = g.id === 'reaction' ? ` (${rxGrade(s)[2]})` : '';
-      shareGame(g, `${g.icon} ${g.title} ${fmt(g, s)}${extra}! 너는 몇 나와? 해 보고 알려 줘`);
+      shareGame(g, `${g.icon} ${g.title} ${fmt(g, s)}${extra}! 내 기록 이겨 볼래? 링크 누르면 바로 도전`, s, stage.querySelector('.game-actions'));
     });
   }
 

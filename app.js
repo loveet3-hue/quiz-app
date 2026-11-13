@@ -836,23 +836,48 @@ function renderResult() {
   window.scrollTo(0, 0);
 }
 
-async function share(quiz, score, total) {
-  const url = quizUrl(quiz.id);
+function share(quiz, score, total) {
   const text = `'${quiz.title}' ${total}문제 중 ${score}개 맞혔어요! 너도 해볼래?`;
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: '맞혀봐', text, url });
-      return;
-    } catch (e) {
-      if (e.name === 'AbortError') return;
-    }
-  }
+  shareBox(app.querySelector('.result-actions'), text, quizUrl(quiz.id));
+}
+
+// 공유: 링크를 만들어 버튼 아래에 보여 주고 바로 복사한다.
+// (맥 사파리 공유 창에는 '링크 복사'가 없어서 공유 창부터 띄우지 않음. 휴대폰은 '다른 앱으로 보내기'로 카톡 등)
+async function copyText(str) {
   try {
-    await navigator.clipboard.writeText(`${text}\n${url}`);
-    toast('링크를 복사했어요');
+    await navigator.clipboard.writeText(str);
+    return true;
   } catch {
-    prompt('아래 링크를 복사해서 보내세요', url);
+    return false;
   }
+}
+function shareBox(host, text, url) {
+  if (host.nextElementSibling?.classList.contains('share-box')) host.nextElementSibling.remove();
+  const box = document.createElement('div');
+  box.className = 'share-box';
+  box.innerHTML = `
+    <p class="share-msg">${esc(text)}</p>
+    <input class="share-url" readonly value="${esc(url)}" aria-label="공유 링크">
+    <div class="share-btns">
+      <button class="btn" data-act="copy">📋 링크 복사</button>
+      ${navigator.share ? '<button class="btn ghost" data-act="send">다른 앱으로 보내기</button>' : ''}
+    </div>`;
+  host.after(box);
+  const input = box.querySelector('.share-url');
+  input.addEventListener('focus', () => input.select());
+  const copy = async () => {
+    if (await copyText(`${text}\n${url}`)) return toast('글과 링크를 복사했어요. 붙여 넣어 보내세요');
+    // 클립보드 권한이 막힌 브라우저: 링크 칸을 골라서 옛 방식으로 복사
+    input.focus();
+    input.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch { /* 무시 */ }
+    toast(ok ? '링크를 복사했어요. 붙여 넣어 보내세요' : '링크를 골라 뒀어요. 복사해서 보내세요');
+  };
+  box.querySelector('[data-act="copy"]').addEventListener('click', copy);
+  box.querySelector('[data-act="send"]')?.addEventListener('click', () => navigator.share({ title: '맞혀봐', text, url }).catch(() => {}));
+  copy();
+  box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
 
 /* ───────── 공통 표시 ───────── */
