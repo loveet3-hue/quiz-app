@@ -866,7 +866,7 @@ function renderMarble(root) {
   // 핀 밭은 적당히 빠르게 내려오고, 마지막 '허우적 방'에서 큰 막대에 휘둘리다 좁은 구멍으로 빠져나감
   const W = 360;
   const R = 8.5;
-  const FINISH = 1750;
+  const FINISH = 3600; // 코스 길이 (11/16 '너무 빨리 끝난다'고 해서 약 2배로)
   const H = FINISH + 120;
   const FUNNEL = FINISH - 420; // 깔때기 시작
   const ROOM_TOP = FINISH - 230; // 허우적 방 위쪽
@@ -1052,8 +1052,8 @@ function renderMarble(root) {
   }
 
   // ── 물리 ──
-  const G = 950;
-  const MAXV = 700;
+  const G = 760;
+  const MAXV = 560;
   function collideCircle(m, cx, cy, cr, bounce, vx = 0, vy = 0) {
     const dx = m.x - cx;
     const dy = m.y - cy;
@@ -1499,7 +1499,7 @@ function renderMarble(root) {
       timeScale = 1;
       celebrate(w, sub);
     }
-    if ((live.length === 0 && !parts.length) || Date.now() - startedAt > 180000) {
+    if ((live.length === 0 && !parts.length) || Date.now() - startedAt > 300000) {
       running = false;
       updateRank();
       startBtn.disabled = false;
