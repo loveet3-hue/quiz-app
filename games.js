@@ -1658,12 +1658,11 @@ function renderHorse(root) {
   const ta = root.querySelector('.names');
   const boardEl = root.querySelector('.horse-board');
   const coinEl = root.querySelector('.horse-coins');
-  // 놀이용 코인 (돈 아님): 한 판에 10개 걸고, 맞히면 말 수 × 10개
-  const BET = 10;
-  const coins = () => gameStore.get('horse-coins') ?? 100;
+  // 적중 점수: 거는 것 없이, 1등을 맞히면 말 수만큼 점수 (맞히기 어려울수록 큼). 이 기기에만 저장
+  const points = () => gameStore.get('horse-points') || 0;
   const showCoins = (msg = '') => {
     const s = gameStore.get('horse-stat') || { play: 0, hit: 0 };
-    coinEl.innerHTML = `🪙 내 코인 <b>${coins()}</b>개 · 한 판에 ${BET}개 걸고, 맞히면 ${BET}×말 수만큼 받아요${s.play ? ` · 적중 ${s.hit}/${s.play}` : ''}${msg}`;
+    coinEl.innerHTML = `🎯 적중 점수 <b>${points()}</b>점 · 1등을 맞히면 말 수만큼 점수${s.play ? ` · 적중 ${s.hit}/${s.play}` : ''}${msg}`;
   };
   let horses = [];
   let pick = -1;
@@ -1727,11 +1726,6 @@ function renderHorse(root) {
     focusBoard(root.querySelector('.track-wrap'));
     gameStore.save('horse', { names: ta.value });
     stop();
-    if (coins() < BET) {
-      gameStore.save('horse-coins', 100);
-      toast('코인이 떨어져서 100개를 다시 드렸어요');
-    }
-    gameStore.save('horse-coins', coins() - BET);
     showCoins();
     boardEl.hidden = true;
     horses.forEach((h) => {
@@ -1856,11 +1850,11 @@ function renderHorse(root) {
     const second = horses.find((h) => h.place === 2);
     const mine = horses[pick];
     const hit = mine.place === 1;
-    const prize = BET * horses.length;
-    if (hit) gameStore.save('horse-coins', coins() + prize);
+    const prize = horses.length;
+    if (hit) gameStore.save('horse-points', points() + prize);
     const stat = gameStore.get('horse-stat') || { play: 0, hit: 0 };
     gameStore.save('horse-stat', { play: stat.play + 1, hit: stat.hit + (hit ? 1 : 0) });
-    showCoins(hit ? ` · <b class="plus">+${prize}</b>` : '');
+    showCoins(hit ? ` · <b class="plus">+${prize}점</b>` : '');
     sfx(hit ? 'win' : 'lose');
     const gap = second ? second.time - winner.time : 1;
     const photo = gap < 0.12;
